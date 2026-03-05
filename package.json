@@ -1,0 +1,10 @@
+{
+  "name": "fluenix",
+  "private": true,
+  "scripts": {
+    "web": "pnpm --filter web dev",
+    "mobile": "pnpm --filter mobile start",
+    "backend": "pnpm --filter backend dev",
+    "ai": "cd apps/ai-service && uvicorn main:app --reload"
+  }
+}
