@@ -1,0 +1,59 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  
+}
+
+model User {
+  id          String     @id @default(cuid())
+  email       String     @unique
+  name        String?
+  level       String     @default("beginner")
+  targetGoal  String?
+  streak      Int        @default(0)
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+  sessions    Session[]
+  progress    Progress[]
+}
+
+model Session {
+  id        String   @id @default(cuid())
+  userId    String
+  type      String
+  scenario  String?
+  duration  Int      @default(0)
+  score     Float?
+  feedback  Json?
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Progress {
+  id        String   @id @default(cuid())
+  userId    String
+  skill     String
+  score     Float
+  date      DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Company {
+  id        String   @id @default(cuid())
+  name      String
+  domain    String?  @unique
+  plan      String   @default("starter")
+  createdAt DateTime @default(now())
+  employees Employee[]
+}
+
+model Employee {
+  id        String   @id @default(cuid())
+  userId    String   @unique
+  companyId String
+  role      String   @default("employee")
+  company   Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
+}
