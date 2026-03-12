@@ -2,6 +2,7 @@ import express, { Request, Response } from 'express'
 import cors from 'cors'
 import dotenv from 'dotenv'
 import { redis } from './config/redis'
+import sessionsRouter from './routes/sessions'
 
 dotenv.config()
 
@@ -21,6 +22,8 @@ app.get('/health', async (req: Request, res: Response) => {
     timestamp: new Date()
   })
 })
+
+app.use('/api/sessions', sessionsRouter)
 
 app.listen(PORT, () => {
   console.log(`✅ Backend running on http://localhost:${PORT}`)
