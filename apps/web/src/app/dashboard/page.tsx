@@ -2,8 +2,20 @@ import { UserButton } from '@clerk/nextjs'
 import { currentUser } from '@clerk/nextjs/server'
 import Link from 'next/link'
 
+async function getUserStats(userId: string) {
+  try {
+    const res = await fetch(`http://localhost:3001/api/sessions/stats/${userId}`, {
+      cache: 'no-store'
+    })
+    return await res.json()
+  } catch {
+    return { totalSessions: 0, averageScore: 0, streak: 0 }
+  }
+}
+
 export default async function DashboardPage() {
   const user = await currentUser()
+  const stats = user ? await getUserStats(user.id) : null
 
   const modules = [
     {
@@ -16,15 +28,6 @@ export default async function DashboardPage() {
       tag: 'ACTIVE',
     },
     {
-      id: 'pronunciation',
-      title: 'Pronunciation Lab',
-      description: 'Master 500+ technical terms with native comparison',
-      icon: '🎙️',
-      href: '/dashboard/pronunciation',
-      available: false,
-      tag: 'SOON',
-    },
-    {
       id: 'writing',
       title: 'Technical Writing',
       description: 'PR descriptions, commit messages & documentation',
@@ -32,6 +35,15 @@ export default async function DashboardPage() {
       href: '/dashboard/writing',
       available: true,
       tag: 'ACTIVE',
+    },
+    {
+      id: 'pronunciation',
+      title: 'Pronunciation Lab',
+      description: 'Master 500+ technical terms with native comparison',
+      icon: '🎙️',
+      href: '/dashboard/pronunciation',
+      available: false,
+      tag: 'SOON',
     },
     {
       id: 'progress',
@@ -68,18 +80,6 @@ export default async function DashboardPage() {
           width: 600px;
           height: 600px;
           background: radial-gradient(circle, rgba(59,108,255,0.12) 0%, transparent 70%);
-          pointer-events: none;
-          z-index: 0;
-        }
-
-        .dash-root::after {
-          content: '';
-          position: fixed;
-          bottom: -200px;
-          right: -100px;
-          width: 500px;
-          height: 500px;
-          background: radial-gradient(circle, rgba(139,92,246,0.08) 0%, transparent 70%);
           pointer-events: none;
           z-index: 0;
         }
@@ -121,12 +121,6 @@ export default async function DashboardPage() {
           vertical-align: middle;
         }
 
-        .nav-right {
-          display: flex;
-          align-items: center;
-          gap: 16px;
-        }
-
         .main {
           max-width: 1100px;
           margin: 0 auto;
@@ -135,9 +129,7 @@ export default async function DashboardPage() {
           z-index: 1;
         }
 
-        .welcome-section {
-          margin-bottom: 56px;
-        }
+        .welcome-section { margin-bottom: 56px; }
 
         .welcome-eyebrow {
           font-size: 12px;
@@ -188,9 +180,7 @@ export default async function DashboardPage() {
           transition: border-color 0.2s;
         }
 
-        .stat-card:hover {
-          border-color: rgba(79,124,255,0.3);
-        }
+        .stat-card:hover { border-color: rgba(79,124,255,0.3); }
 
         .stat-card::before {
           content: '';
@@ -200,10 +190,7 @@ export default async function DashboardPage() {
           background: linear-gradient(90deg, transparent, rgba(79,124,255,0.4), transparent);
         }
 
-        .stat-icon {
-          font-size: 20px;
-          margin-bottom: 12px;
-        }
+        .stat-icon { font-size: 20px; margin-bottom: 12px; }
 
         .stat-value {
           font-family: 'Syne', sans-serif;
@@ -286,11 +273,7 @@ export default async function DashboardPage() {
           border: 1px solid rgba(255,255,255,0.08);
         }
 
-        .module-icon {
-          font-size: 32px;
-          margin-bottom: 16px;
-          display: block;
-        }
+        .module-icon { font-size: 32px; margin-bottom: 16px; display: block; }
 
         .module-title {
           font-family: 'Syne', sans-serif;
@@ -319,14 +302,6 @@ export default async function DashboardPage() {
           letter-spacing: 0.3px;
         }
 
-        .module-cta-arrow {
-          transition: transform 0.2s;
-        }
-
-        .module-card.active:hover .module-cta-arrow {
-          transform: translateX(4px);
-        }
-
         .divider-line {
           width: 40px;
           height: 2px;
@@ -337,21 +312,15 @@ export default async function DashboardPage() {
       `}</style>
 
       <div className="dash-root">
-        {/* Navbar */}
         <nav className="nav">
           <div>
             <span className="nav-logo">Fluenix</span>
             <span className="nav-badge">BETA</span>
           </div>
-          <div className="nav-right">
-            <UserButton />
-          </div>
+          <UserButton />
         </nav>
 
-        {/* Main */}
         <main className="main">
-
-          {/* Welcome */}
           <section className="welcome-section">
             <p className="welcome-eyebrow">Dashboard</p>
             <h1 className="welcome-title">
@@ -363,12 +332,11 @@ export default async function DashboardPage() {
             </p>
           </section>
 
-          {/* Stats */}
           <div className="stats-grid">
             {[
-              { icon: '🎯', value: '0', label: 'Sessions' },
-              { icon: '🔥', value: '0', label: 'Day Streak' },
-              { icon: '📈', value: '—', label: 'Avg Score' },
+              { icon: '🎯', value: stats?.totalSessions ?? 0, label: 'Sessions' },
+              { icon: '🔥', value: stats?.streak ?? 0, label: 'Day Streak' },
+              { icon: '📈', value: stats?.averageScore ? `${Math.round(stats.averageScore)}` : '—', label: 'Avg Score' },
             ].map((s) => (
               <div key={s.label} className="stat-card">
                 <div className="stat-icon">{s.icon}</div>
@@ -378,25 +346,21 @@ export default async function DashboardPage() {
             ))}
           </div>
 
-          {/* Modules */}
           <div className="section-title">Modules</div>
           <div className="divider-line" />
           <div className="modules-grid">
             {modules.map((mod) =>
               mod.available ? (
-                <Link key={mod.id} href={mod.href} className={`module-card active`}>
-                  <span className={`module-tag active-tag`}>{mod.tag}</span>
+                <Link key={mod.id} href={mod.href} className="module-card active">
+                  <span className="module-tag active-tag">{mod.tag}</span>
                   <span className="module-icon">{mod.icon}</span>
                   <div className="module-title">{mod.title}</div>
                   <div className="module-desc">{mod.description}</div>
-                  <div className="module-cta">
-                    Start practicing
-                    <span className="module-cta-arrow">→</span>
-                  </div>
+                  <div className="module-cta">Start practicing →</div>
                 </Link>
               ) : (
-                <div key={mod.id} className={`module-card disabled`}>
-                  <span className={`module-tag soon-tag`}>{mod.tag}</span>
+                <div key={mod.id} className="module-card disabled">
+                  <span className="module-tag soon-tag">{mod.tag}</span>
                   <span className="module-icon">{mod.icon}</span>
                   <div className="module-title">{mod.title}</div>
                   <div className="module-desc">{mod.description}</div>
