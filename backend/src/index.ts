@@ -1,15 +1,20 @@
+import dotenv from 'dotenv'
+import path from 'path'
+dotenv.config({ path: path.resolve(process.cwd(), '.env') })
+
 import express, { Request, Response } from 'express'
 import cors from 'cors'
-import dotenv from 'dotenv'
 import { redis } from './config/redis'
 import sessionsRouter from './routes/sessions'
-
-dotenv.config()
 
 const app = express()
 const PORT = process.env.PORT || 3001
 
-app.use(cors())
+app.use(cors({
+  origin: '*',
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization']
+}))
 app.use(express.json())
 
 app.get('/health', async (req: Request, res: Response) => {

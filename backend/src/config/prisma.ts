@@ -1,7 +1,9 @@
 import { PrismaClient } from '@prisma/client'
+import * as dotenv from 'dotenv'
+import path from 'path'
 
-const prisma = new PrismaClient({
-  log: ['error'],
-})
+dotenv.config({ path: path.resolve(__dirname, '../../.env') })
+
+const prisma = new PrismaClient()
 
 export default prisma

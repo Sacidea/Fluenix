@@ -11,7 +11,8 @@ router.post('/', async (req: Request, res: Response) => {
     const session = await sessionService.createSession(req.body)
     res.json(session)
   } catch (err) {
-    res.status(500).json({ error: 'Failed to create session' })
+    console.error('createSession error:', err)
+    res.status(500).json({ error: 'Failed to create session', detail: String(err) })
   }
 })
 
@@ -22,7 +23,8 @@ router.get('/user/:userId', async (req: Request, res: Response) => {
     const sessions = await sessionService.getUserSessions(userId)
     res.json(sessions)
   } catch (err) {
-    res.status(500).json({ error: 'Failed to get sessions' })
+    console.error('getUserSessions error:', err)
+    res.status(500).json({ error: 'Failed to get sessions', detail: String(err) })
   }
 })
 
@@ -33,8 +35,10 @@ router.get('/stats/:userId', async (req: Request, res: Response) => {
     const stats = await sessionService.getUserStats(userId)
     res.json(stats)
   } catch (err) {
-    res.status(500).json({ error: 'Failed to get stats' })
+    console.error('getUserStats error:', err)
+    res.status(500).json({ error: 'Failed to get stats', detail: String(err) })
   }
+
 })
 
 export default router

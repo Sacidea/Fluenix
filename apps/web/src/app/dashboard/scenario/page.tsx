@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useRef, useEffect } from 'react'
+import { useUser } from '@clerk/nextjs'
 import axios from 'axios'
 import Link from 'next/link'
 
@@ -12,11 +13,13 @@ type Message = {
 type Scenario = 'interview' | 'standup' | 'code_review'
 
 export default function ScenarioPage() {
+  const { user } = useUser()
   const [scenario, setScenario] = useState<Scenario>('interview')
   const [messages, setMessages] = useState<Message[]>([])
   const [input, setInput] = useState('')
   const [loading, setLoading] = useState(false)
   const [started, setStarted] = useState(false)
+  const [startTime, setStartTime] = useState<Date | null>(null)
   const bottomRef = useRef<HTMLDivElement>(null)
 
   const scenarios = [
@@ -33,6 +36,7 @@ export default function ScenarioPage() {
     setStarted(true)
     setLoading(true)
     setMessages([])
+    setStartTime(new Date())
     try {
       const res = await axios.post('http://localhost:8000/scenario/chat', {
         scenario,
@@ -67,6 +71,31 @@ export default function ScenarioPage() {
       setLoading(false)
     }
   }
+
+  const endSession = async () => {
+  console.log('endSession called', { user: user?.id, startTime, messages: messages.length })
+  if (user && startTime && messages.length > 2) {
+    const duration = Math.round((new Date().getTime() - startTime.getTime()) / 1000)
+    console.log('Saving session...', { userId: user.id, duration })
+    try {
+      const res = await axios.post('http://localhost:3001/api/sessions', {
+        userId: user.id,
+        type: 'scenario',
+        scenario,
+        duration,
+        score: null,
+      })
+      console.log('Session saved!', res.data)
+    } catch (err: any) {
+      console.error('Session save error:', err.response?.data || err.message)
+    }
+  } else {
+    console.log('Session not saved - conditions not met')
+  }
+  setStarted(false)
+  setMessages([])
+  setStartTime(null)
+}
 
   return (
     <>
@@ -122,10 +151,7 @@ export default function ScenarioPage() {
           color: #e8eaf0;
         }
 
-        .sc-nav-sep {
-          color: #1f2937;
-          font-size: 18px;
-        }
+        .sc-nav-sep { color: #1f2937; font-size: 18px; }
 
         .sc-main {
           flex: 1;
@@ -135,10 +161,7 @@ export default function ScenarioPage() {
           padding: 48px 40px;
         }
 
-        /* Selector */
-        .sc-selector {
-          animation: fadeUp 0.4s ease;
-        }
+        .sc-selector { animation: fadeUp 0.4s ease; }
 
         @keyframes fadeUp {
           from { opacity: 0; transform: translateY(16px); }
@@ -197,10 +220,7 @@ export default function ScenarioPage() {
           margin-bottom: 4px;
         }
 
-        .sc-card-desc {
-          font-size: 12px;
-          color: #4b5563;
-        }
+        .sc-card-desc { font-size: 12px; color: #4b5563; }
 
         .sc-start-btn {
           width: 100%;
@@ -223,7 +243,6 @@ export default function ScenarioPage() {
           box-shadow: 0 12px 32px rgba(79,124,255,0.35);
         }
 
-        /* Chat */
         .sc-chat {
           display: flex;
           flex-direction: column;
@@ -451,7 +470,6 @@ export default function ScenarioPage() {
       `}</style>
 
       <div className="sc-root">
-        {/* Nav */}
         <nav className="sc-nav">
           <div className="sc-nav-left">
             <Link href="/dashboard" className="sc-back">← Back</Link>
@@ -492,10 +510,7 @@ export default function ScenarioPage() {
                   {scenarios.find(s => s.id === scenario)?.icon}{' '}
                   {scenarios.find(s => s.id === scenario)?.label}
                 </div>
-                <button
-                  className="sc-reset-btn"
-                  onClick={() => { setStarted(false); setMessages([]) }}
-                >
+                <button className="sc-reset-btn" onClick={endSession}>
                   ↺ New Session
                 </button>
               </div>
@@ -510,13 +525,14 @@ export default function ScenarioPage() {
                       <div className="sc-msg-name">
                         {msg.role === 'assistant' ? 'AI Interviewer' : 'You'}
                       </div>
-                     <div className="sc-msg-bubble"
-  dangerouslySetInnerHTML={{
-    __html: msg.content
-      .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
-      .replace(/\n/g, '<br/>')
-  }}
-/>
+                      <div
+                        className="sc-msg-bubble"
+                        dangerouslySetInnerHTML={{
+                          __html: msg.content
+                            .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+                            .replace(/\n/g, '<br/>')
+                        }}
+                      />
                     </div>
                   </div>
                 ))}

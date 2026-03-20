@@ -43,3 +43,4 @@ apps/ai-service/.env:1
 .env.local
 .env.production
 apps/ai-service/.env
+backend/.env

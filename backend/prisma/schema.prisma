@@ -5,10 +5,9 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
-  
-}
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  }
 
 model User {
   id          String     @id @default(cuid())
@@ -19,7 +18,6 @@ model User {
   streak      Int        @default(0)
   createdAt   DateTime   @default(now())
   updatedAt   DateTime   @updatedAt
-  sessions    Session[]
   progress    Progress[]
 }
 
@@ -32,7 +30,6 @@ model Session {
   score     Float?
   feedback  Json?
   createdAt DateTime @default(now())
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model Progress {
