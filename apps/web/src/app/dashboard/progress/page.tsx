@@ -65,7 +65,7 @@ export default function ProgressPage() {
           gap: 16px;
           padding: 0 40px;
           height: 64px;
-          background: rgba(8,11,18,0.9);
+          background: rgba(23, 34, 60, 0.9);
           backdrop-filter: blur(20px);
           border-bottom: 1px solid rgba(255,255,255,0.06);
           position: sticky;
@@ -289,8 +289,7 @@ export default function ProgressPage() {
                   { icon: '🎯', value: stats?.totalSessions ?? 0, label: 'Total Sessions' },
                   { icon: '📈', value: stats?.averageScore ? `${stats.averageScore}` : '—', label: 'Avg Score' },
                   { icon: '🔥', value: `${stats?.streak ?? 0}`, label: 'Day Streak' },
-                  { icon: '📅', value: stats?.lastSession ? new Date(stats.lastSession).toLocaleDateString() : '—', label: 'Last Session' },
-                ].map(s => (
+{ icon: '📅', value: stats?.lastSession ? new Date(stats.lastSession).toLocaleDateString('tr-TR', { day: '2-digit', month: '2-digit' }) : '—', label: 'Last Session' },                ].map(s => (
                   <div key={s.label} className="pr-stat">
                     <div className="pr-stat-icon">{s.icon}</div>
                     <div className="pr-stat-value">{s.value}</div>

@@ -3,10 +3,13 @@
 import { useState } from 'react'
 import axios from 'axios'
 import Link from 'next/link'
+import { useUser } from '@clerk/nextjs'
 
 type Exercise = 'pr_description' | 'commit_message' | 'email'
 
 export default function WritingPage() {
+  const { user } = useUser()
+
   const [exercise, setExercise] = useState<Exercise>('pr_description')
   const [userText, setUserText] = useState('')
   const [feedback, setFeedback] = useState<any>(null)
@@ -46,25 +49,37 @@ export default function WritingPage() {
   const currentExercise = exercises.find(e => e.id === exercise)!
 
   const analyzeWriting = async () => {
-    if (!userText.trim()) return
-    setLoading(true)
-    setFeedback(null)
-    try {
-      const res = await axios.post('http://localhost:8000/writing/analyze', {
-        exercise,
-        text: userText,
-        prompt: currentExercise.prompt,
+  if (!userText.trim()) return
+  setLoading(true)
+  setFeedback(null)
+  try {
+    const res = await axios.post('http://localhost:8000/writing/analyze', {
+      exercise,
+      text: userText,
+      prompt: currentExercise.prompt,
+    })
+    const raw = res.data.feedback
+const clean = typeof raw === 'string' 
+  ? raw.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim()
+  : raw
+const parsed = typeof clean === 'string' ? JSON.parse(clean) : clean
+setFeedback(parsed)
+    // Session kaydet
+    if (user) {
+      await axios.post('http://localhost:3001/api/sessions', {
+        userId: user.id,
+        type: 'writing',
+        scenario: exercise,
+        duration: 0,
+        score: parsed.overall_score ?? null,
       })
-      const raw = res.data.feedback
-      const parsed = typeof raw === 'string' ? JSON.parse(raw) : raw
-      setFeedback(parsed)
-    } catch (err) {
-      console.error(err)
-    } finally {
-      setLoading(false)
     }
+  } catch (err) {
+    console.error(err)
+  } finally {
+    setLoading(false)
   }
-
+}
   return (
     <>
       <style>{`
@@ -84,9 +99,9 @@ export default function WritingPage() {
           justify-content: space-between;
           padding: 0 40px;
           height: 64px;
-          background: rgba(8,11,18,0.9);
+          background: rgba(60, 94, 173, 0.9);
           backdrop-filter: blur(20px);
-          border-bottom: 1px solid rgba(255,255,255,0.06);
+          border-bottom: 1px solid rgba(226, 182, 182, 0.06);
           position: sticky;
           top: 0;
           z-index: 100;
@@ -100,7 +115,7 @@ export default function WritingPage() {
 
         .wr-back {
           font-size: 13px;
-          color: #4b5563;
+          color: #4a6284;
           text-decoration: none;
           transition: color 0.2s;
         }
@@ -113,7 +128,7 @@ export default function WritingPage() {
           font-weight: 700;
         }
 
-        .wr-sep { color: #1f2937; }
+        .wr-sep { color: #082958; }
 
         .wr-main {
           max-width: 900px;
@@ -135,15 +150,15 @@ export default function WritingPage() {
 
         .wr-sub {
           font-size: 15px;
-          color: #4b5563;
+          color: #797f86;
         }
 
         .wr-tabs {
           display: flex;
           gap: 8px;
           margin-bottom: 32px;
-          background: rgba(255,255,255,0.03);
-          border: 1px solid rgba(255,255,255,0.07);
+          background: rgba(149, 74, 74, 0.03);
+          border: 1px solid rgba(96, 30, 30, 0.07);
           border-radius: 14px;
           padding: 6px;
         }
@@ -154,7 +169,7 @@ export default function WritingPage() {
           border-radius: 10px;
           border: none;
           background: none;
-          color: #4b5563;
+          color: #39506f;
           font-family: 'DM Sans', sans-serif;
           font-size: 14px;
           font-weight: 500;
@@ -359,13 +374,13 @@ export default function WritingPage() {
           justify-content: center;
           gap: 12px;
           padding: 32px;
-          color: #4b5563;
+          color: #3e6193;
           font-size: 14px;
         }
 
         .wr-spinner {
           width: 18px; height: 18px;
-          border: 2px solid rgba(79,124,255,0.2);
+          border: 2px solid rgba(83, 118, 223, 0.51);
           border-top-color: #4f7cff;
           border-radius: 50%;
           animation: spin 0.7s linear infinite;

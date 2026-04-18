@@ -80,3 +80,41 @@ async def analyze_writing(data: dict):
     except Exception as e:
         traceback.print_exc()
         raise HTTPException(status_code=500, detail=str(e))
+
+@app.post("/scenario/analyze")
+async def analyze_scenario(data: dict):
+    try:
+        messages = data.get("messages", [])
+        scenario = data.get("scenario", "interview")
+
+        transcript = "\n".join([
+            f"{'AI' if m['role'] == 'assistant' else 'User'}: {m['content']}"
+            for m in messages
+        ])
+
+        response = client.messages.create(
+            model="claude-sonnet-4-6",
+            max_tokens=800,
+            system="""You are a technical English coach for software developers.
+            Analyze the conversation and return ONLY a JSON object:
+            {
+              "fluency_score": <0-100>,
+              "vocabulary_score": <0-100>,
+              "technical_accuracy": <0-100>,
+              "overall_score": <0-100>,
+              "strengths": ["...", "..."],
+              "improvements": ["...", "..."],
+              "overall_feedback": "2-3 sentences"
+            }
+            Return only the JSON, no markdown, no extra text.""",
+            messages=[{
+                "role": "user",
+                "content": f"Scenario: {scenario}\n\nConversation:\n{transcript}"
+            }]
+        )
+        raw = response.content[0].text
+        clean = raw.replace("```json", "").replace("```", "").strip()
+        return {"analysis": clean}
+    except Exception as e:
+        traceback.print_exc()
+        raise HTTPException(status_code=500, detail=str(e))

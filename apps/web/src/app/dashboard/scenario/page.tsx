@@ -73,29 +73,46 @@ export default function ScenarioPage() {
   }
 
   const endSession = async () => {
-  console.log('endSession called', { user: user?.id, startTime, messages: messages.length })
-  if (user && startTime && messages.length > 2) {
-    const duration = Math.round((new Date().getTime() - startTime.getTime()) / 1000)
-    console.log('Saving session...', { userId: user.id, duration })
-    try {
-      const res = await axios.post('http://localhost:3001/api/sessions', {
-        userId: user.id,
-        type: 'scenario',
-        scenario,
-        duration,
-        score: null,
-      })
-      console.log('Session saved!', res.data)
-    } catch (err: any) {
-      console.error('Session save error:', err.response?.data || err.message)
+    if (user && startTime && messages.length > 1) {
+      const duration = Math.round((new Date().getTime() - startTime.getTime()) / 1000)
+      let score = null
+
+      try {
+        const analysisRes = await axios.post('http://localhost:8000/scenario/analyze', {
+          scenario,
+          messages
+        })
+        const raw = analysisRes.data.analysis
+        const clean = raw
+          .replace(/```json\n?/g, '')
+          .replace(/```\n?/g, '')
+          .trim()
+        const jsonStart = clean.indexOf('{')
+        const jsonEnd = clean.lastIndexOf('}')
+        if (jsonStart !== -1 && jsonEnd !== -1) {
+          const analysis = JSON.parse(clean.slice(jsonStart, jsonEnd + 1))
+          score = analysis?.overall_score ?? null
+        }
+      } catch (err) {
+        console.error('Analysis error:', err)
+      }
+
+      try {
+        await axios.post('http://localhost:3001/api/sessions', {
+          userId: user.id,
+          type: 'scenario',
+          scenario,
+          duration,
+          score,
+        })
+      } catch (err) {
+        console.error('Session save error:', err)
+      }
     }
-  } else {
-    console.log('Session not saved - conditions not met')
+    setStarted(false)
+    setMessages([])
+    setStartTime(null)
   }
-  setStarted(false)
-  setMessages([])
-  setStartTime(null)
-}
 
   return (
     <>
