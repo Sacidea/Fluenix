@@ -26,6 +26,9 @@ export default async function DashboardPage() {
       href: '/dashboard/scenario',
       available: true,
       tag: 'ACTIVE',
+      color: '#6366f1',
+      bg: '#eef2ff',
+      border: '#c7d2fe',
     },
     {
       id: 'writing',
@@ -35,6 +38,9 @@ export default async function DashboardPage() {
       href: '/dashboard/writing',
       available: true,
       tag: 'ACTIVE',
+      color: '#0ea5e9',
+      bg: '#e0f2fe',
+      border: '#bae6fd',
     },
     {
       id: 'pronunciation',
@@ -44,6 +50,9 @@ export default async function DashboardPage() {
       href: '/dashboard/pronunciation',
       available: false,
       tag: 'SOON',
+      color: '#f59e0b',
+      bg: '#fffbeb',
+      border: '#fde68a',
     },
     {
       id: 'progress',
@@ -53,35 +62,23 @@ export default async function DashboardPage() {
       href: '/dashboard/progress',
       available: true,
       tag: 'ACTIVE',
+      color: '#10b981',
+      bg: '#ecfdf5',
+      border: '#a7f3d0',
     },
   ]
 
   return (
     <>
       <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap');
-
+        @import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500;600&display=swap');
         * { box-sizing: border-box; margin: 0; padding: 0; }
 
         .dash-root {
           min-height: 100vh;
-          background: #080b12;
-          color: #e8eaf0;
+          background: #f8faff;
+          color: #0f172a;
           font-family: 'DM Sans', sans-serif;
-          position: relative;
-          overflow-x: hidden;
-        }
-
-        .dash-root::before {
-          content: '';
-          position: fixed;
-          top: -200px;
-          left: -200px;
-          width: 600px;
-          height: 600px;
-          background: radial-gradient(circle, rgba(59,108,255,0.12) 0%, transparent 70%);
-          pointer-events: none;
-          z-index: 0;
         }
 
         .nav {
@@ -92,74 +89,78 @@ export default async function DashboardPage() {
           align-items: center;
           justify-content: space-between;
           padding: 0 40px;
-          height: 64px;
-          background: rgba(8,11,18,0.85);
+          height: 75px;
+          background: rgba(255,255,255,0.92);
           backdrop-filter: blur(20px);
-          border-bottom: 1px solid rgba(255,255,255,0.06);
+          border-bottom: 1px solid #e8edf5;
+          box-shadow: 0 1px 12px rgba(0,0,0,0.06);
+        }
+
+        .nav-left {
+          display: flex;
+          align-items: center;
+          gap: 20px;
         }
 
         .nav-logo {
-          font-family: 'Syne', sans-serif;
-          font-weight: 800;
-          font-size: 22px;
-          letter-spacing: -0.5px;
-          background: linear-gradient(135deg, #4f7cff, #a78bfa);
-          -webkit-background-clip: text;
-          -webkit-text-fill-color: transparent;
-        }
+  font-family: var(--font-dm-sans), 'DM Sans', sans-serif;
+  font-weight: 700;
+  font-size: 27px;
+  letter-spacing: -0.5px;
+  background: linear-gradient(135deg, #6366f1, #0ea5e9);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
 
         .nav-badge {
           font-size: 10px;
-          font-weight: 600;
+          font-weight: 700;
           letter-spacing: 1px;
-          color: #4f7cff;
-          background: rgba(79,124,255,0.12);
-          border: 1px solid rgba(79,124,255,0.25);
+          color: #6366f1;
+          background: #eef2ff;
+          border: 1px solid #c7d2fe;
           padding: 2px 8px;
           border-radius: 20px;
-          margin-left: 10px;
-          vertical-align: middle;
         }
 
         .main {
           max-width: 1100px;
           margin: 0 auto;
-          padding: 56px 40px;
-          position: relative;
-          z-index: 1;
+          padding: 52px 40px;
         }
 
-        .welcome-section { margin-bottom: 56px; }
+        .welcome-section { margin-bottom: 48px; }
 
         .welcome-eyebrow {
           font-size: 12px;
-          font-weight: 600;
+          font-weight: 700;
           letter-spacing: 2px;
-          color: #4f7cff;
+          color: #6366f1;
           text-transform: uppercase;
-          margin-bottom: 12px;
+          margin-bottom: 10px;
         }
 
         .welcome-title {
-          font-family: 'Syne', sans-serif;
-          font-size: 42px;
-          font-weight: 800;
-          line-height: 1.1;
-          letter-spacing: -1px;
-          margin-bottom: 14px;
-          color: #f0f2f8;
+          font-family: var(--font-dm-sans), 'DM Sans', sans-serif;
+          font-size: 48px;
+          font-weight: 700;
+          line-height: 1.15;
+          letter-spacing: -1.5px;
+          margin-bottom: 12px;
+          color: #102D47;
         }
 
+
         .welcome-title span {
-          background: linear-gradient(135deg, #4f7cff, #a78bfa);
+          background: linear-gradient(135deg, #6366f1, #0ea5e9);
           -webkit-background-clip: text;
           -webkit-text-fill-color: transparent;
         }
 
         .welcome-sub {
           font-size: 16px;
-          color: #6b7280;
-          font-weight: 300;
+          color: #64748b;
+          font-weight: 400;
           line-height: 1.6;
         }
 
@@ -167,66 +168,61 @@ export default async function DashboardPage() {
           display: grid;
           grid-template-columns: repeat(3, 1fr);
           gap: 16px;
-          margin-bottom: 56px;
+          margin-bottom: 52px;
         }
 
         .stat-card {
-          background: rgba(255,255,255,0.03);
-          border: 1px solid rgba(255,255,255,0.07);
-          border-radius: 16px;
+          background: white;
+          border: 1px solid #e8edf5;
+          border-radius: 18px;
           padding: 24px;
-          position: relative;
-          overflow: hidden;
-          transition: border-color 0.2s;
+          box-shadow: 0 2px 12px rgba(0,0,0,0.05);
+          transition: all 0.25s ease;
         }
 
-        .stat-card:hover { border-color: rgba(79,124,255,0.3); }
-
-        .stat-card::before {
-          content: '';
-          position: absolute;
-          top: 0; left: 0; right: 0;
-          height: 1px;
-          background: linear-gradient(90deg, transparent, rgba(79,124,255,0.4), transparent);
+        .stat-card:hover {
+          transform: translateY(-3px);
+          box-shadow: 0 8px 24px rgba(0,0,0,0.1);
         }
 
-        .stat-icon { font-size: 20px; margin-bottom: 12px; }
+        .stat-icon { font-size: 28px; margin-bottom: 12px; }
 
-        .stat-value {
-          font-family: 'Syne', sans-serif;
-          font-size: 32px;
-          font-weight: 700;
-          color: #f0f2f8;
-          margin-bottom: 4px;
-        }
+      .stat-value {
+  font-family: var(--font-dm-sans), 'DM Sans', sans-serif;
+  font-size: 36px;
+  font-weight: 700;
+  color: #0f172a;
+  margin-bottom: 4px;
+  line-height: 1;
+}
 
         .stat-label {
-          font-size: 13px;
-          color: #4b5563;
-          font-weight: 400;
+          font-size: 12px;
+          color: #94a3b8;
+          font-weight: 600;
           text-transform: uppercase;
-          letter-spacing: 0.5px;
+          letter-spacing: 0.8px;
         }
 
-        .section-title {
-          font-family: 'Syne', sans-serif;
+        .section-label {
+          font-family: var(--font-dm-sans), 'DM Sans', sans-serif;
           font-size: 13px;
-          font-weight: 600;
+          font-weight: 700;
           letter-spacing: 2px;
           text-transform: uppercase;
-          color: #374151;
-          margin-bottom: 20px;
+          color: #94a3b8;
+          margin-bottom: 16px;
         }
 
         .modules-grid {
           display: grid;
           grid-template-columns: repeat(2, 1fr);
-          gap: 16px;
+          gap: 20px;
         }
 
         .module-card {
-          background: rgba(255,255,255,0.025);
-          border: 1px solid rgba(255,255,255,0.07);
+          background: white;
+          border: 1.5px solid #e8edf5;
           border-radius: 20px;
           padding: 28px;
           text-decoration: none;
@@ -235,85 +231,73 @@ export default async function DashboardPage() {
           position: relative;
           overflow: hidden;
           transition: all 0.25s ease;
+          box-shadow: 0 2px 8px rgba(0,0,0,0.04);
         }
 
         .module-card.active:hover {
-          border-color: rgba(79,124,255,0.4);
-          background: rgba(79,124,255,0.05);
-          transform: translateY(-2px);
-          box-shadow: 0 20px 40px rgba(0,0,0,0.3), 0 0 0 1px rgba(79,124,255,0.15);
+          transform: translateY(-4px);
+          box-shadow: 0 16px 40px rgba(0,0,0,0.1);
         }
 
         .module-card.disabled {
-          opacity: 0.4;
+          opacity: 0.55;
           cursor: not-allowed;
           pointer-events: none;
         }
 
-        .module-tag {
+        .module-card-accent {
           position: absolute;
-          top: 20px;
-          right: 20px;
+          top: 0; left: 0; right: 0;
+          height: 4px;
+          border-radius: 20px 20px 0 0;
+        }
+
+        .module-tag {
+          display: inline-block;
           font-size: 10px;
           font-weight: 700;
           letter-spacing: 1.5px;
           padding: 3px 10px;
           border-radius: 20px;
+          margin-bottom: 16px;
         }
 
-        .module-tag.active-tag {
-          background: rgba(79,124,255,0.15);
-          color: #4f7cff;
-          border: 1px solid rgba(79,124,255,0.3);
+        .module-icon {
+          font-size: 36px;
+          margin-bottom: 14px;
+          display: block;
         }
-
-        .module-tag.soon-tag {
-          background: rgba(255,255,255,0.05);
-          color: #4b5563;
-          border: 1px solid rgba(255,255,255,0.08);
-        }
-
-        .module-icon { font-size: 32px; margin-bottom: 16px; display: block; }
 
         .module-title {
-          font-family: 'Syne', sans-serif;
+          font-family:var(--font-dm-sans), 'DM Sans', sans-serif;
           font-size: 18px;
           font-weight: 700;
-          color: #e8eaf0;
+          color: #0f172a;
           margin-bottom: 8px;
-          letter-spacing: -0.3px;
         }
 
         .module-desc {
           font-size: 14px;
-          color: #4b5563;
+          color: #64748b;
           line-height: 1.6;
-          font-weight: 300;
         }
 
         .module-cta {
-          margin-top: 20px;
+          margin-top: 30px;
           font-size: 13px;
           font-weight: 600;
-          color: #4f7cff;
-          display: flex;
+          display: inline-flex;
           align-items: center;
-          gap: 6px;
-          letter-spacing: 0.3px;
-        }
-
-        .divider-line {
-          width: 40px;
-          height: 2px;
-          background: linear-gradient(90deg, #4f7cff, transparent);
-          margin-bottom: 20px;
-          border-radius: 2px;
+          gap: 8px;
+          padding: 8px 16px;
+          border-radius: 10px;
+          transition: all 0.2s;
         }
       `}</style>
 
       <div className="dash-root">
         <nav className="nav">
-          <div>
+          <div className="nav-left">
             <span className="nav-logo">Fluenix</span>
             <span className="nav-badge">BETA</span>
           </div>
@@ -322,51 +306,85 @@ export default async function DashboardPage() {
 
         <main className="main">
           <section className="welcome-section">
-            <p className="welcome-eyebrow">Dashboard</p>
-            <h1 className="welcome-title">
-              Hey, {user?.firstName ?? 'Developer'} —<br />
-              <span>ready to level up?</span>
-            </h1>
-            <p className="welcome-sub">
-              Practice technical English with AI. Pick a module and start today.
-            </p>
-          </section>
+  <p className="welcome-eyebrow" data-aos="fade-up">Dashboard</p>
+  <h1 className="welcome-title" data-aos="fade-up" data-aos-delay="100">
+    Hey, {user?.firstName ?? 'Developer'} —<br />
+    <span>ready to level up?</span>
+  </h1>
+  <p className="welcome-sub" data-aos="fade-up" data-aos-delay="200">
+    Practice technical English with AI. Pick a module and start today.
+  </p>
+</section>
 
           <div className="stats-grid">
-            {[
-              { icon: '🎯', value: stats?.totalSessions ?? 0, label: 'Sessions' },
-              { icon: '🔥', value: stats?.streak ?? 0, label: 'Day Streak' },
-              { icon: '📈', value: stats?.averageScore ? `${Math.round(stats.averageScore)}` : '—', label: 'Avg Score' },
-            ].map((s) => (
-              <div key={s.label} className="stat-card">
-                <div className="stat-icon">{s.icon}</div>
-                <div className="stat-value">{s.value}</div>
-                <div className="stat-label">{s.label}</div>
-              </div>
-            ))}
+         {[
+  { icon: '🎯', value: stats?.totalSessions ?? 0, label: 'Sessions', accent: '#6366f1' },
+  { icon: '🔥', value: stats?.streak ?? 0, label: 'Day Streak', accent: '#f59e0b' },
+  { icon: '📈', value: stats?.averageScore ? `${Math.round(stats.averageScore)}` : '—', label: 'Avg Score', accent: '#10b981' },
+].map((s, i) => (
+  <div
+    key={s.label}
+    className="stat-card"
+    style={{ borderTop: `3px solid ${s.accent}` }}
+    data-aos="fade-up"
+    data-aos-delay={i * 100}
+  >
+    <div className="stat-icon">{s.icon}</div>
+    <div className="stat-value" style={{ color: s.accent }}>{s.value}</div>
+    <div className="stat-label">{s.label}</div>
+  </div>
+))}
           </div>
 
-          <div className="section-title">Modules</div>
-          <div className="divider-line" />
+          <div className="section-label">Modules</div>
           <div className="modules-grid">
-            {modules.map((mod) =>
-              mod.available ? (
-                <Link key={mod.id} href={mod.href} className="module-card active">
-                  <span className="module-tag active-tag">{mod.tag}</span>
-                  <span className="module-icon">{mod.icon}</span>
-                  <div className="module-title">{mod.title}</div>
-                  <div className="module-desc">{mod.description}</div>
-                  <div className="module-cta">Start practicing →</div>
-                </Link>
-              ) : (
-                <div key={mod.id} className="module-card disabled">
-                  <span className="module-tag soon-tag">{mod.tag}</span>
-                  <span className="module-icon">{mod.icon}</span>
-                  <div className="module-title">{mod.title}</div>
-                  <div className="module-desc">{mod.description}</div>
-                </div>
-              )
-            )}
+           {modules.map((mod, i) =>
+  mod.available ? (
+    <Link
+      key={mod.id}
+      href={mod.href}
+      className="module-card active"
+      data-aos="fade-up"
+      data-aos-delay={i * 80}
+    >
+      <div className="module-card-accent" style={{ background: mod.color }} />
+      <span
+        className="module-tag"
+        style={{ background: mod.bg, color: mod.color, border: `1px solid ${mod.border}` }}
+      >
+        {mod.tag}
+      </span>
+      <span className="module-icon">{mod.icon}</span>
+      <div className="module-title">{mod.title}</div>
+      <div className="module-desc">{mod.description}</div>
+      <div
+        className="module-cta"
+        style={{ background: mod.bg, color: mod.color }}
+      >
+        Start practicing →
+      </div>
+    </Link>
+  ) : (
+    <div
+     key={mod.id}
+      className="module-card disabled"
+      data-aos={i % 2 === 0 ? "fade-right" : "fade-left"}
+      data-aos-delay={i * 80}
+    >
+      <div className="module-card-accent" style={{ background: mod.color }} />
+      <span
+        className="module-tag"
+        style={{ background: mod.bg, color: mod.color, border: `1px solid ${mod.border}` }}
+      >
+        {mod.tag}
+      </span>
+      <span className="module-icon">{mod.icon}</span>
+      <div className="module-title">{mod.title}</div>
+      <div className="module-desc">{mod.description}</div>
+    </div>
+  )
+)}
+              
           </div>
         </main>
       </div>
