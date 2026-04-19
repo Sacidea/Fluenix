@@ -118,3 +118,33 @@ async def analyze_scenario(data: dict):
     except Exception as e:
         traceback.print_exc()
         raise HTTPException(status_code=500, detail=str(e))
+@app.post("/pronunciation/analyze")
+async def analyze_pronunciation(data: dict):
+    try:
+        transcript = data.get("transcript", "")
+        target_word = data.get("target_word", "")
+        
+        response = client.messages.create(
+            model="claude-sonnet-4-6",
+            max_tokens=600,
+            system="""You are a technical English pronunciation coach for software developers.
+            Compare the user's spoken transcript with the target word/phrase and return ONLY a JSON object:
+            {
+              "accuracy_score": <0-100>,
+              "is_correct": <true/false>,
+              "feedback": "one sentence feedback",
+              "tip": "one pronunciation tip"
+            }
+            Return only the JSON, no markdown, no extra text.""",
+            messages=[{
+                "role": "user",
+                "content": f"Target word: {target_word}\nUser said: {transcript}"
+            }]
+        )
+        raw = response.content[0].text
+        clean = raw.replace("```json", "").replace("```", "").strip()
+        return {"result": clean}
+    except Exception as e:
+        traceback.print_exc()
+        raise HTTPException(status_code=500, detail=str(e))    
+    
