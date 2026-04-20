@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useCallback } from 'react'
 import { useUser } from '@clerk/nextjs'
 import Link from 'next/link'
 import axios from 'axios'
@@ -26,26 +26,30 @@ export default function ProgressPage() {
   const [stats, setStats] = useState<Stats | null>(null)
   const [sessions, setSessions] = useState<Session[]>([])
   const [loading, setLoading] = useState(true)
+  const [error, setError] = useState(false)
+
+  const fetchData = useCallback(async () => {
+    if (!user) return
+    setError(false)
+    setLoading(true)
+    try {
+      const [statsRes, sessionsRes] = await Promise.all([
+        axios.get(`http://localhost:3001/api/sessions/stats/${user.id}`),
+        axios.get(`http://localhost:3001/api/sessions/user/${user.id}`)
+      ])
+      setStats(statsRes.data)
+      setSessions(sessionsRes.data)
+    } catch (err) {
+      console.error(err)
+      setError(true)
+    } finally {
+      setLoading(false)
+    }
+  }, [user])
 
   useEffect(() => {
-    if (!user) return
-    const fetchData = async () => {
-  try {
-    const [statsRes, sessionsRes] = await Promise.all([
-      axios.get(`http://localhost:3001/api/sessions/stats/${user.id}`),
-      axios.get(`http://localhost:3001/api/sessions/user/${user.id}`)
-    ])
-    setStats(statsRes.data)
-    setSessions(sessionsRes.data)
-  } catch (err) {
-    console.error(err)
-    // Hata olunca loading'i kapat ama mevcut veriyi silme
-  } finally {
-    setLoading(false)
-  }
-}
     fetchData()
-  }, [user])
+  }, [fetchData])
 
   const getScoreColor = (score: number) => {
     if (score >= 80) return '#10b981'
@@ -97,12 +101,7 @@ export default function ProgressPage() {
 
         .pr-back:hover { color: #102D47; }
         .pr-nav-sep { color: #cbd5e1; }
-
-        .pr-nav-title {
-          font-size: 15px;
-          font-weight: 600;
-          color: #102D47;
-        }
+        .pr-nav-title { font-size: 15px; font-weight: 600; color: #102D47; }
 
         .pr-main {
           max-width: 900px;
@@ -198,18 +197,12 @@ export default function ProgressPage() {
           justify-content: space-between;
           box-shadow: 0 1px 4px rgba(0,0,0,0.04);
           transition: all 0.2s;
-          animation: fadeUp 0.3s ease;
         }
 
         .pr-session:hover {
           border-color: #6366f1;
           transform: translateX(4px);
           box-shadow: 0 4px 16px rgba(0,0,0,0.08);
-        }
-
-        @keyframes fadeUp {
-          from { opacity: 0; transform: translateY(8px); }
-          to { opacity: 1; transform: translateY(0); }
         }
 
         .pr-session-left {
@@ -256,12 +249,7 @@ export default function ProgressPage() {
         }
 
         .pr-empty-icon { font-size: 48px; margin-bottom: 14px; }
-
-        .pr-empty-text {
-          font-size: 15px;
-          margin-bottom: 24px;
-          color: #547593;
-        }
+        .pr-empty-text { font-size: 15px; margin-bottom: 24px; color: #547593; }
 
         .pr-start-btn {
           display: inline-block;
@@ -299,6 +287,27 @@ export default function ProgressPage() {
           animation: spin 0.7s linear infinite;
         }
 
+        .pr-error {
+          text-align: center;
+          padding: 60px 20px;
+        }
+
+        .pr-retry-btn {
+          padding: 10px 24px;
+          background: #6366f1;
+          color: white;
+          border: none;
+          border-radius: 10px;
+          cursor: pointer;
+          font-weight: 600;
+          font-size: 14px;
+          font-family: 'DM Sans', sans-serif;
+          margin-top: 16px;
+          transition: all 0.2s;
+        }
+
+        .pr-retry-btn:hover { background: #4f46e5; }
+
         @keyframes spin { to { transform: rotate(360deg); } }
       `}</style>
 
@@ -319,14 +328,22 @@ export default function ProgressPage() {
               <div className="pr-spinner" />
               Loading your stats...
             </div>
+          ) : error ? (
+            <div className="pr-error">
+              <div style={{ fontSize: 48, marginBottom: 12 }}>⚠️</div>
+              <div style={{ color: '#547593', fontSize: 15 }}>Could not load data. Check your connection.</div>
+              <button className="pr-retry-btn" onClick={fetchData}>
+                Try Again
+              </button>
+            </div>
           ) : (
             <>
               <div className="pr-stats">
                 {[
-                  { icon: '🎯', value: stats?.totalSessions ?? 0, label: 'Total Sessions', color: '#6366f1', bg: '#eef2ff' },
-                  { icon: '📈', value: stats?.averageScore ? Math.round(stats.averageScore) : '—', label: 'Avg Score', color: '#0ea5e9', bg: '#e0f2fe' },
-                  { icon: '🔥', value: stats?.streak ?? 0, label: 'Day Streak', color: '#f59e0b', bg: '#fffbeb' },
-                  { icon: '📅', value: stats?.lastSession ? new Date(stats.lastSession).toLocaleDateString('tr-TR', { day: '2-digit', month: '2-digit' }) : '—', label: 'Last Session', color: '#10b981', bg: '#ecfdf5' },
+                  { icon: '🎯', value: stats?.totalSessions ?? 0, label: 'Total Sessions', color: '#6366f1' },
+                  { icon: '📈', value: stats?.averageScore ? Math.round(stats.averageScore) : '—', label: 'Avg Score', color: '#0ea5e9' },
+                  { icon: '🔥', value: stats?.streak ?? 0, label: 'Day Streak', color: '#f59e0b' },
+                  { icon: '📅', value: stats?.lastSession ? new Date(stats.lastSession).toLocaleDateString('tr-TR', { day: '2-digit', month: '2-digit' }) : '—', label: 'Last Session', color: '#10b981' },
                 ].map((s, i) => (
                   <div
                     key={s.label}

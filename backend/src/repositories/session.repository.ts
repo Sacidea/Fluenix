@@ -7,29 +7,45 @@ export class SessionRepository extends BaseRepository<any> {
   }
 
   async findByUserId(userId: string) {
-    return this.prisma.session.findMany({
-      where: { userId },
-      orderBy: { createdAt: 'desc' },
-      take: 20
-    })
+    let retries = 3
+    while (retries > 0) {
+      try {
+        return await this.prisma.session.findMany({
+          where: { userId },
+          orderBy: { createdAt: 'desc' },
+          take: 20
+        })
+      } catch (err) {
+        retries--
+        if (retries === 0) throw err
+        await new Promise(resolve => setTimeout(resolve, 1000))
+      }
+    }
   }
 
   async getUserStats(userId: string) {
-    const sessions = await this.prisma.session.findMany({
-      where: { userId },
-      orderBy: { createdAt: 'desc' }
-    })
-
-    const totalSessions = sessions.length
-    const scoredSessions = sessions.filter(s => s.score !== null)
-    const averageScore = scoredSessions.length > 0
-      ? scoredSessions.reduce((acc, s) => acc + (s.score || 0), 0) / scoredSessions.length
-      : 0
-
-    return {
-      totalSessions,
-      averageScore: Math.round(averageScore),
-      lastSession: sessions[0]?.createdAt || null
+    let retries = 3
+    while (retries > 0) {
+      try {
+        const sessions = await this.prisma.session.findMany({
+          where: { userId },
+          orderBy: { createdAt: 'desc' }
+        })
+        const totalSessions = sessions.length
+        const scoredSessions = sessions.filter(s => s.score !== null)
+        const averageScore = scoredSessions.length > 0
+          ? scoredSessions.reduce((acc, s) => acc + (s.score || 0), 0) / scoredSessions.length
+          : 0
+        return {
+          totalSessions,
+          averageScore: Math.round(averageScore),
+          lastSession: sessions[0]?.createdAt || null
+        }
+      } catch (err) {
+        retries--
+        if (retries === 0) throw err
+        await new Promise(resolve => setTimeout(resolve, 1000))
+      }
     }
   }
 }
