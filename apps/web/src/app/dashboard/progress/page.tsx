@@ -30,19 +30,20 @@ export default function ProgressPage() {
   useEffect(() => {
     if (!user) return
     const fetchData = async () => {
-      try {
-        const [statsRes, sessionsRes] = await Promise.all([
-          axios.get(`http://localhost:3001/api/sessions/stats/${user.id}`),
-          axios.get(`http://localhost:3001/api/sessions/user/${user.id}`)
-        ])
-        setStats(statsRes.data)
-        setSessions(sessionsRes.data)
-      } catch (err) {
-        console.error(err)
-      } finally {
-        setLoading(false)
-      }
-    }
+  try {
+    const [statsRes, sessionsRes] = await Promise.all([
+      axios.get(`http://localhost:3001/api/sessions/stats/${user.id}`),
+      axios.get(`http://localhost:3001/api/sessions/user/${user.id}`)
+    ])
+    setStats(statsRes.data)
+    setSessions(sessionsRes.data)
+  } catch (err) {
+    console.error(err)
+    // Hata olunca loading'i kapat ama mevcut veriyi silme
+  } finally {
+    setLoading(false)
+  }
+}
     fetchData()
   }, [user])
 
