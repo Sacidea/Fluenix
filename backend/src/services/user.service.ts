@@ -1,23 +1,24 @@
-import { UserRepository } from '../repositories/user.repository'
+import { IUserRepository } from '../interfaces/IUserRepository'
+import { IUserService } from '../interfaces/IUserService'
+import { isValidLevel, VALID_LEVELS } from '../config/levels.config'
+import { User } from '@prisma/client'
 
-export class UserService {
-  constructor(private userRepo: UserRepository) {}
+export class UserService implements IUserService {
+  constructor(private userRepo: IUserRepository) {}
 
-  async syncUserWithLevel(userId: string, email: string, name: string | undefined, level: string) {
-    // Determine level if unspecified
-    const finalLevel = level || 'beginner'
+  async syncUserWithLevel(userId: string, email: string, name: string | undefined, level: string): Promise<User> {
+    const finalLevel = isValidLevel(level) ? level : 'beginner'
     return await this.userRepo.upsertUser(userId, email, name, finalLevel)
   }
 
-  async setLevel(userId: string, level: string) {
-    const validLevels = ['A1', 'A2', 'B1', 'B2', 'C1', 'C2', 'beginner']
-    if (!validLevels.includes(level)) {
-      throw new Error(`Invalid level: ${level}. Must be one of ${validLevels.join(', ')}`)
+  async setLevel(userId: string, level: string): Promise<User> {
+    if (!isValidLevel(level)) {
+      throw new Error(`Invalid level: ${level}. Must be one of ${VALID_LEVELS.join(', ')}`)
     }
     return await this.userRepo.updateLevel(userId, level)
   }
 
-  async getUser(userId: string) {
+  async getUser(userId: string): Promise<User | { id: string; level: string }> {
     const user = await this.userRepo.getUserById(userId)
     if (!user) {
       return { id: userId, level: 'beginner' }
@@ -25,3 +26,4 @@ export class UserService {
     return user
   }
 }
+

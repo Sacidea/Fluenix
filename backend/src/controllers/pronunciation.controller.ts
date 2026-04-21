@@ -1,8 +1,8 @@
 import { Request, Response } from 'express'
-import { PronunciationService } from '../services/pronunciation.service'
+import { IPronunciationService } from '../interfaces/IPronunciationService'
 
 export class PronunciationController {
-  private service = new PronunciationService()
+  constructor(private service: IPronunciationService) {}
 
   public getWords = async (req: Request, res: Response) => {
     try {
@@ -14,3 +14,4 @@ export class PronunciationController {
     }
   }
 }
+

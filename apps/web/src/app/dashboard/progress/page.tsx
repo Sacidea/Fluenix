@@ -1,7 +1,10 @@
 'use client'
 
+import React from 'react'
 import Link from 'next/link'
 import { useUser } from '@clerk/nextjs'
+import { motion } from 'framer-motion'
+import { Layout, Terminal, ShieldCheck, AlertTriangle, Inbox } from 'lucide-react'
 import { useProgressData } from '@/hooks/useProgressData'
 import { StatsCards } from '@/components/StatsCards'
 import { SessionItem } from '@/components/SessionItem'
@@ -11,49 +14,233 @@ export default function ProgressPage() {
   const { stats, sessions, loading, error, refetch } = useProgressData(user?.id)
 
   return (
-    <div className="pr-root">
-      <main className="pr-main">
-        <p className="pr-eyebrow">Overview</p>
-        <h1 className="pr-title">My Progress</h1>
-        <p className="pr-sub">Track your improvement over time</p>
+    <div className="ledger-progress-root">
+      <main className="progress-container">
+        
+        {/* PROGRESS HEADER */}
+        <header className="progress-header">
+           <div className="eyebrow-group">
+            <div className="line" />
+            <span className="eyebrow">Personnel Dossier</span>
+          </div>
+          <h1 className="progress-title">
+            Competency <span className="serif-grad">Progress Map</span>
+          </h1>
+          <p className="progress-sub">
+            Tracking technical proficiency across all active simulation environments.
+          </p>
+        </header>
 
         {loading ? (
-          <div className="pr-loading">
-            <div className="pr-spinner" />
-            Loading your stats...
+          <div className="state-display">
+            <div className="spinner" />
+            <span>Analyzing session data...</span>
           </div>
         ) : error ? (
-          <div className="pr-empty">
-            <div className="pr-empty-icon">⚠️</div>
-            <div className="pr-empty-text">Something went wrong.</div>
-            <button onClick={refetch} className="pr-start-btn">Try again</button>
+          <div className="state-display error">
+            <AlertTriangle size={48} className="error-icon" />
+            <h3>Data Synchronization Error</h3>
+            <p>Could not retrieve your operational metrics at this time.</p>
+            <button onClick={refetch} className="retry-btn">Re-initialize Sync</button>
           </div>
         ) : (
-          <>
+          <motion.div 
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5 }}
+          >
+            {/* STATS DOSSIER */}
             <StatsCards stats={stats} />
 
-            <div className="pr-section-title">Recent Sessions</div>
-
-            {sessions.length === 0 ? (
-              <div className="pr-empty">
-                <div className="pr-empty-icon">📭</div>
-                <div className="pr-empty-text">No sessions yet. Start practicing!</div>
-                <Link href="/dashboard/scenario" className="pr-start-btn">
-                  Start a Scenario →
-                </Link>
+            {/* RECENT SESSIONS SECTION */}
+            <div className="sessions-section">
+              <div className="section-header">
+                <span className="header-label">Operational Record Log</span>
+                <div className="h-line" />
               </div>
-            ) : (
-              <div className="pr-sessions">
-                {sessions.map((session, i) => (
-                  <SessionItem key={session.id} session={session} index={i} />
-                ))}
 
-
-              </div>
-            )}
-          </>
+              {sessions.length === 0 ? (
+                <div className="state-display empty">
+                  <Inbox size={48} className="empty-icon" />
+                  <h3>No Operational Logs Found</h3>
+                  <p>Start your first session to begin building your personnel dossier.</p>
+                  <Link href="/dashboard/scenario" className="start-btn">
+                    Launch Scenario Simulation
+                  </Link>
+                </div>
+              ) : (
+                <div className="sessions-grid">
+                  {sessions.map((session, i) => (
+                    <SessionItem key={session.id} session={session} index={i} />
+                  ))}
+                </div>
+              )}
+            </div>
+          </motion.div>
         )}
+
+        <footer className="progress-footer">
+          <div className="f-line" />
+          <p className="f-status">
+            <ShieldCheck size={14} />
+            <span>Verified Technical Proficiency Record — v1.2</span>
+          </p>
+        </footer>
+
       </main>
+
+      <style jsx>{`
+        .ledger-progress-root {
+          min-height: 100vh;
+          background: #f8fafc;
+          padding: 80px 40px;
+        }
+
+        .progress-container {
+          max-width: 1000px;
+          margin: 0 auto;
+        }
+
+        .progress-header {
+          margin-bottom: 60px;
+          border-bottom: 1px solid #e2e8f0;
+          padding-bottom: 40px;
+        }
+
+        .eyebrow-group {
+          display: flex;
+          align-items: center;
+          gap: 12px;
+          margin-bottom: 24px;
+        }
+
+        .line {
+          width: 32px;
+          height: 1px;
+          background: #4338ca;
+        }
+
+        .eyebrow {
+          font-size: 10px;
+          font-weight: 800;
+          text-transform: uppercase;
+          letter-spacing: 3px;
+          color: #94a3b8;
+        }
+
+        .progress-title {
+          font-size: 40px;
+          font-weight: 900;
+          color: #0f172a;
+          letter-spacing: -1.5px;
+          margin-bottom: 16px;
+        }
+
+        .serif-grad {
+          font-family: 'Georgia', serif;
+          font-style: italic;
+          color: #4338ca;
+          font-weight: 400;
+        }
+
+        .progress-sub {
+          font-size: 15px;
+          color: #64748b;
+          max-width: 500px;
+          line-height: 1.8;
+        }
+
+        .sessions-section {
+          margin-top: 60px;
+        }
+
+        .section-header {
+          display: flex;
+          align-items: center;
+          gap: 16px;
+          margin-bottom: 32px;
+        }
+
+        .header-label {
+          font-size: 10px;
+          font-weight: 800;
+          text-transform: uppercase;
+          letter-spacing: 2px;
+          color: #94a3b8;
+          white-space: nowrap;
+        }
+
+        .h-line {
+          flex: 1;
+          height: 1px;
+          background: #f1f5f9;
+        }
+
+        .sessions-grid {
+          display: flex;
+          flex-direction: column;
+          gap: 12px;
+        }
+
+        .state-display {
+          text-align: center;
+          padding: 80px 20px;
+          background: white;
+          border: 1px solid #e2e8f0;
+          border-radius: 20px;
+          color: #64748b;
+        }
+
+        .state-display.error { border-color: #fecaca; background: #fff8f8; }
+        .error-icon { color: #dc2626; margin-bottom: 16px; }
+        .state-display h3 { color: #0f172a; font-weight: 800; margin-bottom: 12px; }
+
+        .spinner {
+          width: 32px;
+          height: 32px;
+          border: 3px solid #e2e8f0;
+          border-top-color: #4338ca;
+          border-radius: 50%;
+          animation: spin 1s linear infinite;
+          margin: 0 auto 16px;
+        }
+
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        .retry-btn, .start-btn {
+          margin-top: 24px;
+          padding: 12px 24px;
+          background: #0f172a;
+          color: white;
+          border: none;
+          border-radius: 12px;
+          font-weight: 800;
+          cursor: pointer;
+          font-size: 14px;
+        }
+
+        .progress-footer {
+          margin-top: 100px;
+          padding-top: 32px;
+          border-top: 1px solid #f1f5f9;
+        }
+
+        .f-status {
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          font-size: 10px;
+          font-weight: 700;
+          color: #cbd5e1;
+          letter-spacing: 1px;
+          text-transform: uppercase;
+        }
+
+        @media (max-width: 768px) {
+          .progress-container { padding: 40px 20px; }
+          .progress-title { font-size: 32px; }
+        }
+      `}</style>
     </div>
   )
 }

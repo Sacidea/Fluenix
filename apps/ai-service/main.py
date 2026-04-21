@@ -18,22 +18,39 @@ app.add_middleware(
 )
 
 SCENARIO_PROMPTS = {
-    "interview": """You are an experienced FAANG technical interviewer. 
-    Conduct a realistic technical interview in English.
-    Ask one question at a time. Be professional but friendly.""",
-    "standup": """You are a Scrum Master running a daily standup meeting.
-    Ask the developer about yesterday's work, today's plan, and any blockers.""",
-    "code_review": """You are a senior software engineer doing a code review.
-    Ask the developer to explain their code choices."""
+    "interview": """You are a highly experienced, NO-NONSENSE FAANG technical interviewer. 
+    Conduct a high-stakes, rigorous technical interview. Your tone is cold, formal, and demanding.
+    Expect precise technical answers. If the candidate is vague, press them for exact architectural details.
+    DO NOT offer encouragement. DO NOT say 'good job' or 'don't worry'. 
+    If the candidate struggles, remain silent or ask a follow-up that exposes the gap.
+    CRITICAL: Maintain a professional distance. You are evaluating, not coaching.""",
+    
+    "standup": """You are a high-pressure Engineering Lead running a mission-critical daily standup.
+    Expect brief, high-signal updates. If an update is too vague or 'soft', call it out and demand specific technical blockers.
+    Maintain a time-boxed, efficient, and strictly professional atmosphere. 
+    Zero tolerance for fluff or patronizing language.""",
+    
+    "code_review": """You are a pedantic Senior Software Architect conducting a critical code review.
+    Your goal is to find architectural flaws and demand justification for every line of code.
+    Be thorough, technically rigorous, and uncompromising on quality. 
+    Maintain a formal peer-review tone with zero emotional padding."""
 }
+
+def get_level_steering(level: str):
+    """Provides invisible steering instructions based on CEFR level."""
+    steering = f"\n\n[INVISIBLE STEERING: The candidate has a CEFR {level} level. "
+    if level in ["beginner", "A1", "A2"]:
+        steering += "Avoid extremely rare idioms and complex nested sentences. Use standard professional vocabulary. "
+    elif level in ["B1", "B2"]:
+        steering += "Use natural professional industry terminology. No need to over-simplify. "
+    else:
+        steering += "Use advanced architectural concepts and native-level professional jargon. No restrictions on complexity. "
+    steering += "CRITICAL: Do NOT mention their level. Do NOT be patronizing. Remain a professional peer/interviewer.]"
+    return steering
 
 @app.get("/health")
 def health():
-    return {
-        "status": "ok",
-        "service": "fluenix-ai",
-        "api_key_set": bool(os.getenv("ANTHROPIC_API_KEY"))
-    }
+    return {"status": "ok"}
 
 @app.post("/scenario/chat")
 async def scenario_chat(data: dict):
@@ -42,13 +59,14 @@ async def scenario_chat(data: dict):
         level = data.get("level", "B2")
         messages = data.get("messages", [])
         
-        base_prompt = SCENARIO_PROMPTS.get(scenario, SCENARIO_PROMPTS["interview"])
-        level_instruction = f"\n\nIMPORTANT: The user is at a CEFR {level} English proficiency level. Strictly adjust your language complexity, vocabulary, and expectations to match the {level} level."
+        system_prompt = SCENARIO_PROMPTS.get(scenario, SCENARIO_PROMPTS["interview"])
+        system_prompt += get_level_steering(level)
         
         response = client.messages.create(
+            # Using the name provided in the snippet as it is confirmed working for the user
             model="claude-sonnet-4-6",
             max_tokens=500,
-            system=base_prompt + level_instruction,
+            system=system_prompt,
             messages=messages
         )
         return {"reply": response.content[0].text}
@@ -62,20 +80,24 @@ async def analyze_writing(data: dict):
         exercise = data.get("exercise", "pr_description")
         text = data.get("text", "")
         prompt = data.get("prompt", "")
+        
+        # Maintain the strict analyst persona
+        system_msg = """You are a senior technical English coach. 
+        Analyze the technical writing and return ONLY a JSON object:
+        {
+          "clarity_score": <0-100>,
+          "technical_score": <0-100>,
+          "overall_score": <0-100>,
+          "strengths": ["...", "..."],
+          "improvements": ["...", "..."],
+          "overall_feedback": "2-3 sentences of sharp, professional analysis"
+        }
+        Return only the JSON."""
+
         response = client.messages.create(
             model="claude-sonnet-4-6",
             max_tokens=1000,
-            system="""You are a technical English writing coach for software developers.
-            Analyze the writing and return ONLY a JSON object with these exact fields:
-            {
-              "clarity_score": <0-100>,
-              "technical_score": <0-100>,
-              "overall_score": <0-100>,
-              "strengths": ["...", "..."],
-              "improvements": ["...", "..."],
-              "overall_feedback": "2-3 sentences"
-            }
-            Return only the JSON, no extra text, no markdown.""",
+            system=system_msg,
             messages=[{
                 "role": "user",
                 "content": f"Task: {prompt}\n\nUser's writing:\n{text}"
@@ -98,10 +120,10 @@ async def analyze_scenario(data: dict):
             for m in messages
         ])
 
-        system_prompt="""You are a technical English coach for software developers.
-        The user is targeting a CEFR {LEVEL} English proficiency level. Evaluate them strictly based on {LEVEL} standards.
-        Analyze the conversation and return ONLY a JSON object:
-        {
+        system_prompt=f"""You are a technical English evaluator.
+        The user is at CEFR {level}. Grade them based on the expectations for that level in a tech environment.
+        Return ONLY a JSON object:
+        {{
           "fluency_score": <0-100>,
           "vocabulary_score": <0-100>,
           "technical_accuracy": <0-100>,
@@ -109,13 +131,13 @@ async def analyze_scenario(data: dict):
           "strengths": ["...", "..."],
           "improvements": ["...", "..."],
           "overall_feedback": "2-3 sentences"
-        }
-        Return only the JSON, no markdown, no extra text."""
+        }}
+        Return only JSON."""
 
         response = client.messages.create(
             model="claude-sonnet-4-6",
             max_tokens=800,
-            system=system_prompt.replace("{LEVEL}", level),
+            system=system_prompt,
             messages=[{
                 "role": "user",
                 "content": f"Scenario: {scenario}\n\nConversation:\n{transcript}"
@@ -127,6 +149,7 @@ async def analyze_scenario(data: dict):
     except Exception as e:
         traceback.print_exc()
         raise HTTPException(status_code=500, detail=str(e))
+
 @app.post("/pronunciation/analyze")
 async def analyze_pronunciation(data: dict):
     try:
@@ -134,20 +157,16 @@ async def analyze_pronunciation(data: dict):
         target_word = data.get("target_word", "")
         level = data.get("level", "B2")
         
-        system_prompt = f"""You are a technical English pronunciation coach for software developers.
-        The user is targeting a CEFR {level} English proficiency level. Compare the user's spoken transcript with the target word/phrase.
-        Evaluate them based on {level} expectations:
-        - If {level} is Beginner/A1/A2, be very forgiving, focus on basic intelligibility, and reply in simple, highly encouraging English.
-        - If {level} is B1/B2, focus on correct syllable stress, clarity, and intermediate phonetic correctness.
-        - If {level} is C1/C2, be extremely strict, focusing on advanced phonetics, tongue placement, native-like articulation, and precise intonation.
+        system_prompt = f"""You are a technical English pronunciation specialist.
+        Compare transcript with target. Grade relative to CEFR {level} expectations.
         Return ONLY a JSON object:
         {{
           "accuracy_score": <0-100>,
           "is_correct": <true/false>,
-          "feedback": "2-3 sentences of feedback tailored to the {level} strictness guidelines.",
-          "tip": "one precise pronunciation tip tailored to the {level} level."
+          "feedback": "Professional feedback.",
+          "tip": "Technical tip."
         }}
-        Return only the JSON, no markdown, no extra text."""
+        Return only JSON."""
 
         response = client.messages.create(
             model="claude-sonnet-4-6",
@@ -163,5 +182,4 @@ async def analyze_pronunciation(data: dict):
         return {"result": clean}
     except Exception as e:
         traceback.print_exc()
-        raise HTTPException(status_code=500, detail=str(e))    
-    
+        raise HTTPException(status_code=500, detail=str(e))

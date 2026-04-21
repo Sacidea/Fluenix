@@ -1,8 +1,8 @@
 import { Request, Response } from 'express'
-import { SessionService } from '../services/session.service'
+import { ISessionService } from '../interfaces/ISessionService'
 
 export class SessionController {
-  constructor(private sessionService: SessionService) {}
+  constructor(private sessionService: ISessionService) {}
 
   public createSession = async (req: Request, res: Response) => {
     try {
@@ -36,3 +36,4 @@ export class SessionController {
     }
   }
 }
+

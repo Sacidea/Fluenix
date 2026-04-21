@@ -16,7 +16,7 @@ export function useDashboardData(userId?: string) {
         if (!userId) return
         setLoading(true)
         try {
-            const res = await axios.get(`http://localhost:3001/api/sessions/stats/${userId}`)
+            const res = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/api/sessions/stats/${userId}`)
             setStats(res.data)
         } catch {
             setStats({ totalSessions: 0, averageScore: 0, streak: 0, lastSession: null })

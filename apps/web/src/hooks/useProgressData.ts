@@ -29,8 +29,8 @@ export function useProgressData(userId?: string) {
         setLoading(true)
         try {
             const [statsRes, sessionsRes] = await Promise.all([
-                axios.get(`http://localhost:3001/api/sessions/stats/${userId}`),
-                axios.get(`http://localhost:3001/api/sessions/user/${userId}`)
+                axios.get(`${process.env.NEXT_PUBLIC_API_URL}/api/sessions/stats/${userId}`),
+                axios.get(`${process.env.NEXT_PUBLIC_API_URL}/api/sessions/user/${userId}`)
             ])
             setStats(statsRes.data)
             setSessions(sessionsRes.data)

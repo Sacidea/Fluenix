@@ -1,614 +1,380 @@
 'use client'
 
-import { useState, useRef, useEffect } from 'react'
-import { useUser } from '@clerk/nextjs'
-import axios from 'axios'
+import React from 'react'
 import Link from 'next/link'
-
-type Message = {
-  role: 'user' | 'assistant'
-  content: string
-}
-
-type Scenario = 'interview' | 'standup' | 'code_review'
+import { motion, AnimatePresence } from 'framer-motion'
+import { ChevronLeft, Send, Terminal, Users, FileCode, RotateCcw } from 'lucide-react'
+import { useScenarioSession, scenarios } from '@/hooks/useScenarioSession'
 
 export default function ScenarioPage() {
-  const { user } = useUser()
-  const [scenario, setScenario] = useState<Scenario>('interview')
-  const [messages, setMessages] = useState<Message[]>([])
-  const [input, setInput] = useState('')
-  const [loading, setLoading] = useState(false)
-  const [started, setStarted] = useState(false)
-  const [startTime, setStartTime] = useState<Date | null>(null)
-  const [level, setLevel] = useState('B2')
-  const bottomRef = useRef<HTMLDivElement>(null)
+  const {
+    scenario,
+    setScenario,
+    messages,
+    input,
+    setInput,
+    loading,
+    started,
+    startScenario,
+    sendMessage,
+    endSession,
+    bottomRef,
+    activeScenario
+  } = useScenarioSession()
 
-  useEffect(() => {
-    if (!user) return
-    axios.get(`http://localhost:3001/api/users/${user.id}`)
-      .then(res => {
-        if (res.data?.level) setLevel(res.data.level)
-      })
-      .catch(err => console.error('Failed to get user level', err))
-  }, [user])
-
-  const scenarios = [
-    { id: 'interview', label: 'Technical Interview', icon: '🎯', desc: 'FAANG-style technical questions', color: '#6366f1', bg: '#eef2ff', border: '#c7d2fe' },
-    { id: 'standup', label: 'Daily Standup', icon: '📋', desc: 'Agile team communication', color: '#0ea5e9', bg: '#e0f2fe', border: '#bae6fd' },
-    { id: 'code_review', label: 'Code Review', icon: '👨‍💻', desc: 'Explain your code decisions', color: '#10b981', bg: '#ecfdf5', border: '#a7f3d0' },
-  ]
-
-  useEffect(() => {
-    bottomRef.current?.scrollIntoView({ behavior: 'smooth' })
-  }, [messages])
-
-  const startScenario = async () => {
-    setStarted(true)
-    setLoading(true)
-    setMessages([])
-    setStartTime(new Date())
-    try {
-      const res = await axios.post('http://localhost:8000/scenario/chat', {
-        scenario,
-        level,
-        messages: [{ role: 'user', content: 'Hello, I am ready to start.' }]
-      })
-      setMessages([
-        { role: 'user', content: 'Hello, I am ready to start.' },
-        { role: 'assistant', content: res.data.reply }
-      ])
-    } catch (err) {
-      console.error(err)
-    } finally {
-      setLoading(false)
-    }
-  }
-
-  const sendMessage = async () => {
-    if (!input.trim() || loading) return
-    const newMessages: Message[] = [...messages, { role: 'user', content: input }]
-    setMessages(newMessages)
-    setInput('')
-    setLoading(true)
-    try {
-      const res = await axios.post('http://localhost:8000/scenario/chat', {
-        scenario,
-        level,
-        messages: newMessages
-      })
-      setMessages([...newMessages, { role: 'assistant', content: res.data.reply }])
-    } catch (err) {
-      console.error(err)
-    } finally {
-      setLoading(false)
-    }
-  }
-
-  const endSession = async () => {
-    if (user && startTime && messages.length > 1) {
-      const duration = Math.round((new Date().getTime() - startTime.getTime()) / 1000)
-      let score = null
-
-      try {
-        const analysisRes = await axios.post('http://localhost:8000/scenario/analyze', {
-          scenario,
-          level,
-          messages
-        })
-        const raw = analysisRes.data.analysis
-        const clean = raw.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim()
-        const jsonStart = clean.indexOf('{')
-        const jsonEnd = clean.lastIndexOf('}')
-        if (jsonStart !== -1 && jsonEnd !== -1) {
-          const analysis = JSON.parse(clean.slice(jsonStart, jsonEnd + 1))
-          score = analysis?.overall_score ?? null
-        }
-      } catch (err) {
-        console.error('Analysis error:', err)
-      }
-
-      try {
-        await axios.post('http://localhost:3001/api/sessions', {
-          userId: user.id,
-          type: 'scenario',
-          scenario,
-          duration,
-          score,
-        })
-      } catch (err) {
-        console.error('Session save error:', err)
-      }
-    }
-    setStarted(false)
-    setMessages([])
-    setStartTime(null)
-  }
-
-  const activeScenario = scenarios.find(s => s.id === scenario)!
+  const IconMap: Record<string, any> = { Terminal, Users, FileCode }
 
   return (
-    <>
-      <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&display=swap');
-        * { box-sizing: border-box; margin: 0; padding: 0; }
+    <div className="scenario-lab-root">
+      {/* Header */}
+      <header className="lab-header">
+        <div className="header-content">
+          <Link href="/dashboard" className="back-link">
+            <ChevronLeft size={16} />
+            <span>Dashboard</span>
+          </Link>
+          <div className="header-title-group">
+            <span className="eyebrow">Simulation Environment</span>
+            <h1 className="main-title">Scenario Transcript</h1>
+          </div>
+        </div>
+      </header>
 
-        .sc-root {
+      <main className="lab-main">
+        {!started ? (
+          <section className="selector-view">
+            <div className="selector-intro">
+              <h2>Select Operational Context</h2>
+              <p>AI will simulate a high-stakes professional environment based on your selection.</p>
+            </div>
+
+            <div className="scenarios-grid">
+              {scenarios.map((s) => {
+                const Icon = IconMap[s.icon]
+                return (
+                  <button
+                    key={s.id}
+                    className={`scenario-card ${scenario === s.id ? 'active' : ''}`}
+                    onClick={() => setScenario(s.id as any)}
+                  >
+                    <div className="card-accent" style={{ background: s.color }} />
+                    <div className="card-top">
+                      <Icon size={24} style={{ color: scenario === s.id ? s.color : '#94a3b8' }} />
+                      <span className="sc-tag">{s.id.replace('_', ' ')}</span>
+                    </div>
+                    <h3 className="sc-title">{s.label}</h3>
+                    <p className="sc-desc">{s.desc}</p>
+                  </button>
+                )
+              })}
+            </div>
+
+            <button className="start-btn" onClick={startScenario}>
+              Initialize Simulation
+            </button>
+          </section>
+        ) : (
+          <section className="chat-view">
+            <header className="chat-control">
+              <div className="active-badge" style={{ color: activeScenario.color, background: `${activeScenario.color}10`, borderColor: `${activeScenario.color}30` }}>
+                <span className="pulse-dot" style={{ background: activeScenario.color }} />
+                <span className="badge-text">{activeScenario.label} Active</span>
+              </div>
+              <button className="reset-btn" onClick={endSession}>
+                <RotateCcw size={14} />
+                <span>Reset Terminal</span>
+              </button>
+            </header>
+
+            <div className="transcript-area">
+              {messages.map((msg, i) => (
+                <div key={i} className={`transcript-entry ${msg.role}`}>
+                  <div className="entry-meta">
+                    <span className="meta-time">[{new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', second: '2-digit' })}]</span>
+                    <span className="meta-actor">{msg.role === 'assistant' ? 'SYSTEM_AI' : 'ENGINEER_USER'}</span>
+                  </div>
+                  <div 
+                    className="entry-content"
+                    dangerouslySetInnerHTML={{
+                      __html: msg.content
+                        .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+                        .replace(/\n/g, '<br/>')
+                    }}
+                  />
+                </div>
+              ))}
+              
+              {loading && (
+                <div className="transcript-entry assistant typing">
+                   <div className="entry-meta">
+                    <span className="meta-time">[...]</span>
+                    <span className="meta-actor">SYSTEM_AI</span>
+                  </div>
+                  <div className="typing-dots">
+                    <span>.</span><span>.</span><span>.</span>
+                  </div>
+                </div>
+              )}
+              <div ref={bottomRef} />
+            </div>
+
+            <footer className="input-area">
+              <input
+                className="terminal-input"
+                type="text"
+                value={input}
+                onChange={(e) => setInput(e.target.value)}
+                onKeyDown={(e) => e.key === 'Enter' && sendMessage()}
+                placeholder="Enter command or response..."
+              />
+              <button className="send-btn" onClick={sendMessage} disabled={loading || !input.trim()}>
+                <Send size={18} />
+              </button>
+            </footer>
+          </section>
+        )}
+      </main>
+
+      <style jsx>{`
+        .scenario-lab-root {
           min-height: 100vh;
-          background: #f8faff;
-          color: #102D47;
-          font-family: 'DM Sans', sans-serif;
+          background-color: #f8fafc;
           display: flex;
           flex-direction: column;
         }
 
-        .sc-nav {
-          display: flex;
-          align-items: center;
-          justify-content: space-between;
-          padding: 0 40px;
-          height: 68px;
-          background: rgba(255,255,255,0.92);
-          backdrop-filter: blur(20px);
-          border-bottom: 1px solid #e8edf5;
-          box-shadow: 0 1px 12px rgba(0,0,0,0.06);
-          position: sticky;
-          top: 0;
-          z-index: 100;
+        .lab-header {
+          background: white;
+          border-bottom: 1px solid #e2e8f0;
+          padding: 20px 40px;
         }
 
-        .sc-nav-left {
-          display: flex;
-          align-items: center;
-          gap: 16px;
+        .header-content {
+          max-width: 1000px;
+          margin: 0 auto;
         }
 
-        .sc-back {
-          font-size: 13px;
-          font-weight: 500;
-          color: #547593;
-          text-decoration: none;
+        .back-link {
           display: flex;
           align-items: center;
           gap: 6px;
-          transition: color 0.2s;
-        }
-
-        .sc-back:hover { color: #102D47; }
-
-        .sc-nav-sep { color: #cbd5e1; }
-
-        .sc-nav-title {
-          font-size: 15px;
-          font-weight: 600;
-          color: #102D47;
-        }
-
-        .sc-main {
-          flex: 1;
-          max-width: 860px;
-          margin: 0 auto;
-          width: 100%;
-          padding: 48px 40px;
-        }
-
-        .sc-selector-eyebrow {
-          font-size: 12px;
+          color: #94a3b8;
+          font-size: 13px;
           font-weight: 700;
+          text-decoration: none;
+          margin-bottom: 12px;
+        }
+
+        .eyebrow {
+          font-size: 10px;
+          text-transform: uppercase;
           letter-spacing: 2px;
           color: #6366f1;
-          text-transform: uppercase;
-          margin-bottom: 10px;
+          font-weight: 800;
         }
 
-        .sc-selector-title {
-          font-size: 36px;
-          font-weight: 700;
-          letter-spacing: -0.8px;
-          margin-bottom: 8px;
-          color: #102D47;
-          line-height: 1.2;
+        .main-title {
+          font-size: 28px;
+          font-weight: 900;
+          color: #0f172a;
+          margin: 0;
         }
 
-        .sc-selector-sub {
-          font-size: 15px;
-          color: #547593;
-          margin-bottom: 36px;
-          line-height: 1.6;
+        .lab-main {
+          flex: 1;
+          max-width: 1000px;
+          width: 100%;
+          margin: 0 auto;
+          padding: 40px;
         }
 
-        .sc-cards {
+        /* Selector View */
+        .selector-intro { text-align: center; margin-bottom: 40px; }
+        .selector-intro h2 { font-size: 32px; font-weight: 900; color: #0f172a; margin-bottom: 8px; }
+        .selector-intro p { color: #64748b; font-size: 16px; }
+
+        .scenarios-grid {
           display: grid;
           grid-template-columns: repeat(3, 1fr);
-          gap: 16px;
-          margin-bottom: 28px;
+          gap: 20px;
+          margin-bottom: 40px;
         }
 
-        .sc-card {
+        .scenario-card {
           background: white;
-          border: 1.5px solid #e8edf5;
-          border-radius: 18px;
-          padding: 24px;
+          border: 1px solid #e2e8f0;
+          border-radius: 20px;
+          padding: 32px;
+          text-align: left;
           cursor: pointer;
-          transition: all 0.2s ease;
-          box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+          position: relative;
+          overflow: hidden;
+          transition: all 0.3s;
         }
 
-        .sc-card:hover {
-          transform: translateY(-2px);
-          box-shadow: 0 8px 24px rgba(0,0,0,0.08);
-        }
+        .scenario-card:hover { transform: translateY(-4px); border-color: #cbd5e1; }
+        .scenario-card.active { border-color: #6366f1; box-shadow: 0 10px 30px rgba(99,102,241,0.1); }
 
-        .sc-card.selected {
-          border-color: var(--card-color);
-          box-shadow: 0 0 0 3px var(--card-bg), 0 8px 24px rgba(0,0,0,0.08);
-        }
+        .card-accent { position: absolute; top: 0; left: 0; width: 100%; height: 3px; }
+        .card-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; }
+        .sc-tag { font-size: 9px; font-weight: 800; text-transform: uppercase; color: #94a3b8; letter-spacing: 1px; }
+        .sc-title { font-size: 18px; font-weight: 900; color: #0f172a; margin-bottom: 8px; }
+        .sc-desc { font-size: 13px; color: #64748b; line-height: 1.5; }
 
-        .sc-card-icon { font-size: 32px; margin-bottom: 12px; }
-
-        .sc-card-label {
-          font-size: 15px;
-          font-weight: 600;
-          color: #102D47;
-          margin-bottom: 4px;
-        }
-
-        .sc-card-desc { font-size: 12px; color: #547593; line-height: 1.5; }
-
-        .sc-start-btn {
+        .start-btn {
           width: 100%;
-          padding: 16px;
-          background: linear-gradient(135deg, #6366f1, #0ea5e9);
-          border: none;
-          border-radius: 14px;
+          padding: 20px;
+          background: #4338ca;
           color: white;
-          font-family: 'DM Sans', sans-serif;
+          border: none;
+          border-radius: 16px;
+          font-weight: 800;
           font-size: 16px;
-          font-weight: 600;
           cursor: pointer;
-          transition: all 0.2s ease;
-          box-shadow: 0 4px 16px rgba(99,102,241,0.3);
+          transition: all 0.3s;
+          box-shadow: 0 10px 25px -5px rgba(67, 56, 202, 0.3);
         }
 
-        .sc-start-btn:hover {
-          transform: translateY(-2px);
-          box-shadow: 0 8px 24px rgba(99,102,241,0.4);
-        }
-
-        .sc-chat {
+        /* Chat View */
+        .chat-view {
           display: flex;
           flex-direction: column;
-          height: calc(100vh - 160px);
+          height: calc(100vh - 240px);
+          background: white;
+          border: 1px solid #e2e8f0;
+          border-radius: 24px;
+          box-shadow: 0 10px 40px rgba(0,0,0,0.03);
+          overflow: hidden;
         }
 
-        .sc-chat-header {
+        .chat-control {
+          padding: 16px 24px;
+          border-bottom: 1px solid #f1f5f9;
           display: flex;
-          align-items: center;
           justify-content: space-between;
-          margin-bottom: 24px;
+          align-items: center;
         }
 
-        .sc-chat-badge {
+        .active-badge {
           display: flex;
           align-items: center;
           gap: 8px;
-          border-radius: 20px;
-          padding: 8px 16px;
-          font-size: 13px;
-          font-weight: 600;
-          border: 1.5px solid;
+          padding: 6px 12px;
+          border-radius: 99px;
+          font-size: 12px;
+          font-weight: 800;
+          border: 1px solid;
+          text-transform: uppercase;
         }
 
-        .sc-chat-dot {
-          width: 7px; height: 7px;
-          border-radius: 50%;
-          animation: pulse 1.5s infinite;
-        }
+        .pulse-dot { width: 6px; height: 6px; border-radius: 50%; }
 
-        @keyframes pulse {
-          0%, 100% { opacity: 1; transform: scale(1); }
-          50% { opacity: 0.5; transform: scale(0.85); }
-        }
-
-        .sc-reset-btn {
-          background: white;
-          border: 1.5px solid #e8edf5;
-          border-radius: 10px;
-          color: #547593;
-          padding: 8px 16px;
-          font-size: 13px;
-          font-weight: 500;
-          cursor: pointer;
-          transition: all 0.2s;
-          font-family: 'DM Sans', sans-serif;
-          box-shadow: 0 1px 4px rgba(0,0,0,0.05);
-        }
-
-        .sc-reset-btn:hover {
-          border-color: #6366f1;
-          color: #6366f1;
-        }
-
-        .sc-messages {
-          flex: 1;
-          overflow-y: auto;
-          padding: 4px 0 24px;
-          display: flex;
-          flex-direction: column;
-          gap: 16px;
-          scrollbar-width: thin;
-          scrollbar-color: #e2e8f0 transparent;
-        }
-
-        .sc-msg {
-          display: flex;
-          gap: 12px;
-        }
-
-        .sc-msg.user { flex-direction: row-reverse; }
-
-        .sc-msg-avatar {
-          width: 36px; height: 36px;
-          border-radius: 12px;
+        .reset-btn {
           display: flex;
           align-items: center;
-          justify-content: center;
-          font-size: 16px;
-          flex-shrink: 0;
-          box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-        }
-
-        .sc-msg.ai .sc-msg-avatar {
-          background: #eef2ff;
-          border: 1.5px solid #c7d2fe;
-        }
-
-        .sc-msg.user .sc-msg-avatar {
-          background: #f0fdf4;
-          border: 1.5px solid #bbf7d0;
-        }
-
-        .sc-msg-body { max-width: 72%; }
-
-        .sc-msg-name {
-          font-size: 11px;
+          gap: 8px;
+          background: #f8fafc;
+          border: 1px solid #e2e8f0;
+          padding: 6px 12px;
+          border-radius: 8px;
+          font-size: 12px;
           font-weight: 700;
-          letter-spacing: 0.8px;
-          text-transform: uppercase;
+          color: #64748b;
+          cursor: pointer;
+        }
+
+        .transcript-area {
+          flex: 1;
+          overflow-y: auto;
+          padding: 32px;
+          background: #fafafa;
+          display: flex;
+          flex-direction: column;
+          gap: 24px;
+        }
+
+        .transcript-entry {
+          max-width: 85%;
+        }
+
+        .transcript-entry.user { align-self: flex-end; }
+
+        .entry-meta {
+          display: flex;
+          gap: 8px;
+          font-family: 'JetBrains Mono', monospace;
+          font-size: 10px;
           margin-bottom: 6px;
           color: #94a3b8;
         }
 
-        .sc-msg.user .sc-msg-name { text-align: right; }
+        .meta-actor { font-weight: 800; }
 
-        .sc-msg-bubble {
-          padding: 14px 18px;
-          border-radius: 16px;
-          font-size: 14px;
-          line-height: 1.65;
-          font-weight: 400;
+        .entry-content {
+          font-family: 'Georgia', serif;
+          font-size: 15px;
+          line-height: 1.6;
+          padding: 16px 20px;
+          border-radius: 12px;
+          box-shadow: 0 2px 8px rgba(0,0,0,0.02);
         }
 
-        .sc-msg.ai .sc-msg-bubble {
+        .assistant .entry-content {
           background: white;
-          border: 1.5px solid #e8edf5;
-          color: #102D47;
-          border-radius: 4px 16px 16px 16px;
-          box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+          color: #0f172a;
+          border: 1px solid #e2e8f0;
+          border-left: 3px solid #4338ca;
         }
 
-        .sc-msg.user .sc-msg-bubble {
-          background: linear-gradient(135deg, #6366f1, #0ea5e9);
+        .user .entry-content {
+          background: #4338ca;
           color: white;
-          border-radius: 16px 4px 16px 16px;
-          box-shadow: 0 4px 12px rgba(99,102,241,0.3);
         }
 
-        .sc-typing {
+        .typing-dots span {
+          display: inline-block;
+          animation: blink 1.4s infinite;
+          font-size: 24px;
+          line-height: 0;
+        }
+
+        @keyframes blink { 0%, 80%, 100% { opacity: 0; } 40% { opacity: 1; } }
+
+        .input-area {
+          padding: 24px;
+          border-top: 1px solid #f1f5f9;
           display: flex;
           gap: 12px;
         }
 
-        .sc-typing-avatar {
-          width: 36px; height: 36px;
-          border-radius: 12px;
-          background: #eef2ff;
-          border: 1.5px solid #c7d2fe;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          font-size: 16px;
-          flex-shrink: 0;
-        }
-
-        .sc-typing-bubble {
-          background: white;
-          border: 1.5px solid #e8edf5;
-          border-radius: 4px 16px 16px 16px;
-          padding: 14px 20px;
-          display: flex;
-          gap: 5px;
-          align-items: center;
-          box-shadow: 0 2px 8px rgba(0,0,0,0.05);
-        }
-
-        .sc-typing-dot {
-          width: 6px; height: 6px;
-          background: #6366f1;
-          border-radius: 50%;
-          animation: typingDot 1.2s infinite;
-        }
-
-        .sc-typing-dot:nth-child(2) { animation-delay: 0.2s; }
-        .sc-typing-dot:nth-child(3) { animation-delay: 0.4s; }
-
-        @keyframes typingDot {
-          0%, 60%, 100% { transform: translateY(0); opacity: 0.3; }
-          30% { transform: translateY(-5px); opacity: 1; }
-        }
-
-        .sc-input-area {
-          border-top: 1.5px solid #e8edf5;
-          padding-top: 20px;
-          display: flex;
-          gap: 10px;
-          align-items: center;
-          background: #f8faff;
-        }
-
-        .sc-input {
+        .terminal-input {
           flex: 1;
-          background: white;
-          border: 1.5px solid #e8edf5;
-          border-radius: 14px;
-          padding: 14px 18px;
-          font-size: 14px;
-          color: #102D47;
-          font-family: 'DM Sans', sans-serif;
-          font-weight: 400;
+          padding: 14px 20px;
+          border: 1px solid #e2e8f0;
+          border-radius: 12px;
+          font-size: 15px;
           outline: none;
-          transition: border-color 0.2s;
-          box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+          transition: border-color 0.3s;
         }
 
-        .sc-input::placeholder { color: #94a3b8; }
+        .terminal-input:focus { border-color: #4338ca; }
 
-        .sc-input:focus {
-          border-color: #6366f1;
-          box-shadow: 0 0 0 3px rgba(99,102,241,0.1);
-        }
-
-        .sc-send-btn {
-          width: 48px; height: 48px;
-          background: linear-gradient(135deg, #6366f1, #0ea5e9);
-          border: none;
-          border-radius: 14px;
+        .send-btn {
+          width: 48px;
+          height: 48px;
+          background: #4338ca;
           color: white;
-          font-size: 18px;
-          cursor: pointer;
-          transition: all 0.2s ease;
+          border: none;
+          border-radius: 12px;
           display: flex;
           align-items: center;
           justify-content: center;
-          flex-shrink: 0;
-          box-shadow: 0 4px 12px rgba(99,102,241,0.3);
+          cursor: pointer;
+          transition: all 0.3s;
         }
 
-        .sc-send-btn:hover:not(:disabled) {
-          transform: translateY(-1px);
-          box-shadow: 0 8px 20px rgba(99,102,241,0.4);
-        }
-
-        .sc-send-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+        .send-btn:disabled { opacity: 0.5; cursor: not-allowed; }
       `}</style>
-
-      <div className="sc-root">
-        <main className="sc-main">
-          {!started ? (
-            <div>
-              <p className="sc-selector-eyebrow">Practice</p>
-              <h1 className="sc-selector-title">Choose your scenario</h1>
-              <p className="sc-selector-sub">AI will play the opposite role in a real-world tech situation</p>
-
-              <div className="sc-cards">
-                {scenarios.map((s) => (
-                  <div
-                    key={s.id}
-                    className={`sc-card ${scenario === s.id ? 'selected' : ''}`}
-                    style={{
-                      '--card-color': s.color,
-                      '--card-bg': s.bg,
-                      borderTopColor: scenario === s.id ? s.color : undefined,
-                      borderTopWidth: scenario === s.id ? '3px' : undefined,
-                    } as React.CSSProperties}
-                    onClick={() => setScenario(s.id as Scenario)}
-                    data-aos="fade-up"
-                    data-aos-delay={scenarios.indexOf(s) * 80}
-                  >
-                    <div className="sc-card-icon">{s.icon}</div>
-                    <div className="sc-card-label">{s.label}</div>
-                    <div className="sc-card-desc">{s.desc}</div>
-                  </div>
-                ))}
-              </div>
-
-              <button className="sc-start-btn" onClick={startScenario} data-aos="fade-up" data-aos-delay="300">
-                Start Session →
-              </button>
-            </div>
-          ) : (
-            <div className="sc-chat">
-              <div className="sc-chat-header">
-                <div
-                  className="sc-chat-badge"
-                  style={{
-                    background: activeScenario.bg,
-                    color: activeScenario.color,
-                    borderColor: activeScenario.border,
-                  }}
-                >
-                  <div className="sc-chat-dot" style={{ background: activeScenario.color }} />
-                  {activeScenario.icon} {activeScenario.label}
-                </div>
-                <button className="sc-reset-btn" onClick={endSession}>
-                  ↺ New Session
-                </button>
-              </div>
-
-              <div className="sc-messages">
-                {messages.map((msg, i) => (
-                  <div key={i} className={`sc-msg ${msg.role === 'user' ? 'user' : 'ai'}`}>
-                    <div className="sc-msg-avatar">
-                      {msg.role === 'assistant' ? '🤖' : '👤'}
-                    </div>
-                    <div className="sc-msg-body">
-                      <div className="sc-msg-name">
-                        {msg.role === 'assistant' ? 'AI Interviewer' : 'You'}
-                      </div>
-                      <div
-                        className="sc-msg-bubble"
-                        dangerouslySetInnerHTML={{
-                          __html: msg.content
-                            .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
-                            .replace(/\n/g, '<br/>')
-                        }}
-                      />
-                    </div>
-                  </div>
-                ))}
-                {loading && (
-                  <div className="sc-typing">
-                    <div className="sc-typing-avatar">🤖</div>
-                    <div className="sc-typing-bubble">
-                      <div className="sc-typing-dot" />
-                      <div className="sc-typing-dot" />
-                      <div className="sc-typing-dot" />
-                    </div>
-                  </div>
-                )}
-                <div ref={bottomRef} />
-              </div>
-
-              <div className="sc-input-area">
-                <input
-                  className="sc-input"
-                  type="text"
-                  value={input}
-                  onChange={(e) => setInput(e.target.value)}
-                  onKeyDown={(e) => e.key === 'Enter' && sendMessage()}
-                  placeholder="Type your response and press Enter..."
-                />
-                <button
-                  className="sc-send-btn"
-                  onClick={sendMessage}
-                  disabled={loading || !input.trim()}
-                >
-                  ↑
-                </button>
-              </div>
-            </div>
-          )}
-        </main>
-      </div>
-    </>
+    </div>
   )
 }

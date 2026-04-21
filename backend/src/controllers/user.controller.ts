@@ -1,8 +1,8 @@
 import { Request, Response } from 'express'
-import { UserService } from '../services/user.service'
+import { IUserService } from '../interfaces/IUserService'
 
 export class UserController {
-  constructor(private userService: UserService) {}
+  constructor(private userService: IUserService) {}
 
   public getUser = async (req: Request, res: Response) => {
     try {
@@ -25,7 +25,6 @@ export class UserController {
         return res.status(400).json({ error: 'Email is required for syncing user' })
       }
 
-      // Upsert user ensuring they exist in Prisma with updated level
       const updatedUser = await this.userService.syncUserWithLevel(userId, email, name, level)
       res.json(updatedUser)
     } catch (err) {
@@ -35,3 +34,4 @@ export class UserController {
     }
   }
 }
+

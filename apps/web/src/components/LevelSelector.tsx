@@ -1,42 +1,23 @@
 'use client'
 
-import { useState, useEffect, useRef } from 'react'
-import axios from 'axios'
-import { useUser } from '@clerk/nextjs'
+import React, { useState, useEffect, useRef } from 'react'
+import { ChevronDown, Check, Settings2, Sliders } from 'lucide-react'
+import { useLevel } from '@/context/LevelContext'
 
 const LEVEL_MAP = {
-  'beginner': { label: 'Beginner', color: '#64748b', bg: '#f1f5f9', border: '#cbd5e1' },
-  'A1': { label: 'A1 - Starter', color: '#10b981', bg: '#ecfdf5', border: '#a7f3d0' },
-  'A2': { label: 'A2 - Elementary', color: '#0ea5e9', bg: '#e0f2fe', border: '#bae6fd' },
-  'B1': { label: 'B1 - Intermediate', color: '#6366f1', bg: '#eef2ff', border: '#c7d2fe' },
-  'B2': { label: 'B2 - Upper Inter.', color: '#8b5cf6', bg: '#f3e8ff', border: '#ddd6fe' },
-  'C1': { label: 'C1 - Advanced', color: '#d946ef', bg: '#fae8ff', border: '#f5d0fe' },
-  'C2': { label: 'C2 - Mastery', color: '#f43f5e', bg: '#ffe4e6', border: '#fecdd3' },
+  'beginner': { label: 'INIT - Beginner', desc: 'Baseline starting point', color: '#64748b' },
+  'A1': { label: 'A1 - Starter', desc: 'Functional terminology', color: '#5b7065' },
+  'A2': { label: 'A2 - Elementary', desc: 'Standard operations', color: '#4a6fa5' },
+  'B1': { label: 'B1 - Intermediate', desc: 'Technical fluency', color: '#8d7b68' },
+  'B2': { label: 'B2 - Upper Inter.', desc: 'High-level analysis', color: '#c18161' },
+  'C1': { label: 'C1 - Advanced', desc: 'Architectural mastery', color: '#4338ca' },
+  'C2': { label: 'C2 - Mastery', desc: 'Strategic authority', color: '#0f172a' },
 }
 
 export function LevelSelector() {
-  const { user } = useUser()
-  const [level, setLevel] = useState('beginner')
-  const [loading, setLoading] = useState(true)
+  const { level, setLevel, loading } = useLevel()
   const [isOpen, setIsOpen] = useState(false)
   const menuRef = useRef<HTMLDivElement>(null)
-
-  useEffect(() => {
-    if (!user) return
-    const fetchLevel = async () => {
-      try {
-        const res = await axios.get(`http://localhost:3001/api/users/${user.id}`)
-        if (res.data?.level) {
-          setLevel(res.data.level)
-        }
-      } catch (err) {
-        console.error('Failed to get user level', err)
-      } finally {
-        setLoading(false)
-      }
-    }
-    fetchLevel()
-  }, [user])
 
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
@@ -44,28 +25,13 @@ export function LevelSelector() {
         setIsOpen(false)
       }
     }
-    if (isOpen) {
-      document.addEventListener('mousedown', handleClickOutside)
-    }
+    if (isOpen) document.addEventListener('mousedown', handleClickOutside)
     return () => document.removeEventListener('mousedown', handleClickOutside)
   }, [isOpen])
 
   const handleLevelChange = async (newLevel: string) => {
-    if (!user || newLevel === level) {
-      setIsOpen(false)
-      return
-    }
-    setLevel(newLevel)
     setIsOpen(false)
-    try {
-      await axios.put(`http://localhost:3001/api/users/${user.id}/level`, {
-        email: user.primaryEmailAddress?.emailAddress,
-        name: user.fullName,
-        level: newLevel
-      })
-    } catch (err) {
-      console.error('Failed to update level', err)
-    }
+    if (newLevel !== level) await setLevel(newLevel)
   }
 
   if (loading) return <div className="ls-skeleton" />
@@ -73,144 +39,189 @@ export function LevelSelector() {
   const activeObj = LEVEL_MAP[level as keyof typeof LEVEL_MAP] || LEVEL_MAP['beginner']
 
   return (
-    <div className="ls-wrapper" ref={menuRef}>
-      <style>{`
-        .ls-wrapper {
+    <div className="ledger-level-selector" ref={menuRef}>
+      <button 
+        className={`selector-btn ${isOpen ? 'active' : ''}`}
+        onClick={() => setIsOpen(!isOpen)}
+      >
+        <div className="btn-left">
+          <div className="icon-box">
+             <Sliders size={14} strokeWidth={3} />
+          </div>
+          <div className="label-group">
+            <span className="eyebrow">Level Calibration</span>
+            <span className="current-val" style={{ color: activeObj.color }}>{activeObj.label}</span>
+          </div>
+        </div>
+        <ChevronDown size={14} className={`chevron ${isOpen ? 'rotate' : ''}`} />
+      </button>
+
+      {isOpen && (
+        <div className="dropdown">
+          <div className="dropdown-header">Select Target Proficiency</div>
+          <div className="options-list">
+            {Object.entries(LEVEL_MAP).map(([key, obj]) => (
+              <button 
+                key={key}
+                className={`option-item ${level === key ? 'selected' : ''}`}
+                onClick={() => handleLevelChange(key)}
+              >
+                <div className="option-info">
+                   <span className="opt-label" style={{ color: level === key ? obj.color : 'inherit' }}>{obj.label}</span>
+                   <span className="opt-desc">{obj.desc}</span>
+                </div>
+                {level === key && <Check size={14} strokeWidth={3} style={{ color: obj.color }} />}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+
+      <style jsx>{`
+        .ledger-level-selector {
           position: relative;
-          font-family: 'DM Sans', sans-serif;
           width: 100%;
         }
-        .ls-btn {
+
+        .selector-btn {
           width: 100%;
           display: flex;
           align-items: center;
           justify-content: space-between;
-          padding: 10px 14px;
-          background: var(--bg);
-          border: 1.5px solid var(--border);
+          padding: 12px;
+          background: #f8fafc;
+          border: 1px solid #e2e8f0;
           border-radius: 12px;
           cursor: pointer;
-          transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
-          outline: none;
+          transition: all 0.2s;
         }
-        .ls-btn:hover {
-          transform: translateY(-2px);
-          box-shadow: 0 4px 12px rgba(0,0,0,0.04);
+
+        .selector-btn:hover, .selector-btn.active {
+          border-color: #cbd5e1;
+          background: #ffffff;
+          box-shadow: 0 4px 12px rgba(0,0,0,0.03);
         }
-        .ls-btn:active {
-          transform: scale(0.95);
-        }
-        .ls-btn-content {
+
+        .btn-left {
           display: flex;
-          flex-direction: column;
-          align-items: flex-start;
-          gap: 2px;
+          align-items: center;
+          gap: 12px;
         }
-        .ls-eyebrow {
-          font-size: 11px;
-          font-weight: 700;
-          text-transform: uppercase;
-          letter-spacing: 0.5px;
+
+        .icon-box {
+          width: 32px;
+          height: 32px;
+          background: white;
+          border: 1px solid #e2e8f0;
+          border-radius: 8px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
           color: #94a3b8;
         }
-        .ls-active-label {
-          font-size: 14px;
-          font-weight: 700;
-          color: var(--color);
-        }
-        .ls-caret {
-          color: var(--color);
-          font-size: 10px;
-          transition: transform 0.3s ease;
-        }
-        .ls-caret.open {
-          transform: rotate(180deg);
-        }
 
-        .ls-dropdown {
-          position: absolute;
-          bottom: calc(100% + 8px);
-          left: 0;
-          width: 100%;
-          background: white;
-          border-radius: 12px;
-          border: 1.5px solid #e8edf5;
-          padding: 8px;
-          box-shadow: 0 12px 32px rgba(0,0,0,0.08);
-          z-index: 100;
-          transform-origin: bottom center;
-          animation: popUp 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+        .label-group {
           display: flex;
           flex-direction: column;
-          gap: 4px;
-        }
-        @keyframes popUp {
-          from { opacity: 0; transform: scale(0.9) translateY(10px); }
-          to { opacity: 1; transform: scale(1) translateY(0); }
+          text-align: left;
         }
 
-        .ls-option {
+        .eyebrow {
+          font-family: var(--font-mono);
+          font-size: 8px;
+          font-weight: 800;
+          text-transform: uppercase;
+          letter-spacing: 2px;
+          color: #94a3b8;
+          margin-bottom: 2px;
+        }
+
+        .current-val {
+          font-family: var(--font-serif);
+          font-size: 15px;
+          font-weight: 900;
+          letter-spacing: -0.2px;
+        }
+
+        .chevron {
+          color: #94a3b8;
+          transition: transform 0.3s;
+        }
+
+        .chevron.rotate { transform: rotate(180deg); }
+
+        .dropdown {
+          position: absolute;
+          bottom: calc(100% + 12px);
+          left: 0;
+          width: 240px;
+          background: white;
+          border: 1px solid #e2e8f0;
+          box-shadow: 0 20px 50px rgba(0,0,0,0.1);
+          border-radius: 16px;
+          overflow: hidden;
+          z-index: 1000;
+          padding: 8px;
+        }
+
+        .dropdown-header {
+          padding: 12px;
+          font-size: 10px;
+          font-weight: 800;
+          text-transform: uppercase;
+          color: #94a3b8;
+          letter-spacing: 1px;
+          border-bottom: 1px solid #f1f5f9;
+          margin-bottom: 8px;
+        }
+
+        .options-list {
+          display: flex;
+          flex-direction: column;
+          gap: 2px;
+        }
+
+        .option-item {
+          width: 100%;
           padding: 10px 12px;
+          border: none;
+          background: none;
           border-radius: 8px;
-          cursor: pointer;
-          font-size: 13px;
-          font-weight: 600;
-          color: #547593;
-          transition: all 0.2s ease;
           display: flex;
           align-items: center;
           justify-content: space-between;
+          cursor: pointer;
+          transition: all 0.2s;
+          text-align: left;
         }
-        .ls-option:hover {
-          background: var(--bg);
-          color: var(--color);
+
+        .option-item:hover { background: #f8fafc; }
+        .option-item.selected { background: #f8fafc; }
+
+        .option-info { display: flex; flex-direction: column; }
+        .opt-label { 
+          font-family: var(--font-serif);
+          font-size: 14px; 
+          font-weight: 800; 
         }
-        .ls-option.selected {
-          background: var(--bg);
-          color: var(--color);
-          font-weight: 700;
+        .opt-desc { 
+          font-family: var(--font-mono);
+          font-size: 9px; 
+          font-weight: 600;
+          text-transform: uppercase;
+          color: #94a3b8; 
+          letter-spacing: 0.5px;
         }
 
         .ls-skeleton {
           width: 100%;
-          height: 52px;
+          height: 60px;
           background: #f1f5f9;
           border-radius: 12px;
           animation: pulse 1.5s infinite;
         }
+        @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.5; } 100% { opacity: 1; } }
       `}</style>
-      
-      <button 
-        className="ls-btn" 
-        onClick={() => setIsOpen(!isOpen)}
-        style={{ 
-          '--bg': activeObj.bg, 
-          '--border': activeObj.border,
-          '--color': activeObj.color 
-        } as React.CSSProperties}
-      >
-        <div className="ls-btn-content">
-          <span className="ls-eyebrow">Target Level</span>
-          <span className="ls-active-label">{activeObj.label}</span>
-        </div>
-        <span className={`ls-caret ${isOpen ? 'open' : ''}`}>▼</span>
-      </button>
-
-      {isOpen && (
-        <div className="ls-dropdown">
-          {Object.entries(LEVEL_MAP).map(([key, obj]) => (
-            <div 
-              key={key}
-              className={`ls-option ${level === key ? 'selected' : ''}`}
-              onClick={() => handleLevelChange(key)}
-              style={{ '--bg': obj.bg, '--color': obj.color } as React.CSSProperties}
-            >
-              {obj.label}
-              {level === key && <span style={{ fontSize: '12px' }}>✓</span>}
-            </div>
-          ))}
-        </div>
-      )}
     </div>
   )
 }
