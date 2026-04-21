@@ -57,3 +57,11 @@ model Employee {
   role      String   @default("employee")
   company   Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
 }
+
+model PronunciationWord {
+  id        String   @id @default(cuid())
+  word      String   @unique
+  category  String
+  phonetic  String
+  createdAt DateTime @default(now())
+}

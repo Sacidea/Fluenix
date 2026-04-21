@@ -1,0 +1,209 @@
+@import './variables.css';
+
+/* ─── Gradient text ──────────────────────── */
+.gradientText {
+  background: linear-gradient(135deg, var(--color-primary), var(--color-blue));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+/* ─── Page root ──────────────────────────── */
+.pageRoot {
+  min-height: 100vh;
+  background: var(--color-bg);
+  color: var(--color-text-dark);
+  font-family: var(--font-base);
+}
+
+/* ─── Nav ────────────────────────────────── */
+.pageNav {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 0 40px;
+  height: var(--nav-height);
+  background: rgba(255,255,255,0.92);
+  backdrop-filter: blur(20px);
+  border-bottom: 1px solid var(--color-border);
+  box-shadow: 0 1px 12px rgba(0,0,0,0.06);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+/* ─── Page main ──────────────────────────── */
+.pageMain {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: var(--space-2xl) var(--space-xl);
+}
+
+.pageMainWide {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: var(--space-2xl) var(--space-xl);
+}
+
+/* ─── Eyebrow ────────────────────────────── */
+.eyebrow {
+  font-size: var(--text-xs);
+  font-weight: 700;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  margin-bottom: 10px;
+}
+
+/* ─── Page title ─────────────────────────── */
+.pageTitle {
+  font-size: var(--text-2xl);
+  font-weight: 700;
+  letter-spacing: -0.8px;
+  margin-bottom: 8px;
+  color: var(--color-text-dark);
+  line-height: 1.2;
+}
+
+/* ─── Page subtitle ──────────────────────── */
+.pageSub {
+  font-size: var(--text-base);
+  color: var(--color-text-mid);
+  margin-bottom: 36px;
+  line-height: 1.6;
+}
+
+/* ─── Card ───────────────────────────────── */
+.card {
+  background: var(--color-white);
+  border: 1.5px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-md);
+  transition: var(--transition-base);
+}
+
+.cardHover:hover {
+  transform: translateY(-3px);
+  box-shadow: var(--shadow-lg);
+}
+
+/* ─── Gradient button ────────────────────── */
+.gradientBtn {
+  background: linear-gradient(135deg, var(--color-primary), var(--color-blue));
+  border: none;
+  color: white;
+  font-family: var(--font-base);
+  font-weight: 600;
+  cursor: pointer;
+  transition: var(--transition-base);
+  box-shadow: 0 4px 16px rgba(99,102,241,0.3);
+  border-radius: var(--radius-md);
+}
+
+.gradientBtn:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(99,102,241,0.4);
+}
+
+.gradientBtn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* ─── Spinner ────────────────────────────── */
+.spinner {
+  width: 20px;
+  height: 20px;
+  border: 2.5px solid var(--color-border);
+  border-top-color: var(--color-primary);
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* ─── Loading state ──────────────────────── */
+.loadingState {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 200px;
+  color: var(--color-text-mid);
+  font-size: var(--text-sm);
+  gap: 12px;
+}
+
+/* ─── Empty state ────────────────────────── */
+.emptyState {
+  text-align: center;
+  padding: 60px 20px;
+  color: var(--color-text-light);
+}
+
+.emptyStateIcon {
+  font-size: 48px;
+  margin-bottom: 14px;
+}
+
+.emptyStateText {
+  font-size: var(--text-base);
+  margin-bottom: 24px;
+  color: var(--color-text-mid);
+}
+
+/* ─── Error state ────────────────────────── */
+.errorState {
+  text-align: center;
+  padding: 60px 20px;
+}
+
+.retryBtn {
+  padding: 10px 24px;
+  background: var(--color-primary);
+  color: white;
+  border: none;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  font-weight: 600;
+  font-size: var(--text-sm);
+  font-family: var(--font-base);
+  margin-top: 16px;
+  transition: var(--transition-base);
+}
+
+.retryBtn:hover {
+  background: #4f46e5;
+}
+
+/* ─── Section title ──────────────────────── */
+.sectionTitle {
+  font-size: var(--text-xs);
+  font-weight: 700;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--color-text-light);
+  margin-bottom: 16px;
+}
+
+/* ─── Back link ──────────────────────────── */
+.backLink {
+  font-size: var(--text-sm);
+  font-weight: 500;
+  color: var(--color-text-mid);
+  text-decoration: none;
+  transition: var(--transition-fast);
+}
+
+.backLink:hover {
+  color: var(--color-text-dark);
+}
+
+.navSep {
+  color: var(--color-border-mid);
+}
+
+.navTitle {
+  font-size: var(--text-base);
+  font-weight: 600;
+  color: var(--color-text-dark);
+}

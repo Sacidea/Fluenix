@@ -1,9 +1,11 @@
 import { PrismaClient } from '@prisma/client'
+import dotenv from 'dotenv'
+import path from 'path'
 
-const DATABASE_URL = "postgresql://postgres.acodoencywnjbduxptzm:2131282.Supa@aws-1-eu-west-1.pooler.supabase.com:6543/postgres"
+dotenv.config({ path: path.resolve(__dirname, '../../.env'), override: true })
 
 const prisma = new PrismaClient({
-  datasourceUrl: DATABASE_URL,
+  datasourceUrl: process.env.DATABASE_URL!,
 })
 
 export default prisma

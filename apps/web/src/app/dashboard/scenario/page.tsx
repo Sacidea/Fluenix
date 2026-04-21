@@ -20,7 +20,17 @@ export default function ScenarioPage() {
   const [loading, setLoading] = useState(false)
   const [started, setStarted] = useState(false)
   const [startTime, setStartTime] = useState<Date | null>(null)
+  const [level, setLevel] = useState('B2')
   const bottomRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    if (!user) return
+    axios.get(`http://localhost:3001/api/users/${user.id}`)
+      .then(res => {
+        if (res.data?.level) setLevel(res.data.level)
+      })
+      .catch(err => console.error('Failed to get user level', err))
+  }, [user])
 
   const scenarios = [
     { id: 'interview', label: 'Technical Interview', icon: '🎯', desc: 'FAANG-style technical questions', color: '#6366f1', bg: '#eef2ff', border: '#c7d2fe' },
@@ -40,6 +50,7 @@ export default function ScenarioPage() {
     try {
       const res = await axios.post('http://localhost:8000/scenario/chat', {
         scenario,
+        level,
         messages: [{ role: 'user', content: 'Hello, I am ready to start.' }]
       })
       setMessages([
@@ -62,6 +73,7 @@ export default function ScenarioPage() {
     try {
       const res = await axios.post('http://localhost:8000/scenario/chat', {
         scenario,
+        level,
         messages: newMessages
       })
       setMessages([...newMessages, { role: 'assistant', content: res.data.reply }])
@@ -80,6 +92,7 @@ export default function ScenarioPage() {
       try {
         const analysisRes = await axios.post('http://localhost:8000/scenario/analyze', {
           scenario,
+          level,
           messages
         })
         const raw = analysisRes.data.analysis
@@ -489,14 +502,6 @@ export default function ScenarioPage() {
       `}</style>
 
       <div className="sc-root">
-        <nav className="sc-nav">
-          <div className="sc-nav-left">
-            <Link href="/dashboard" className="sc-back">← Back</Link>
-            <span className="sc-nav-sep">|</span>
-            <span className="sc-nav-title">Scenario Simulation</span>
-          </div>
-        </nav>
-
         <main className="sc-main">
           {!started ? (
             <div>

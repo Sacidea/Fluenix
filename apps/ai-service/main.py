@@ -39,11 +39,16 @@ def health():
 async def scenario_chat(data: dict):
     try:
         scenario = data.get("scenario", "interview")
+        level = data.get("level", "B2")
         messages = data.get("messages", [])
+        
+        base_prompt = SCENARIO_PROMPTS.get(scenario, SCENARIO_PROMPTS["interview"])
+        level_instruction = f"\n\nIMPORTANT: The user is at a CEFR {level} English proficiency level. Strictly adjust your language complexity, vocabulary, and expectations to match the {level} level."
+        
         response = client.messages.create(
             model="claude-sonnet-4-6",
             max_tokens=500,
-            system=SCENARIO_PROMPTS.get(scenario, SCENARIO_PROMPTS["interview"]),
+            system=base_prompt + level_instruction,
             messages=messages
         )
         return {"reply": response.content[0].text}
@@ -86,27 +91,31 @@ async def analyze_scenario(data: dict):
     try:
         messages = data.get("messages", [])
         scenario = data.get("scenario", "interview")
+        level = data.get("level", "B2")
 
         transcript = "\n".join([
             f"{'AI' if m['role'] == 'assistant' else 'User'}: {m['content']}"
             for m in messages
         ])
 
+        system_prompt="""You are a technical English coach for software developers.
+        The user is targeting a CEFR {LEVEL} English proficiency level. Evaluate them strictly based on {LEVEL} standards.
+        Analyze the conversation and return ONLY a JSON object:
+        {
+          "fluency_score": <0-100>,
+          "vocabulary_score": <0-100>,
+          "technical_accuracy": <0-100>,
+          "overall_score": <0-100>,
+          "strengths": ["...", "..."],
+          "improvements": ["...", "..."],
+          "overall_feedback": "2-3 sentences"
+        }
+        Return only the JSON, no markdown, no extra text."""
+
         response = client.messages.create(
             model="claude-sonnet-4-6",
             max_tokens=800,
-            system="""You are a technical English coach for software developers.
-            Analyze the conversation and return ONLY a JSON object:
-            {
-              "fluency_score": <0-100>,
-              "vocabulary_score": <0-100>,
-              "technical_accuracy": <0-100>,
-              "overall_score": <0-100>,
-              "strengths": ["...", "..."],
-              "improvements": ["...", "..."],
-              "overall_feedback": "2-3 sentences"
-            }
-            Return only the JSON, no markdown, no extra text.""",
+            system=system_prompt.replace("{LEVEL}", level),
             messages=[{
                 "role": "user",
                 "content": f"Scenario: {scenario}\n\nConversation:\n{transcript}"
@@ -123,19 +132,27 @@ async def analyze_pronunciation(data: dict):
     try:
         transcript = data.get("transcript", "")
         target_word = data.get("target_word", "")
+        level = data.get("level", "B2")
         
+        system_prompt = f"""You are a technical English pronunciation coach for software developers.
+        The user is targeting a CEFR {level} English proficiency level. Compare the user's spoken transcript with the target word/phrase.
+        Evaluate them based on {level} expectations:
+        - If {level} is Beginner/A1/A2, be very forgiving, focus on basic intelligibility, and reply in simple, highly encouraging English.
+        - If {level} is B1/B2, focus on correct syllable stress, clarity, and intermediate phonetic correctness.
+        - If {level} is C1/C2, be extremely strict, focusing on advanced phonetics, tongue placement, native-like articulation, and precise intonation.
+        Return ONLY a JSON object:
+        {{
+          "accuracy_score": <0-100>,
+          "is_correct": <true/false>,
+          "feedback": "2-3 sentences of feedback tailored to the {level} strictness guidelines.",
+          "tip": "one precise pronunciation tip tailored to the {level} level."
+        }}
+        Return only the JSON, no markdown, no extra text."""
+
         response = client.messages.create(
             model="claude-sonnet-4-6",
             max_tokens=600,
-            system="""You are a technical English pronunciation coach for software developers.
-            Compare the user's spoken transcript with the target word/phrase and return ONLY a JSON object:
-            {
-              "accuracy_score": <0-100>,
-              "is_correct": <true/false>,
-              "feedback": "one sentence feedback",
-              "tip": "one pronunciation tip"
-            }
-            Return only the JSON, no markdown, no extra text.""",
+            system=system_prompt,
             messages=[{
                 "role": "user",
                 "content": f"Target word: {target_word}\nUser said: {transcript}"

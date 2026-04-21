@@ -1,0 +1,125 @@
+/* ─── BREAKPOINTS ───────────────────────────────────────
+   xs: 480px  (küçük telefon)
+   sm: 640px  (telefon)
+   md: 768px  (tablet)
+   lg: 1024px (küçük masaüstü)
+   xl: 1280px (büyük masaüstü)
+──────────────────────────────────────────────────────── */
+
+/* ─── NAV ─────────────────────────────────────────────── */
+@media (max-width: 640px) {
+  .nav, .sc-nav, .wr-nav, .pr-nav, .pn-nav {
+    padding: 0 20px;
+    height: 60px;/* ─── BREAKPOINTS ────────────────────────────
+   sm: 640px  (telefon)
+   md: 768px  (tablet)
+   lg: 1024px (küçük masaüstü)
+─────────────────────────────────────────────── */
+
+/* ─── Nav ────────────────────────────────── */
+@media (max-width: 640px) {
+  .pageNav {
+    padding: 0 20px;
+  }
+}
+
+/* ─── Page main ──────────────────────────── */
+@media (max-width: 768px) {
+  .pageMain,
+  .pageMainWide {
+    padding: 32px 20px;
+  }
+  .pageTitle {
+    font-size: 26px;
+  }
+}
+
+@media (max-width: 480px) {
+  .pageMain,
+  .pageMainWide {
+    padding: 24px 16px;
+  }
+  .pageTitle {
+    font-size: 22px;
+  }
+}
+  }
+}
+
+/* ─── DASHBOARD ───────────────────────────────────────── */
+@media (max-width: 1024px) {
+  .main { padding: 40px 24px; }
+  .welcome-title { font-size: 32px; }
+}
+
+@media (max-width: 768px) {
+  .stats-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .modules-grid {
+    grid-template-columns: 1fr;
+  }
+  .welcome-title { font-size: 28px; }
+  .main { padding: 32px 20px; }
+}
+
+@media (max-width: 480px) {
+  .stats-grid {
+    grid-template-columns: 1fr;
+  }
+  .welcome-title { font-size: 24px; }
+}
+
+/* ─── SCENARIO ────────────────────────────────────────── */
+@media (max-width: 768px) {
+  .sc-main { padding: 32px 20px; }
+  .sc-cards { grid-template-columns: 1fr; }
+  .sc-selector-title { font-size: 26px; }
+  .sc-msg-body { max-width: 85%; }
+}
+
+@media (max-width: 480px) {
+  .sc-nav { padding: 0 16px; }
+  .sc-main { padding: 24px 16px; }
+}
+
+/* ─── WRITING ─────────────────────────────────────────── */
+@media (max-width: 768px) {
+  .wr-main { padding: 32px 20px; }
+  .wr-content { grid-template-columns: 1fr; }
+  .wr-tabs { flex-wrap: wrap; }
+  .wr-title { font-size: 26px; }
+}
+
+/* ─── PROGRESS ────────────────────────────────────────── */
+@media (max-width: 768px) {
+  .pr-main { padding: 32px 20px; }
+  .pr-stats {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .pr-title { font-size: 26px; }
+}
+
+@media (max-width: 480px) {
+  .pr-stats {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ─── PRONUNCIATION ───────────────────────────────────── */
+@media (max-width: 768px) {
+  .pn-main { padding: 32px 20px; }
+  .pn-word { font-size: 40px; }
+  .pn-actions { flex-wrap: wrap; justify-content: center; }
+  .pn-title { font-size: 26px; }
+}
+
+@media (max-width: 480px) {
+  .pn-word { font-size: 32px; }
+  .pn-mic-btn { width: 100%; justify-content: center; }
+}
+
+/* ─── FEEDBACK SCORES ─────────────────────────────────── */
+@media (max-width: 480px) {
+  .wr-scores { grid-template-columns: 1fr; }
+}

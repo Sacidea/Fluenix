@@ -2,9 +2,10 @@
 
 import { useState, useEffect, useRef } from 'react'
 import axios from 'axios'
-import Link from 'next/link'
+import { useUser } from '@clerk/nextjs'
 
 type Word = {
+  id: string
   word: string
   category: string
   phonetic: string
@@ -17,30 +18,11 @@ type Result = {
   tip: string
 }
 
-const TECH_WORDS: Word[] = [
-  { word: 'Kubernetes', category: 'DevOps', phonetic: 'koo-ber-NET-eez' },
-  { word: 'PostgreSQL', category: 'Database', phonetic: 'POST-gres-Q-L' },
-  { word: 'asynchronous', category: 'Programming', phonetic: 'ay-SINK-ruh-nus' },
-  { word: 'algorithm', category: 'Programming', phonetic: 'AL-go-rith-um' },
-  { word: 'deprecated', category: 'Programming', phonetic: 'DEP-ruh-kay-ted' },
-  { word: 'repository', category: 'Git', phonetic: 'reh-POZ-ih-tor-ee' },
-  { word: 'microservices', category: 'Architecture', phonetic: 'MY-kro-SUR-vi-sez' },
-  { word: 'authentication', category: 'Security', phonetic: 'aw-then-tih-KAY-shun' },
-  { word: 'bandwidth', category: 'Network', phonetic: 'BAND-width' },
-  { word: 'recursion', category: 'Programming', phonetic: 'reh-KUR-zhun' },
-  { word: 'infrastructure', category: 'DevOps', phonetic: 'IN-fra-struk-chur' },
-  { word: 'polymorphism', category: 'OOP', phonetic: 'pol-ee-MOR-fiz-um' },
-  { word: 'synchronization', category: 'Programming', phonetic: 'sin-kruh-nih-ZAY-shun' },
-  { word: 'refactoring', category: 'Programming', phonetic: 'ree-FAK-tor-ing' },
-  { word: 'middleware', category: 'Backend', phonetic: 'MID-ul-wair' },
-  { word: 'scalability', category: 'Architecture', phonetic: 'skay-luh-BIL-ih-tee' },
-  { word: 'encapsulation', category: 'OOP', phonetic: 'en-kap-syoo-LAY-shun' },
-  { word: 'throughput', category: 'Network', phonetic: 'THROO-put' },
-  { word: 'idempotent', category: 'API', phonetic: 'eye-DEM-poh-tent' },
-  { word: 'concatenate', category: 'Programming', phonetic: 'kon-KAT-en-ayt' },
-]
-
 export default function PronunciationPage() {
+  const { user } = useUser()
+  const [words, setWords] = useState<Word[]>([])
+  const [userLevel, setUserLevel] = useState('B2')
+  
   const [currentIndex, setCurrentIndex] = useState(0)
   const [listening, setListening] = useState(false)
   const [transcript, setTranscript] = useState('')
@@ -51,16 +33,28 @@ export default function PronunciationPage() {
   const [supported, setSupported] = useState(true)
   const recognitionRef = useRef<any>(null)
 
-  const currentWord = TECH_WORDS[currentIndex]
-
   useEffect(() => {
+    // 1. Fetch Words from DB
+    axios.get('http://localhost:3001/api/pronunciation/words')
+      .then(res => setWords(res.data))
+      .catch(err => console.error('Failed to fetch words', err))
+      
+    // 2. Fetch User target level
+    if (user) {
+      axios.get(`http://localhost:3001/api/users/${user.id}`)
+        .then(res => setUserLevel(res.data?.level || 'B2'))
+        .catch(err => console.error('Failed relative user fetch', err))
+    }
+
     if (typeof window !== 'undefined') {
       const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition
       if (!SpeechRecognition) {
         setSupported(false)
       }
     }
-  }, [])
+  }, [user])
+
+  const currentWord = words[currentIndex] || null
 
   const startListening = () => {
     const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition
@@ -103,6 +97,7 @@ export default function PronunciationPage() {
       const res = await axios.post('http://localhost:8000/pronunciation/analyze', {
         transcript: heard,
         target_word: currentWord.word,
+        level: userLevel
       })
       const raw = res.data.result
       const clean = raw.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim()
@@ -118,13 +113,13 @@ export default function PronunciationPage() {
   }
 
   const nextWord = () => {
-    setCurrentIndex(i => (i + 1) % TECH_WORDS.length)
+    setCurrentIndex(i => (i + 1) % words.length)
     setTranscript('')
     setResult(null)
   }
 
   const prevWord = () => {
-    setCurrentIndex(i => (i - 1 + TECH_WORDS.length) % TECH_WORDS.length)
+    setCurrentIndex(i => (i - 1 + words.length) % words.length)
     setTranscript('')
     setResult(null)
   }
@@ -148,33 +143,6 @@ export default function PronunciationPage() {
           color: #102D47;
           font-family: 'DM Sans', sans-serif;
         }
-
-        .pn-nav {
-          display: flex;
-          align-items: center;
-          gap: 16px;
-          padding: 0 40px;
-          height: 68px;
-          background: rgba(255,255,255,0.92);
-          backdrop-filter: blur(20px);
-          border-bottom: 1px solid #e8edf5;
-          box-shadow: 0 1px 12px rgba(0,0,0,0.06);
-          position: sticky;
-          top: 0;
-          z-index: 100;
-        }
-
-        .pn-back {
-          font-size: 13px;
-          font-weight: 500;
-          color: #547593;
-          text-decoration: none;
-          transition: color 0.2s;
-        }
-
-        .pn-back:hover { color: #102D47; }
-        .pn-nav-sep { color: #cbd5e1; }
-        .pn-nav-title { font-size: 15px; font-weight: 600; color: #102D47; }
 
         .pn-main {
           max-width: 800px;
@@ -515,12 +483,6 @@ export default function PronunciationPage() {
       `}</style>
 
       <div className="pn-root">
-        <nav className="pn-nav">
-          <Link href="/dashboard" className="pn-back">← Back</Link>
-          <span className="pn-nav-sep">|</span>
-          <span className="pn-nav-title">Pronunciation Lab</span>
-        </nav>
-
         <main className="pn-main">
           <p className="pn-eyebrow">Practice</p>
           <h1 className="pn-title">Pronunciation Lab</h1>
@@ -529,7 +491,7 @@ export default function PronunciationPage() {
           <div className="pn-progress-bar">
             <div
               className="pn-progress-fill"
-              style={{ width: `${((currentIndex + 1) / TECH_WORDS.length) * 100}%` }}
+              style={{ width: `${words.length > 0 ? ((currentIndex + 1) / words.length) * 100 : 0}%` }}
             />
           </div>
 
@@ -538,7 +500,7 @@ export default function PronunciationPage() {
               ✅ {score} / {attempted} correct
             </div>
             <div className="pn-counter">
-              {currentIndex + 1} / {TECH_WORDS.length} words
+              {words.length > 0 ? `${currentIndex + 1} / ${words.length} words` : 'Loading...'}
             </div>
           </div>
 
@@ -551,6 +513,11 @@ export default function PronunciationPage() {
               <p style={{ color: '#547593', fontSize: 14 }}>
                 Please use Chrome or Edge browser for speech recognition.
               </p>
+            </div>
+          ) : !currentWord ? (
+            <div className="pn-loading">
+              <div className="pn-spinner" />
+              Loading words from Database...
             </div>
           ) : (
             <>

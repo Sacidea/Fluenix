@@ -1,12 +1,13 @@
 import dotenv from 'dotenv'
 import path from 'path'
-dotenv.config({ path: path.resolve(process.cwd(), '.env') })
+dotenv.config({ path: path.resolve(__dirname, '../.env') })
 
 import express, { Request, Response } from 'express'
 import cors from 'cors'
 import { redis } from './config/redis'
 import sessionsRouter from './routes/sessions'
-
+import usersRouter from './routes/users'
+import pronunciationRouter from './routes/pronunciation'
 const app = express()
 const PORT = process.env.PORT || 3001
 
@@ -29,7 +30,8 @@ app.get('/health', async (req: Request, res: Response) => {
 })
 
 app.use('/api/sessions', sessionsRouter)
-
+app.use('/api/users', usersRouter)
+app.use('/api/pronunciation', pronunciationRouter)
 app.listen(PORT, () => {
   console.log(`✅ Backend running on http://localhost:${PORT}`)
 })

@@ -1,0 +1,71 @@
+:root {
+  /* ─── Renkler ─────────────────────────── */
+  --color-primary: #6366f1;
+  --color-primary-bg: #eef2ff;
+  --color-primary-border: #c7d2fe;
+
+  --color-blue: #0ea5e9;
+  --color-blue-bg: #e0f2fe;
+  --color-blue-border: #bae6fd;
+
+  --color-green: #10b981;
+  --color-green-bg: #ecfdf5;
+  --color-green-border: #a7f3d0;
+
+  --color-orange: #f59e0b;
+  --color-orange-bg: #fffbeb;
+  --color-orange-border: #fde68a;
+
+  --color-red: #ef4444;
+  --color-red-bg: #fef2f2;
+
+  --color-text-dark: #102D47;
+  --color-text-mid: #547593;
+  --color-text-light: #94a3b8;
+
+  --color-bg: #f8faff;
+  --color-white: #ffffff;
+  --color-border: #e8edf5;
+  --color-border-mid: #cbd5e1;
+
+  /* ─── Gölgeler ───────────────────────── */
+  --shadow-sm: 0 1px 4px rgba(0,0,0,0.04);
+  --shadow-md: 0 2px 8px rgba(0,0,0,0.06);
+  --shadow-lg: 0 8px 24px rgba(0,0,0,0.10);
+  --shadow-xl: 0 16px 40px rgba(0,0,0,0.12);
+
+  /* ─── Border radius ──────────────────── */
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 18px;
+  --radius-xl: 24px;
+  --radius-full: 9999px;
+
+  /* ─── Spacing ────────────────────────── */
+  --space-xs: 4px;
+  --space-sm: 8px;
+  --space-md: 16px;
+  --space-lg: 24px;
+  --space-xl: 40px;
+  --space-2xl: 52px;
+
+  /* ─── Typography ─────────────────────── */
+  --font-base: 'DM Sans', sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
+
+  --text-xs: 11px;
+  --text-sm: 13px;
+  --text-base: 15px;
+  --text-md: 16px;
+  --text-lg: 18px;
+  --text-xl: 24px;
+  --text-2xl: 32px;
+  --text-3xl: 40px;
+
+  /* ─── Transitions ────────────────────── */
+  --transition-fast: all 0.15s ease;
+  --transition-base: all 0.25s ease;
+
+  /* ─── Nav ────────────────────────────── */
+  --nav-height: 68px;
+}
