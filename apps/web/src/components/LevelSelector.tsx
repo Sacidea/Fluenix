@@ -14,7 +14,7 @@ const LEVEL_MAP = {
   'C2': { label: 'C2 - Mastery', desc: 'Strategic authority', color: '#0f172a' },
 }
 
-export function LevelSelector() {
+export function LevelSelector({ isCollapsed = false }: { isCollapsed?: boolean }) {
   const { level, setLevel, loading } = useLevel()
   const [isOpen, setIsOpen] = useState(false)
   const menuRef = useRef<HTMLDivElement>(null)
@@ -41,19 +41,22 @@ export function LevelSelector() {
   return (
     <div className="ledger-level-selector" ref={menuRef}>
       <button 
-        className={`selector-btn ${isOpen ? 'active' : ''}`}
+        className={`selector-btn ${isOpen ? 'active' : ''} ${isCollapsed ? 'collapsed' : ''}`}
         onClick={() => setIsOpen(!isOpen)}
+        title="Level Calibration"
       >
         <div className="btn-left">
           <div className="icon-box">
              <Sliders size={14} strokeWidth={3} />
           </div>
-          <div className="label-group">
-            <span className="eyebrow">Level Calibration</span>
-            <span className="current-val" style={{ color: activeObj.color }}>{activeObj.label}</span>
-          </div>
+          {!isCollapsed && (
+            <div className="label-group">
+              <span className="eyebrow">Level Calibration</span>
+              <span className="current-val" style={{ color: activeObj.color }}>{activeObj.label}</span>
+            </div>
+          )}
         </div>
-        <ChevronDown size={14} className={`chevron ${isOpen ? 'rotate' : ''}`} />
+        {!isCollapsed && <ChevronDown size={14} className={`chevron ${isOpen ? 'rotate' : ''}`} />}
       </button>
 
       {isOpen && (

@@ -1,46 +1,49 @@
 'use client'
 
-import { ReactNode, useState } from 'react'
+import { ReactNode } from 'react'
 import Sidebar from '@/components/Sidebar'
-import Navbar from '@/components/layout/Navbar'
 import { LevelProvider } from '@/context/LevelContext'
+import { useSidebarStore } from '@/store/useSidebarStore'
 
 export default function DashboardLayout({ children }: { children: ReactNode }) {
-    const [sidebarOpen, setSidebarOpen] = useState(false)
+    const { isOpen } = useSidebarStore()
 
     return (
         <LevelProvider>
-            <div className="dashboard-root">
-                <Sidebar isOpen={sidebarOpen} setIsOpen={setSidebarOpen} />
-                
-                <div className="main-viewport">
-                    <Navbar onMenuClick={() => setSidebarOpen(true)} />
-                    <main className="content-area">
-                        {children}
-                    </main>
-                </div>
-
-                <style jsx>{`
-                    .dashboard-root {
-                        display: flex;
-                        min-height: 100vh;
-                        background-color: #f8fafc;
-                    }
-
-                    .main-viewport {
-                        flex: 1;
-                        display: flex;
-                        flex-direction: column;
-                        min-width: 0;
-                    }
-
-                    .content-area {
-                        flex: 1;
-                        padding: 0;
-                        overflow-x: hidden;
-                    }
-                `}</style>
+            <div className="dashboard-layout">
+                <Sidebar />
+                <main className={`dashboard-main ${isOpen ? 'sidebar-open' : 'sidebar-closed'}`}>
+                    {children}
+                </main>
             </div>
+            <style jsx>{`
+                .dashboard-layout {
+                    display: flex;
+                    min-height: 100vh;
+                    width: 100%;
+                }
+                .dashboard-main {
+                    flex: 1;
+                    background: #f8fafc;
+                    min-height: 100vh;
+                    transition: margin-left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+                }
+                
+                .dashboard-main.sidebar-open {
+                    margin-left: 280px;
+                }
+                
+                .dashboard-main.sidebar-closed {
+                    margin-left: 80px;
+                }
+                
+                @media (max-width: 1024px) {
+                    .dashboard-main.sidebar-open,
+                    .dashboard-main.sidebar-closed {
+                        margin-left: 0;
+                    }
+                }
+            `}</style>
         </LevelProvider>
     )
 }

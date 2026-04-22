@@ -24,24 +24,31 @@ export default function PronunciationPage() {
   } = usePronunciationSession()
 
   return (
-    <div className="pronunciation-lab-root">
-      <header className="lab-header">
-        <div className="header-content">
+    <div className="ledger-dash">
+      <main className="dash-container">
+        
+        {/* CORPORATE GREETING SECTION */}
+        <section className="welcome-area">
           <Link href="/dashboard" className="back-link">
-            <ChevronLeft size={16} />
-            <span>Dashboard</span>
+            <ChevronLeft size={14} />
+            <span>Return to Dashboard</span>
           </Link>
-          <div className="header-title-group">
-            <span className="eyebrow">Acoustic Analysis Lab</span>
-            <h1 className="main-title">Phonetic Reporting</h1>
+          <div className="title-block">
+            <div className="eyebrow-group">
+              <div className="line" />
+              <span className="eyebrow">Acoustic Analysis Lab</span>
+            </div>
+            
+            <h1 className="welcome-text">
+              Phonetic Reporting —<br />
+              <span className="serif-grad">Voice pattern recognition active.</span>
+            </h1>
           </div>
-        </div>
-      </header>
+        </section>
 
-      <main className="lab-main">
         <div className="lab-workspace">
           
-          {/* LEFT SIDE: WORD INDEX (Fihrist) */}
+          {/* LEFT SIDE: WORD INDEX */}
           <aside className="word-index">
             <div className="index-header">
               <List size={14} />
@@ -72,7 +79,7 @@ export default function PronunciationPage() {
             ) : !currentWord ? (
               <div className="loading-state">
                 <div className="spinner" />
-                <span>Loading word database...</span>
+                <span>Initializing Phonetic Engine...</span>
               </div>
             ) : (
               <div className="report-canvas">
@@ -89,7 +96,7 @@ export default function PronunciationPage() {
                 <div className="action-row">
                   <button className="p-action-btn secondary" onClick={speakWord}>
                     <Volume2 size={18} />
-                    <span>Listen to Master</span>
+                    <span>Reference Audio</span>
                   </button>
 
                   <button 
@@ -104,12 +111,12 @@ export default function PronunciationPage() {
                 {/* WAVEFORM MICRO-ANIMATION */}
                 {listening && (
                   <div className="waveform-container">
-                    {[...Array(12)].map((_, i) => (
+                    {[...Array(16)].map((_, i) => (
                       <motion.div
                         key={i}
                         className="wave-bar"
-                        animate={{ height: [10, 40, 15, 35, 10] }}
-                        transition={{ repeat: Infinity, duration: 0.6, delay: i * 0.05 }}
+                        animate={{ height: [10, 30 + Math.random() * 20, 10] }}
+                        transition={{ repeat: Infinity, duration: 0.5 + Math.random() * 0.2, delay: i * 0.05 }}
                       />
                     ))}
                   </div>
@@ -131,7 +138,7 @@ export default function PronunciationPage() {
                 {loading && (
                   <div className="analysis-loading">
                     <div className="pulse-loader" />
-                    <span>Analyzing Phonetic Accuracy...</span>
+                    <span>Analyzing Acoustic Signature...</span>
                   </div>
                 )}
 
@@ -145,11 +152,11 @@ export default function PronunciationPage() {
                       <div className="report-top">
                         <div className={`status-badge ${result.is_correct ? 'success' : 'fail'}`}>
                           {result.is_correct ? <CheckCircle size={16} /> : <AlertCircle size={16} />}
-                          <span>{result.is_correct ? 'PASSED' : 'RETRY REQUIRED'}</span>
+                          <span>{result.is_correct ? 'ANALYSIS PASSED' : 'RETRY REQUIRED'}</span>
                         </div>
                         <div className="accuracy-score">
                            <span className="score-val">{result.accuracy_score}</span>
-                           <span className="score-label">MATCH</span>
+                           <span className="score-label">MATCH %</span>
                         </div>
                       </div>
 
@@ -159,13 +166,13 @@ export default function PronunciationPage() {
                           <p>{result.feedback}</p>
                         </div>
                         <div className="report-block tip">
-                          <span className="block-label">IMPROVEMENT TIP</span>
+                          <span className="block-label">CALIBRATION TIP</span>
                           <p>{result.tip}</p>
                         </div>
                       </div>
 
                       <button className="next-word-btn" onClick={nextWord}>
-                        Analyze Next Word
+                        Proceed to Next Module
                       </button>
                     </motion.div>
                   )}
@@ -177,70 +184,91 @@ export default function PronunciationPage() {
       </main>
 
       <style jsx>{`
-        .pronunciation-lab-root {
+        .ledger-dash {
           min-height: 100vh;
           background: #f8fafc;
-          display: flex;
-          flex-direction: column;
+          padding: 80px 40px;
         }
 
-        .lab-header {
-          background: white;
-          border-bottom: 1px solid #e2e8f0;
-          padding: 20px 40px;
-        }
-
-        .header-content {
+        .dash-container {
           max-width: 1200px;
           margin: 0 auto;
         }
 
+        .welcome-area {
+          margin-bottom: 60px;
+          border-bottom: 1px solid #e2e8f0;
+          padding-bottom: 40px;
+        }
+
         .back-link {
-          display: flex;
+          display: inline-flex;
           align-items: center;
           gap: 6px;
-          color: #94a3b8;
-          font-size: 13px;
+          color: #64748b;
+          font-family: var(--font-mono);
+          font-size: 11px;
           font-weight: 700;
           text-decoration: none;
-          margin-bottom: 12px;
+          text-transform: uppercase;
+          letter-spacing: 1px;
+          margin-bottom: 24px;
+          transition: color 0.2s;
+        }
+
+        .back-link:hover { color: #0f172a; }
+
+        .title-block { display: flex; flex-direction: column; gap: 24px; }
+
+        .eyebrow-group {
+          display: flex;
+          align-items: center;
+          gap: 12px;
+        }
+
+        .line {
+          width: 32px;
+          height: 1px;
+          background: #4338ca;
         }
 
         .eyebrow {
           font-size: 10px;
-          text-transform: uppercase;
-          letter-spacing: 2px;
-          color: #f59e0b;
           font-weight: 800;
+          text-transform: uppercase;
+          letter-spacing: 3px;
+          color: #94a3b8;
         }
 
-        .main-title {
-          font-size: 28px;
+        .welcome-text {
+          font-family: 'DM Sans', sans-serif;
+          font-size: 40px;
           font-weight: 900;
+          line-height: 1.2;
+          letter-spacing: -1.5px;
           color: #0f172a;
           margin: 0;
         }
 
-        .lab-main {
-          flex: 1;
-          max-width: 1200px;
-          width: 100%;
-          margin: 0 auto;
-          padding: 40px;
+        .serif-grad {
+          font-family: 'Georgia', serif;
+          font-style: italic;
+          color: #4338ca;
+          font-weight: 400;
         }
 
         .lab-workspace {
           display: grid;
           grid-template-columns: 280px 1fr;
           gap: 40px;
-          height: calc(100vh - 240px);
+          min-height: 600px;
         }
 
         /* Word Index Aside */
         .word-index {
           background: white;
           border: 1px solid #e2e8f0;
-          border-radius: 4px;
+          border-radius: 12px;
           display: flex;
           flex-direction: column;
           overflow: hidden;
@@ -248,12 +276,13 @@ export default function PronunciationPage() {
         }
 
         .index-header {
-          padding: 16px;
+          padding: 20px;
           background: #f8fafc;
           border-bottom: 1px solid #e2e8f0;
           display: flex;
           align-items: center;
           gap: 8px;
+          font-family: var(--font-mono);
           font-size: 10px;
           font-weight: 800;
           color: #64748b;
@@ -270,48 +299,56 @@ export default function PronunciationPage() {
           width: 100%;
           display: flex;
           align-items: center;
-          gap: 12px;
-          padding: 10px 16px;
+          gap: 16px;
+          padding: 14px 20px;
           border: none;
           background: none;
           border-bottom: 1px solid #f1f5f9;
           text-align: left;
           cursor: pointer;
-          transition: all 0.15s;
-          font-family: inherit;
+          transition: all 0.2s;
         }
 
         .index-item:last-child { border-bottom: none; }
         .index-item:hover { background: #f8fafc; }
-        .index-item.active { background: #eef2ff; color: #4338ca; border-left: 3px solid #4338ca; }
+        .index-item.active { background: #ffffff; box-shadow: inset 3px 0 0 #4338ca; }
 
         .item-num { 
-          font-family: 'JetBrains Mono', monospace; 
+          font-family: var(--font-mono);
           font-size: 11px; 
+          font-weight: 700;
           color: #94a3b8;
-          width: 24px;
         }
-        .item-word { font-size: 13px; font-weight: 700; letter-spacing: -0.2px; }
+        .index-item.active .item-num { color: #4338ca; }
+
+        .item-word { 
+          font-family: var(--font-serif);
+          font-size: 14px; 
+          font-weight: 800; 
+          color: #475569;
+        }
+        .index-item.active .item-word { color: #0f172a; }
 
         /* Analysis Space */
         .analysis-space {
           background: white;
           border: 1px solid #e2e8f0;
-          border-radius: 24px;
+          border-radius: 20px;
           box-shadow: 0 10px 40px rgba(0,0,0,0.03);
-          overflow-y: auto;
           padding: 48px;
+          display: flex;
+          flex-direction: column;
         }
 
-        .report-canvas { max-width: 600px; margin: 0 auto; }
+        .report-canvas { max-width: 600px; margin: 0 auto; width: 100%; }
 
         .report-header { display: flex; align-items: center; gap: 12px; margin-bottom: 40px; }
-        .category-tag { font-size: 10px; font-weight: 800; text-transform: uppercase; color: #f59e0b; letter-spacing: 1.5px; }
-        .p-accent { flex: 1; height: 1px; background: #fed7aa; }
+        .category-tag { font-family: var(--font-mono); font-size: 10px; font-weight: 800; text-transform: uppercase; color: #4338ca; letter-spacing: 2px; }
+        .p-accent { flex: 1; height: 1px; background: #eef2ff; }
 
         .word-display { text-align: center; margin-bottom: 48px; }
-        .target-word { font-size: 64px; font-weight: 900; color: #0f172a; margin-bottom: 12px; letter-spacing: -2px; }
-        .phonetic-notation { font-family: 'JetBrains Mono', monospace; font-size: 20px; color: #f59e0b; }
+        .target-word { font-family: var(--font-serif); font-size: 64px; font-weight: 900; color: #0f172a; margin-bottom: 12px; letter-spacing: -2px; }
+        .phonetic-notation { font-family: var(--font-mono); font-size: 18px; color: #64748b; font-weight: 600; letter-spacing: 2px; }
 
         .action-row { display: flex; gap: 16px; justify-content: center; margin-bottom: 48px; }
         
@@ -320,48 +357,53 @@ export default function PronunciationPage() {
           align-items: center;
           gap: 10px;
           padding: 16px 28px;
-          border-radius: 16px;
+          border-radius: 12px;
+          font-family: var(--font-serif);
           font-weight: 800;
           font-size: 14px;
           cursor: pointer;
-          transition: all 0.3s;
+          transition: all 0.2s;
           border: 1px solid transparent;
         }
 
-        .p-action-btn.secondary { background: #fff7ed; color: #c2410c; border-color: #ffedd5; }
-        .p-action-btn.primary { background: #f59e0b; color: white; box-shadow: 0 8px 20px -4px rgba(245, 158, 11, 0.3); }
+        .p-action-btn.secondary { background: white; color: #0f172a; border-color: #e2e8f0; box-shadow: 0 2px 8px rgba(0,0,0,0.02); }
+        .p-action-btn.secondary:hover { border-color: #cbd5e1; transform: translateY(-1px); }
 
-        .p-action-btn.listening { background: #ef4444; animation: pulse 2s infinite; }
-        @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.8; } 100% { opacity: 1; } }
+        .p-action-btn.primary { background: #0f172a; color: white; box-shadow: 0 8px 20px -4px rgba(15, 23, 42, 0.3); }
+        .p-action-btn.primary:hover { transform: translateY(-1px); box-shadow: 0 12px 24px -4px rgba(15, 23, 42, 0.4); }
+
+        .p-action-btn.listening { background: #4338ca; box-shadow: 0 0 0 4px rgba(67, 56, 202, 0.2); animation: pulse-ring 2s infinite; }
+        @keyframes pulse-ring { 0% { box-shadow: 0 0 0 0 rgba(67, 56, 202, 0.4); } 70% { box-shadow: 0 0 0 10px rgba(67, 56, 202, 0); } 100% { box-shadow: 0 0 0 0 rgba(67, 56, 202, 0); } }
 
         .waveform-container { display: flex; align-items: center; justify-content: center; gap: 4px; height: 40px; margin-bottom: 32px; }
-        .wave-bar { width: 3px; background: #ef4444; border-radius: 3px; }
+        .wave-bar { width: 4px; background: linear-gradient(to top, #4338ca, #818cf8); border-radius: 4px; }
 
-        .transcript-note { background: #f8fafc; border: 1px solid #e2e8f0; padding: 20px; border-radius: 12px; margin-bottom: 32px; }
-        .note-label { font-size: 9px; font-weight: 800; color: #94a3b8; letter-spacing: 1px; display: block; margin-bottom: 8px; }
-        .note-text { font-size: 14px; font-weight: 600; color: #0f172a; font-style: italic; }
+        .transcript-note { background: #f8fafc; border: 1px solid #e2e8f0; padding: 24px; border-radius: 12px; margin-bottom: 32px; border-left: 3px solid #64748b; }
+        .note-label { font-family: var(--font-mono); font-size: 9px; font-weight: 800; color: #94a3b8; letter-spacing: 2px; display: block; margin-bottom: 8px; }
+        .note-text { font-family: var(--font-serif); font-size: 15px; font-weight: 700; color: #0f172a; font-style: italic; }
 
-        .analysis-loading { display: flex; align-items: center; justify-content: center; gap: 12px; color: #64748b; font-weight: 700; font-size: 14px; }
-        .pulse-loader { width: 12px; height: 12px; background: #f59e0b; border-radius: 50%; animation: pulse 1s infinite; }
+        .analysis-loading { display: flex; align-items: center; justify-content: center; gap: 12px; color: #64748b; font-family: var(--font-mono); font-weight: 700; font-size: 11px; text-transform: uppercase; letter-spacing: 1px; }
+        .pulse-loader { width: 10px; height: 10px; background: #4338ca; border-radius: 50%; animation: pulse 1s infinite; }
+        @keyframes pulse { 0% { opacity: 1; transform: scale(1); } 50% { opacity: 0.5; transform: scale(0.8); } 100% { opacity: 1; transform: scale(1); } }
 
         /* Results Report */
-        .result-report { background: white; border: 1px solid #e2e8f0; border-radius: 20px; padding: 32px; box-shadow: 0 15px 35px rgba(0,0,0,0.05); }
+        .result-report { background: white; border: 1px solid #e2e8f0; border-radius: 16px; padding: 32px; box-shadow: 0 10px 30px rgba(0,0,0,0.04); }
 
-        .report-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; }
+        .report-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 32px; padding-bottom: 24px; border-bottom: 1px solid #f1f5f9; }
         
-        .status-badge { display: flex; align-items: center; gap: 8px; padding: 6px 12px; border-radius: 99px; font-size: 11px; font-weight: 800; }
-        .status-badge.success { background: #ecfdf5; color: #059669; }
-        .status-badge.fail { background: #fef2f2; color: #dc2626; }
+        .status-badge { display: flex; align-items: center; gap: 8px; padding: 8px 16px; border-radius: 8px; font-family: var(--font-mono); font-size: 10px; font-weight: 800; letter-spacing: 1px; }
+        .status-badge.success { background: #f0fdf4; color: #16a34a; border: 1px solid #dcfce7; }
+        .status-badge.fail { background: #fef2f2; color: #dc2626; border: 1px solid #fee2e2; }
 
         .accuracy-score { display: flex; flex-direction: column; align-items: flex-end; }
-        .score-val { font-size: 32px; font-weight: 900; color: #0f172a; line-height: 1; }
-        .score-label { font-size: 9px; font-weight: 800; color: #94a3b8; letter-spacing: 1px; }
+        .score-val { font-family: var(--font-serif); font-size: 36px; font-weight: 900; color: #0f172a; line-height: 1; letter-spacing: -1px; }
+        .score-label { font-family: var(--font-mono); font-size: 9px; font-weight: 800; color: #94a3b8; letter-spacing: 2px; margin-top: 4px; }
 
-        .report-block { margin-bottom: 20px; }
-        .block-label { font-size: 9px; font-weight: 800; color: #94a3b8; display: block; margin-bottom: 6px; }
-        .report-block p { font-size: 14px; color: #475569; line-height: 1.6; }
+        .report-block { margin-bottom: 24px; }
+        .block-label { font-family: var(--font-mono); font-size: 9px; font-weight: 800; color: #94a3b8; display: block; margin-bottom: 8px; letter-spacing: 1px; }
+        .report-block p { font-size: 14px; color: #475569; line-height: 1.7; }
 
-        .report-block.tip { background: #fffcf0; padding: 16px; border-radius: 12px; border-left: 3px solid #f59e0b; }
+        .report-block.tip { background: #f8fafc; padding: 20px; border-radius: 12px; border-left: 3px solid #4338ca; }
 
         .next-word-btn {
           width: 100%;
@@ -370,18 +412,28 @@ export default function PronunciationPage() {
           color: white;
           border: none;
           border-radius: 12px;
+          font-family: var(--font-serif);
           font-weight: 800;
+          font-size: 14px;
           cursor: pointer;
-          transition: all 0.3s;
+          transition: all 0.2s;
+          margin-top: 8px;
         }
+        .next-word-btn:hover { background: #1e293b; transform: translateY(-1px); }
         
-        .loading-state { text-align: center; color: #64748b; padding-top: 100px; }
-        .spinner { width: 32px; height: 32px; border: 3px solid #e2e8f0; border-top-color: #f59e0b; border-radius: 50%; animation: spin 1s linear infinite; margin: 0 auto 16px; }
+        .loading-state { text-align: center; color: #64748b; padding-top: 100px; display: flex; flex-direction: column; align-items: center; gap: 16px; font-family: var(--font-mono); font-size: 11px; text-transform: uppercase; letter-spacing: 1px; }
+        .spinner { width: 32px; height: 32px; border: 2px solid #e2e8f0; border-top-color: #4338ca; border-radius: 50%; animation: spin 0.8s linear infinite; }
         @keyframes spin { to { transform: rotate(360deg); } }
+
+        .unsupported-msg { text-align: center; padding-top: 80px; display: flex; flex-direction: column; align-items: center; gap: 16px; }
+        .unsupported-msg h2 { font-family: var(--font-serif); font-size: 24px; color: #0f172a; font-weight: 800; }
+        .unsupported-msg p { color: #64748b; max-width: 400px; line-height: 1.6; }
 
         @media (max-width: 900px) {
           .lab-workspace { grid-template-columns: 1fr; }
           .word-index { display: none; }
+          .welcome-text { font-size: 32px; }
+          .ledger-dash { padding: 40px 20px; }
         }
       `}</style>
     </div>

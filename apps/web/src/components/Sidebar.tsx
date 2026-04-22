@@ -1,20 +1,17 @@
 'use client'
 
-import React from 'react'
+import { useState } from 'react'
 import Link from 'next/link'
 import { motion } from 'framer-motion'
 import { usePathname } from 'next/navigation'
 import { UserButton } from '@clerk/nextjs'
 import { LevelSelector } from './LevelSelector'
 import * as Icons from 'lucide-react'
+import { useSidebarStore } from '@/store/useSidebarStore'
 
-interface SidebarProps {
-  isOpen: boolean
-  setIsOpen: (open: boolean) => void
-}
-
-export default function Sidebar({ isOpen, setIsOpen }: SidebarProps) {
+export default function Sidebar() {
   const pathname = usePathname()
+  const { isOpen, toggle, setIsOpen } = useSidebarStore()
 
   const links = [
     { href: '/dashboard', label: 'Home', icon: 'Layout' },
@@ -26,35 +23,46 @@ export default function Sidebar({ isOpen, setIsOpen }: SidebarProps) {
 
   return (
     <>
-      <div className={`sb-overlay ${isOpen ? 'visible' : ''}`} onClick={() => setIsOpen(false)} />
-
-      <motion.aside 
-        className={`sb-root ${isOpen ? 'open' : ''}`}
-        initial={false}
-        animate={{ x: isOpen ? 0 : '-100%' }}
-        transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+      {/* Mobile-only toggle button */}
+      <button
+        className={`sb-toggle-btn ${isOpen ? 'active' : ''}`}
+        onClick={toggle}
+        aria-label="Menu"
       >
+        {isOpen ? <Icons.X size={20} /> : <Icons.Menu size={20} />}
+      </button>
+
+      {isOpen && (
+        <motion.div
+          className="sb-overlay"
+          onClick={() => setIsOpen(false)}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+        />
+      )}
+
+      <aside className={`sb-root ${isOpen ? 'open' : 'collapsed'}`}>
         <div className="sb-header">
-           <div className="header-top">
-              <div className="logo-box">
-                <Icons.Zap size={24} className="logo-icon" />
-              </div>
-              <button className="sb-close-btn" onClick={() => setIsOpen(false)}>
-                <Icons.X size={20} />
-              </button>
-           </div>
-           <span className="sb-logo-text">Fluenix <span className="lab-tag">LAB</span></span>
+          <div className="header-left">
+            <div className="logo-box">
+              <Icons.Zap size={24} className="logo-icon" />
+            </div>
+            <span className="sb-logo-text">Fluenix <span className="lab-tag">LAB</span></span>
+          </div>
+          <button className="collapse-btn" onClick={toggle} aria-label="Toggle Menu">
+            {isOpen ? <Icons.PanelLeftClose size={18} /> : <Icons.PanelLeft size={18} />}
+          </button>
         </div>
-        
+
         <nav className="sb-nav">
           {links.map((link) => {
             const Icon = (Icons as any)[link.icon] || Icons.HelpCircle
             const isActive = pathname === link.href || (link.href !== '/dashboard' && pathname.startsWith(link.href))
-            
+
             return (
-              <Link 
-                key={link.href} 
-                href={link.href} 
+              <Link
+                key={link.href}
+                href={link.href}
                 className={`sb-link ${isActive ? 'active' : ''}`}
                 onClick={() => setIsOpen(false)}
               >
@@ -68,15 +76,15 @@ export default function Sidebar({ isOpen, setIsOpen }: SidebarProps) {
         <div className="sb-footer">
           <div className="footer-section">
             <div className="footer-label">System Calibration</div>
-            <LevelSelector />
+            <LevelSelector isCollapsed={!isOpen} />
           </div>
-          
+
           <div className="footer-section profile">
             <div className="footer-label">System Operator</div>
             <div className="sb-user-card">
               <div className="clerk-wrapper">
-                <UserButton 
-                  afterSignOutUrl="/" 
+                <UserButton
+                  afterSignOutUrl="/"
                   appearance={{
                     elements: {
                       userButtonAvatarBox: { width: 32, height: 32, borderRadius: 8 }
@@ -93,19 +101,49 @@ export default function Sidebar({ isOpen, setIsOpen }: SidebarProps) {
         </div>
 
         <style jsx>{`
+          .sb-toggle-btn {
+            position: fixed;
+            top: 24px;
+            left: 24px;
+            z-index: 1010;
+            width: 44px;
+            height: 44px;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            background: #ffffff;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+            color: #0f172a;
+            transition: all 0.2s;
+          }
+
+          @media (max-width: 1024px) {
+            .sb-toggle-btn {
+              display: flex;
+            }
+          }
+
+          .sb-toggle-btn:hover {
+            border-color: #cbd5e1;
+            transform: scale(1.05);
+          }
+
           .sb-overlay {
             position: fixed;
             inset: 0;
             background: rgba(15, 23, 42, 0.15);
             backdrop-filter: blur(4px);
             z-index: 990;
-            opacity: 0;
-            pointer-events: none;
-            transition: opacity 0.3s;
+            display: none;
           }
-          .sb-overlay.visible {
-            opacity: 1;
-            pointer-events: auto;
+
+          @media (max-width: 1024px) {
+            .sb-overlay {
+              display: block;
+            }
           }
 
           .sb-root {
@@ -120,24 +158,51 @@ export default function Sidebar({ isOpen, setIsOpen }: SidebarProps) {
             z-index: 1000;
             border-right: 1px solid #e2e8f0;
             box-shadow: 10px 0 40px rgba(0,0,0,0.03); 
+            overflow: visible;
+            transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1), transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
           }
 
-          .sb-header { padding: 32px 24px 24px; display: flex; flex-direction: column; gap: 20px; }
-          .header-top { display: flex; justify-content: space-between; align-items: center; }
+          .sb-root.collapsed {
+            width: 80px;
+          }
+
+          @media (max-width: 1024px) {
+            .sb-root.collapsed {
+              width: 280px;
+              transform: translateX(-100%);
+            }
+          }
+
+          .sb-header { padding: 40px 24px 24px; display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+          .sb-root.collapsed .sb-header { padding: 40px 0 24px; justify-content: center; }
           
-          .logo-box { width: 40px; height: 40px; background: #0f172a; border-radius: 10px; display: flex; align-items: center; justify-content: center; color: white; }
+          .header-left { display: flex; align-items: center; gap: 12px; }
+          .sb-root.collapsed .header-left { display: none; }
           
-          .sb-close-btn {
-            background: none;
-            border: none;
+          .logo-box { width: 40px; height: 40px; background: #0f172a; border-radius: 10px; display: flex; align-items: center; justify-content: center; color: white; flex-shrink: 0; }
+          
+          .collapse-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            border: 1px solid transparent;
+            background: transparent;
             color: #94a3b8;
             cursor: pointer;
-            padding: 8px;
-            border-radius: 8px;
             transition: all 0.2s;
           }
-          .sb-close-btn:hover { background: #f1f5f9; color: #0f172a; }
-
+          .collapse-btn:hover {
+            background: #f1f5f9;
+            color: #0f172a;
+          }
+          
+          @media (max-width: 1024px) {
+            .collapse-btn { display: none; }
+          }
+          
           .sb-logo-text { 
             font-family: var(--font-serif);
             font-size: 22px; 
@@ -159,7 +224,7 @@ export default function Sidebar({ isOpen, setIsOpen }: SidebarProps) {
             border-radius: 4px; 
           }
 
-          .sb-nav { flex: 1; padding: 10px 16px; display: flex; flex-direction: column; gap: 4px; }
+          .sb-nav { flex: 1; padding: 20px 16px; display: flex; flex-direction: column; gap: 4px; overflow: hidden; }
           .sb-link { 
             display: flex; 
             align-items: center; 
@@ -169,6 +234,7 @@ export default function Sidebar({ isOpen, setIsOpen }: SidebarProps) {
             text-decoration: none; 
             color: #64748b; 
             transition: all 0.2s; 
+            white-space: nowrap;
           }
           .sb-link:hover, .sb-link.active { background: #f1f5f9; color: #0f172a; }
 
@@ -177,7 +243,12 @@ export default function Sidebar({ isOpen, setIsOpen }: SidebarProps) {
             font-size: 16px;
             font-weight: 700;
             letter-spacing: -0.2px;
+            transition: opacity 0.2s;
           }
+
+          .sb-root.collapsed .sb-link { padding: 12px; justify-content: center; }
+          .sb-root.collapsed .sb-link-label { display: none; }
+          .sb-root.collapsed .sb-link-icon { margin: 0; }
 
           .sb-footer { 
             padding: 24px; 
@@ -186,8 +257,13 @@ export default function Sidebar({ isOpen, setIsOpen }: SidebarProps) {
             flex-direction: column; 
             gap: 24px; 
             background: #fafafa;
+            overflow: visible;
           }
-          .footer-section { display: flex; flex-direction: column; gap: 8px; }
+          .sb-root.collapsed .sb-footer { padding: 24px 0; align-items: center; }
+
+          .footer-section { display: flex; flex-direction: column; gap: 8px; overflow: visible; width: 100%; }
+          .sb-root.collapsed .footer-section { align-items: center; }
+
           .footer-label { 
             font-family: var(--font-mono);
             font-size: 9px; 
@@ -196,6 +272,7 @@ export default function Sidebar({ isOpen, setIsOpen }: SidebarProps) {
             letter-spacing: 2px; 
             color: #94a3b8; 
           }
+          .sb-root.collapsed .footer-label { display: none; }
           
           .sb-user-card { 
             display: flex; 
@@ -205,8 +282,14 @@ export default function Sidebar({ isOpen, setIsOpen }: SidebarProps) {
             background: white; 
             border: 1px solid #e2e8f0; 
             border-radius: 12px;
+            overflow: hidden; 
+            width: 100%;
           }
-          .sb-user-info { display: flex; flex-direction: column; }
+          .sb-root.collapsed .sb-user-card { padding: 10px; justify-content: center; border: none; background: transparent; }
+          
+          .clerk-wrapper { display: flex; align-items: center; justify-content: center; overflow: visible; flex-shrink: 0; }
+          .sb-user-info { display: flex; flex-direction: column; white-space: nowrap; }
+          .sb-root.collapsed .sb-user-info { display: none; }
           .sb-user-name { 
             font-family: var(--font-serif);
             font-size: 13px; 
@@ -221,7 +304,7 @@ export default function Sidebar({ isOpen, setIsOpen }: SidebarProps) {
             text-transform: uppercase; 
           }
         `}</style>
-      </motion.aside>
+      </aside>
     </>
   )
 }
