@@ -1,16 +1,18 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import axios from 'axios'
-import { useUser } from '@clerk/nextjs'
+import { useAuth, useUser } from '@clerk/nextjs'
 import { useLevel } from '@/context/LevelContext'
-import { WritingExercise, WritingExerciseId, writingExercises } from '@/data/writingExercises'
+import { WritingExercise, WritingExerciseId, WritingMission, writingExercises } from '@/data/writingExercises'
 
 export function useWritingSession() {
   const { user } = useUser()
+  const { getToken } = useAuth()
   const { level } = useLevel()
   
   const [exerciseId, setExerciseId] = useState<WritingExerciseId>('pr_description')
+  const [activeMission, setActiveMission] = useState<WritingMission | null>(null)
   const [userText, setUserText] = useState('')
   const [feedback, setFeedback] = useState<any>(null)
   const [loading, setLoading] = useState(false)
@@ -18,8 +20,17 @@ export function useWritingSession() {
 
   const currentExercise = writingExercises.find(e => e.id === exerciseId)!
 
+  // Pick a random mission when the exercise changes
+  useEffect(() => {
+    const missions = currentExercise.missions
+    if (missions && missions.length > 0) {
+      const randomMission = missions[Math.floor(Math.random() * missions.length)]
+      setActiveMission(randomMission)
+    }
+  }, [exerciseId, currentExercise])
+
   const analyzeWriting = async () => {
-    if (!userText.trim()) return
+    if (!userText.trim() || !activeMission) return
     setLoading(true)
     setFeedback(null)
     setError(null)
@@ -29,8 +40,9 @@ export function useWritingSession() {
       const res = await axios.post(`${process.env.NEXT_PUBLIC_AI_URL}/writing/analyze`, {
         exercise: exerciseId,
         text: userText,
-        prompt: currentExercise.prompt,
-        level: level // Send CEFR level for tailored feedback
+        context: activeMission.context,
+        referenceData: activeMission.referenceData,
+        level: level 
       })
 
       const raw = res.data.feedback
@@ -40,12 +52,16 @@ export function useWritingSession() {
 
       // 2. Save Session to Backend
       if (user) {
+        const token = await getToken()
         await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/api/sessions`, {
           userId: user.id,
           type: 'writing',
-          scenario: exerciseId,
+          scenario: activeMission.title, // Store the specific mission title
           duration: 0,
-          score: parsed.overall_score ?? null
+          score: parsed.overall_score ?? null,
+          feedback: parsed // Store the full feedback json
+        }, {
+          headers: token ? { Authorization: `Bearer ${token}` } : undefined
         })
       }
     } catch (err: any) {
@@ -65,6 +81,7 @@ export function useWritingSession() {
 
   return {
     exercise: currentExercise,
+    activeMission,
     userText,
     setUserText,
     feedback,
