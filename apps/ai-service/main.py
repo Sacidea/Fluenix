@@ -10,11 +10,14 @@ load_dotenv()
 app = FastAPI(title="Fluenix AI Service")
 client = Anthropic(api_key=os.getenv("ANTHROPIC_API_KEY"))
 
+raw_origins = os.getenv("CORS_ORIGINS", "http://localhost:3000")
+allowed_origins = [origin.strip() for origin in raw_origins.split(",") if origin.strip()]
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
-    allow_methods=["*"],
-    allow_headers=["*"],
+    allow_origins=allowed_origins,
+    allow_methods=["GET", "POST", "OPTIONS"],
+    allow_headers=["Content-Type", "Authorization"],
 )
 
 SCENARIO_PROMPTS = {
@@ -57,10 +60,14 @@ async def scenario_chat(data: dict):
     try:
         scenario = data.get("scenario", "interview")
         level = data.get("level", "B2")
+        context = data.get("context", "")
         messages = data.get("messages", [])
         
         system_prompt = SCENARIO_PROMPTS.get(scenario, SCENARIO_PROMPTS["interview"])
         system_prompt += get_level_steering(level)
+
+        if context:
+            system_prompt += f"\n\n[SCENARIO CONTEXT: {context}. You must strictly adhere to this exact context. Initiate the conversation by addressing this scenario directly.]"
         
         response = client.messages.create(
             # Using the name provided in the snippet as it is confirmed working for the user
@@ -79,20 +86,37 @@ async def analyze_writing(data: dict):
     try:
         exercise = data.get("exercise", "pr_description")
         text = data.get("text", "")
-        prompt = data.get("prompt", "")
+        context = data.get("context", "")
+        referenceData = data.get("referenceData", "")
+        level = data.get("level", "B2")
         
-        # Maintain the strict analyst persona
-        system_msg = """You are a senior technical English coach. 
-        Analyze the technical writing and return ONLY a JSON object:
-        {
-          "clarity_score": <0-100>,
-          "technical_score": <0-100>,
-          "overall_score": <0-100>,
-          "strengths": ["...", "..."],
-          "improvements": ["...", "..."],
-          "overall_feedback": "2-3 sentences of sharp, professional analysis"
-        }
-        Return only the JSON."""
+        system_msg = f"""You are a Senior Staff Engineer at a FAANG company reviewing a colleague's written communication.
+They are practicing technical English for a {exercise}.
+Their English CEFR level is {level}. Adjust your expectations accordingly.
+
+SCENARIO CONTEXT: {context}
+REFERENCE DATA (Code Diff / Ticket):
+{referenceData}
+
+The user has written the following draft based on the context above:
+<draft>{text}</draft>
+
+Evaluate their draft on:
+1. Technical Clarity: Does it accurately and professionally convey the required information based on the reference data?
+2. Professional Tone: Is it appropriate for a FAANG environment?
+3. Grammar and Vocabulary: Correctness and richness of language.
+
+Provide a strict, professional review. Return ONLY a valid JSON object matching this exact schema:
+{{
+  "overall_score": 85,
+  "fluency_score": 80,
+  "vocabulary_score": 90,
+  "technical_accuracy": 85,
+  "strengths": ["Clear opening", "Good use of tech terms"],
+  "improvements": ["Sentence 2 is passive", "Missed a comma"],
+  "overall_feedback": "A concise paragraph summarizing the review..."
+}}
+Do NOT wrap the JSON in markdown code blocks. Start immediately with {{."""
 
         response = client.messages.create(
             model="claude-sonnet-4-6",
@@ -100,7 +124,7 @@ async def analyze_writing(data: dict):
             system=system_msg,
             messages=[{
                 "role": "user",
-                "content": f"Task: {prompt}\n\nUser's writing:\n{text}"
+                "content": "Analyze my draft."
             }]
         )
         return {"feedback": response.content[0].text}
@@ -182,4 +206,4 @@ async def analyze_pronunciation(data: dict):
         return {"result": clean}
     except Exception as e:
         traceback.print_exc()
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail=str(e))
