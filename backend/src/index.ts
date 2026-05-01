@@ -8,11 +8,28 @@ import { redis } from './config/redis'
 import sessionsRouter from './routes/sessions'
 import usersRouter from './routes/users'
 import pronunciationRouter from './routes/pronunciation'
+import listeningRouter from './routes/listening.routes'
+
 const app = express()
 const PORT = process.env.PORT || 3001
 
+const parseCorsOrigins = (rawOrigins?: string): string[] => {
+  if (!rawOrigins) return ['http://localhost:3000']
+  return rawOrigins
+    .split(',')
+    .map(origin => origin.trim())
+    .filter(Boolean)
+}
+
+const allowedOrigins = parseCorsOrigins(process.env.CORS_ORIGINS)
+
 app.use(cors({
-  origin: '*',
+  origin: (origin, callback) => {
+    // Allow non-browser tools (health checks, server-to-server requests).
+    if (!origin) return callback(null, true)
+    if (allowedOrigins.includes(origin)) return callback(null, true)
+    return callback(new Error('Not allowed by CORS'))
+  },
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization']
 }))
@@ -49,8 +66,25 @@ app.use((err: any, req: Request, res: Response, next: any) => {
 app.use('/api/sessions', sessionsRouter)
 app.use('/api/users', usersRouter)
 app.use('/api/pronunciation', pronunciationRouter)
-app.listen(PORT, () => {
+app.use('/api/listening', listeningRouter)
+import { PrismaClient } from '@prisma/client'
+import { DEFAULT_PRONUNCIATION_WORDS } from './seeders/pronunciation.seeder'
+
+const prisma = new PrismaClient()
+
+app.listen(PORT, async () => {
   console.log(`✅ Backend running on http://localhost:${PORT}`)
+  
+  // Auto-seed pronunciation words
+  console.log('Seeding pronunciation words...')
+  for (const word of DEFAULT_PRONUNCIATION_WORDS) {
+    await prisma.pronunciationWord.upsert({
+      where: { word: word.word },
+      update: { category: word.category, phonetic: word.phonetic },
+      create: word,
+    })
+  }
+  console.log('Successfully seeded ' + DEFAULT_PRONUNCIATION_WORDS.length + ' words.')
 })
 
 export default app

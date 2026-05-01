@@ -66,3 +66,15 @@ model PronunciationWord {
   phonetic  String
   createdAt DateTime @default(now())
 }
+
+model ListeningScenario {
+  id        String   @id @default(cuid())
+  title     String
+  context   String
+  level     String   @default("B1") // CEFR level: B1, B2, C1
+  dialogue  Json
+  questions Json
+  dictation Json?
+  shadowing Json?
+  createdAt DateTime @default(now())
+}
