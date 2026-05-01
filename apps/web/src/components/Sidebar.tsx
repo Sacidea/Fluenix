@@ -84,7 +84,6 @@ export default function Sidebar() {
             <div className="sb-user-card">
               <div className="clerk-wrapper">
                 <UserButton
-                  afterSignOutUrl="/"
                   appearance={{
                     elements: {
                       userButtonAvatarBox: { width: 32, height: 32, borderRadius: 8 }

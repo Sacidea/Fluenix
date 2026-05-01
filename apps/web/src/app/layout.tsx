@@ -36,7 +36,7 @@ export default function RootLayout({
   children: React.ReactNode
 }) {
   return (
-    <ClerkProvider>
+    <ClerkProvider afterSignOutUrl="/">
       <html lang="en">
         <body className={`${dmSans.variable} ${ebGaramond.variable} ${jetbrainsMono.variable} ${dmSans.className}`}>
           <NextTopLoader color="#6366f1" showSpinner={false} />

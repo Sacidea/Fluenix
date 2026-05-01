@@ -7,6 +7,7 @@ import { Session } from '../hooks/useProgressData'
 interface SessionItemProps {
     session: Session
     index?: number
+    onSelect?: (session: Session) => void
 }
 
 const labelMap: Record<string, string> = {
@@ -28,14 +29,25 @@ const getLabel = (session: { type: string; scenario?: string }) => {
     return labelMap[raw] ?? raw
 }
 
-export function SessionItem({ session, index = 0 }: SessionItemProps) {
+export function SessionItem({ session, index = 0, onSelect }: SessionItemProps) {
     const Icon = session.type === 'scenario' ? Icons.MessagesSquare :
                  session.type === 'pronunciation' ? Icons.Mic : Icons.PenTool
 
     const scoreColor = session.score != null ? (session.score >= 80 ? '#059669' : session.score >= 60 ? '#d97706' : '#dc2626') : '#94a3b8'
 
     return (
-        <div className="ledger-entry">
+        <div
+            className="ledger-entry"
+            role="button"
+            tabIndex={0}
+            onClick={() => onSelect?.(session)}
+            onKeyDown={(e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault()
+                    onSelect?.(session)
+                }
+            }}
+        >
             <div className="entry-left">
                 <div className="entry-icon">
                     <Icon size={16} strokeWidth={2.5} />

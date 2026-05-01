@@ -29,19 +29,44 @@ export function ModuleCard({ moduleData, index }: ModuleCardProps) {
 
     if (!available) {
         return (
-            <div className="ledger-module-card disabled">
+            <div className="saas-module-card disabled">
                 <style jsx>{`
-                    .ledger-module-card.disabled {
-                        background: #f1f5f9;
+                    .saas-module-card.disabled {
+                        background: #ffffff;
                         border: 1px dashed #cbd5e1;
                         padding: 32px;
-                        border-radius: 12px;
+                        border-radius: 24px;
                         opacity: 0.6;
                         cursor: not-allowed;
+                        display: flex;
+                        flex-direction: column;
+                        height: 100%;
+                        align-items: center;
+                        justify-content: center;
+                        text-align: center;
                     }
-                    .module-title { font-size: 20px; font-weight: 900; margin-bottom: 8px; color: #475569; }
-                    .module-desc { font-size: 14px; color: #94a3b8; line-height: 1.5; }
+                    .lock-icon {
+                        color: #94a3b8;
+                        margin-bottom: 16px;
+                    }
+                    .module-title { 
+                        font-family: var(--font-base); 
+                        font-size: 20px; 
+                        font-weight: 800; 
+                        margin-bottom: 8px; 
+                        color: #64748b; 
+                        letter-spacing: -0.5px;
+                    }
+                    .module-desc { 
+                        font-size: 14px; 
+                        color: #94a3b8; 
+                        line-height: 1.6; 
+                        font-weight: 500;
+                    }
                 `}</style>
+                <div className="lock-icon">
+                    <Icons.Lock size={32} />
+                </div>
                 <h3 className="module-title">{title}</h3>
                 <p className="module-desc">{description}</p>
             </div>
@@ -49,127 +74,155 @@ export function ModuleCard({ moduleData, index }: ModuleCardProps) {
     }
 
     return (
-        <Link href={href} className="card-link">
-            <motion.div 
-                className="ledger-module-card"
-                whileHover={{ y: -6 }}
-                transition={{ type: 'spring', stiffness: 300, damping: 25 }}
-            >
-                <div className="card-accent" style={{ background: color }} />
+        <Link 
+            href={href} 
+            className="card-link" 
+            style={{ textDecoration: 'none', color: 'inherit', display: 'block', height: '100%' }}
+        >
+            <div className="saas-module-card">
+                <div className="card-top-accent" style={{ background: color }} />
                 
-                <div className="card-main-content">
-                    <div className="card-top">
-                        <IconComponent size={24} style={{ color }} strokeWidth={2.5} />
-                        <span className="card-id">MOD_{index + 1}</span>
+                <div className="card-content">
+                    <div className="card-header">
+                        <div className="icon-wrapper" style={{ color: color, backgroundColor: `${color}15` }}>
+                            <IconComponent size={24} strokeWidth={2.5} />
+                        </div>
+                        <div className="badge-wrapper">
+                            <span className="mod-badge">MODULE {index + 1}</span>
+                        </div>
                     </div>
 
-                    <div className="card-inner-body">
+                    <div className="card-body">
                         <h3 className="module-title">{title}</h3>
                         <p className="module-desc">{description}</p>
                     </div>
 
                     <div className="card-footer">
-                        <span className="cta-text">Enter Module</span>
-                        <Icons.ArrowRight size={16} className="cta-icon" />
+                        <span className="cta-text" style={{ color: color }}>Launch Application</span>
+                        <div className="cta-arrow" style={{ background: color }}>
+                            <Icons.ArrowRight size={14} color="white" strokeWidth={3} />
+                        </div>
                     </div>
                 </div>
-            </motion.div>
+            </div>
 
             <style jsx>{`
-                .card-link {
-                    text-decoration: none;
-                    color: inherit;
-                    display: block;
-                    height: 100%;
-                }
-
-                .ledger-module-card {
+                .saas-module-card {
                     background: #ffffff;
-                    border: 1px solid #e2e8f0;
-                    border-left: 0; /* Removed gray left border to avoid double lines */
-                    border-radius: 12px;
+                    border: 1px solid #f1f5f9;
+                    border-radius: 24px;
                     position: relative;
                     overflow: hidden;
                     height: 100%;
                     display: flex;
                     flex-direction: column;
-                    box-shadow: 0 4px 20px rgba(0,0,0,0.02);
-                    transition: all 0.3s ease;
+                    box-shadow: 0 10px 40px -10px rgba(15, 23, 42, 0.04);
+                    transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
                 }
 
-                .ledger-module-card:hover {
-                    border-color: #cbd5e1;
-                    box-shadow: 0 20px 40px -12px rgba(0,0,0,0.08);
+                .saas-module-card:hover {
+                    transform: translateY(-6px);
+                    box-shadow: 0 20px 50px -15px rgba(15, 23, 42, 0.08);
+                    border-color: #e2e8f0;
                 }
 
-                .card-accent {
+                .card-top-accent {
+                    height: 4px;
+                    width: 100%;
                     position: absolute;
-                    top: 35px;
-                    bottom: 35px;
+                    top: 0;
                     left: 0;
-                    width: 3px;
-                    border-radius: 0 4px 4px 0;
-                    transition: all 0.3s ease;
+                    opacity: 0.8;
+                    transition: opacity 0.3s;
                 }
 
-                /* Neutral hover, no extra glow */
-                .ledger-module-card:hover .card-accent {
-                    width: 3px;
+                .saas-module-card:hover .card-top-accent {
+                    opacity: 1;
                 }
 
-                .card-main-content {
-                    padding: 40px 40px 40px 32px; /* Adjusted indentation for edge-aligned line */
+                .card-content {
+                    padding: 32px;
                     display: flex;
                     flex-direction: column;
                     height: 100%;
                 }
 
-                .card-top {
+                .card-header {
                     display: flex;
                     justify-content: space-between;
                     align-items: center;
-                    margin-bottom: 20px;
+                    margin-bottom: 32px;
                 }
 
-                .card-id {
-                    font-family: 'JetBrains Mono', monospace;
+                .icon-wrapper {
+                    width: 56px;
+                    height: 56px;
+                    border-radius: 16px;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+                }
+
+                .saas-module-card:hover .icon-wrapper {
+                    transform: scale(1.1) rotate(-5deg);
+                }
+
+                .mod-badge {
+                    font-family: var(--font-mono);
                     font-size: 10px;
                     font-weight: 800;
-                    color: #cbd5e1;
+                    color: #64748b;
+                    background: #f8fafc;
+                    padding: 6px 12px;
+                    border-radius: 99px;
                     letter-spacing: 1px;
                 }
 
                 .module-title {
-                    font-family: 'DM Sans', sans-serif;
+                    font-family: var(--font-base);
                     font-size: 22px;
-                    font-weight: 900;
+                    font-weight: 800;
                     color: #0f172a;
                     margin-bottom: 12px;
-                    letter-spacing: -0.8px;
+                    letter-spacing: -0.5px;
                 }
 
                 .module-desc {
-                    font-size: 14px;
+                    font-family: var(--font-base);
+                    font-size: 15px;
                     color: #64748b;
                     line-height: 1.6;
                     margin-bottom: 40px;
+                    font-weight: 500;
                 }
 
                 .card-footer {
                     margin-top: auto;
                     display: flex;
+                    justify-content: space-between;
                     align-items: center;
-                    gap: 8px;
-                    color: #4338ca;
+                    padding-top: 24px;
+                    border-top: 1px solid #f1f5f9;
+                }
+
+                .cta-text {
+                    font-family: var(--font-base);
                     font-weight: 700;
                     font-size: 14px;
                 }
 
-                .cta-icon {
+                .cta-arrow {
+                    width: 32px;
+                    height: 32px;
+                    border-radius: 50%;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
                     transition: transform 0.3s;
                 }
 
-                .ledger-module-card:hover .cta-icon {
+                .saas-module-card:hover .cta-arrow {
                     transform: translateX(4px);
                 }
             `}</style>
