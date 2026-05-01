@@ -1,5 +1,6 @@
 import { useState, useCallback, useEffect } from 'react'
 import axios from 'axios'
+import { useAuth } from '@clerk/nextjs'
 
 export type Stats = {
     totalSessions: number
@@ -15,9 +16,11 @@ export type Session = {
     score?: number
     duration: number
     createdAt: string
+    feedback?: unknown
 }
 
 export function useProgressData(userId?: string) {
+    const { getToken } = useAuth()
     const [stats, setStats] = useState<Stats | null>(null)
     const [sessions, setSessions] = useState<Session[]>([])
     const [loading, setLoading] = useState(true)
@@ -28,9 +31,11 @@ export function useProgressData(userId?: string) {
         setError(false)
         setLoading(true)
         try {
+            const token = await getToken()
+            const headers = token ? { Authorization: `Bearer ${token}` } : undefined
             const [statsRes, sessionsRes] = await Promise.all([
-                axios.get(`${process.env.NEXT_PUBLIC_API_URL}/api/sessions/stats/${userId}`),
-                axios.get(`${process.env.NEXT_PUBLIC_API_URL}/api/sessions/user/${userId}`)
+                axios.get(`${process.env.NEXT_PUBLIC_API_URL}/api/sessions/stats/${userId}`, { headers }),
+                axios.get(`${process.env.NEXT_PUBLIC_API_URL}/api/sessions/user/${userId}`, { headers })
             ])
             setStats(statsRes.data)
             setSessions(sessionsRes.data)
@@ -40,7 +45,7 @@ export function useProgressData(userId?: string) {
         } finally {
             setLoading(false)
         }
-    }, [userId])
+    }, [userId, getToken])
 
     useEffect(() => {
         fetchData()

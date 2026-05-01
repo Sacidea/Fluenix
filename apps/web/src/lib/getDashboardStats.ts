@@ -1,10 +1,23 @@
-export async function getDashboardStats(userId: string) {
+export async function getDashboardStats(userId: string, token?: string | null) {
     try {
         const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/sessions/stats/${userId}`, {
-            cache: 'no-store'
+            cache: 'no-store',
+            headers: token ? { Authorization: `Bearer ${token}` } : undefined
         })
         return await res.json()
     } catch {
         return { totalSessions: 0, averageScore: 0, streak: 0 }
+    }
+}
+
+export async function getDashboardSessions(userId: string, token?: string | null) {
+    try {
+        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/sessions/user/${userId}`, {
+            cache: 'no-store',
+            headers: token ? { Authorization: `Bearer ${token}` } : undefined
+        })
+        return await res.json()
+    } catch {
+        return []
     }
 }

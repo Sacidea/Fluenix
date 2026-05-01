@@ -1,6 +1,6 @@
 'use client'
 
-import React from 'react'
+import React, { useState } from 'react'
 import Link from 'next/link'
 import { useUser } from '@clerk/nextjs'
 import { motion } from 'framer-motion'
@@ -8,10 +8,14 @@ import { Layout, Terminal, ShieldCheck, AlertTriangle, Inbox } from 'lucide-reac
 import { useProgressData } from '@/hooks/useProgressData'
 import { StatsCards } from '@/components/StatsCards'
 import { SessionItem } from '@/components/SessionItem'
+import { ProgressInsights } from '@/components/ProgressInsights'
+import { SessionDetailPanel } from '@/components/SessionDetailPanel'
+import type { Session } from '@/hooks/useProgressData'
 
 export default function ProgressPage() {
   const { user } = useUser()
   const { stats, sessions, loading, error, refetch } = useProgressData(user?.id)
+  const [selectedSession, setSelectedSession] = useState<Session | null>(null)
 
   return (
     <div className="ledger-progress-root">
@@ -51,6 +55,7 @@ export default function ProgressPage() {
           >
             {/* STATS DOSSIER */}
             <StatsCards stats={stats} />
+            <ProgressInsights sessions={sessions} />
 
             {/* RECENT SESSIONS SECTION */}
             <div className="sessions-section">
@@ -71,7 +76,12 @@ export default function ProgressPage() {
               ) : (
                 <div className="sessions-grid">
                   {sessions.map((session, i) => (
-                    <SessionItem key={session.id} session={session} index={i} />
+                    <SessionItem
+                      key={session.id}
+                      session={session}
+                      index={i}
+                      onSelect={setSelectedSession}
+                    />
                   ))}
                 </div>
               )}
@@ -88,6 +98,7 @@ export default function ProgressPage() {
         </footer>
 
       </main>
+      <SessionDetailPanel session={selectedSession} onClose={() => setSelectedSession(null)} />
 
       <style jsx>{`
         .ledger-progress-root {

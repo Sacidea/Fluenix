@@ -1,5 +1,6 @@
 import { useState, useCallback, useEffect } from 'react'
 import axios from 'axios'
+import { useAuth } from '@clerk/nextjs'
 
 export type DashboardStats = {
     totalSessions: number
@@ -9,6 +10,7 @@ export type DashboardStats = {
 }
 
 export function useDashboardData(userId?: string) {
+    const { getToken } = useAuth()
     const [stats, setStats] = useState<DashboardStats | null>(null)
     const [loading, setLoading] = useState(true)
 
@@ -16,14 +18,17 @@ export function useDashboardData(userId?: string) {
         if (!userId) return
         setLoading(true)
         try {
-            const res = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/api/sessions/stats/${userId}`)
+            const token = await getToken()
+            const res = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/api/sessions/stats/${userId}`, {
+                headers: token ? { Authorization: `Bearer ${token}` } : undefined
+            })
             setStats(res.data)
         } catch {
             setStats({ totalSessions: 0, averageScore: 0, streak: 0, lastSession: null })
         } finally {
             setLoading(false)
         }
-    }, [userId])
+    }, [userId, getToken])
 
     useEffect(() => {
         fetchStats()
