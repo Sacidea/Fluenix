@@ -9,6 +9,8 @@ import sessionsRouter from './routes/sessions'
 import usersRouter from './routes/users'
 import pronunciationRouter from './routes/pronunciation'
 import listeningRouter from './routes/listening.routes'
+import grammarRouter from './routes/grammar.routes'
+import handbookRouter from './routes/handbook.routes'
 
 const app = express()
 const PORT = process.env.PORT || 3001
@@ -67,6 +69,8 @@ app.use('/api/sessions', sessionsRouter)
 app.use('/api/users', usersRouter)
 app.use('/api/pronunciation', pronunciationRouter)
 app.use('/api/listening', listeningRouter)
+app.use('/api/grammar', grammarRouter)
+app.use('/api/handbook', handbookRouter)
 import { PrismaClient } from '@prisma/client'
 import { DEFAULT_PRONUNCIATION_WORDS } from './seeders/pronunciation.seeder'
 

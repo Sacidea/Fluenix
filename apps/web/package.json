@@ -19,6 +19,7 @@
     "nextjs-toploader": "^3.9.17",
     "react": "19.2.3",
     "react-dom": "19.2.3",
+    "react-markdown": "^10.1.0",
     "zustand": "^5.0.11"
   },
   "devDependencies": {

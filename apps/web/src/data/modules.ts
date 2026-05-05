@@ -85,4 +85,16 @@ export const modulesData: ModuleItem[] = [
     bg: '#ecfeff',
     border: '#cffafe',
   },
+  {
+    id: 'grammar-lab',
+    title: 'Grammar Linter Lab',
+    description: 'Spot and fix common FAANG grammar mistakes in context',
+    icon: 'CheckSquare',
+    href: '/dashboard/grammar-lab',
+    available: true,
+    tag: 'NEW',
+    color: '#84cc16',
+    bg: '#ecfccb',
+    border: '#d9f99d',
+  },
 ]

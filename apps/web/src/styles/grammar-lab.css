@@ -1,0 +1,205 @@
+/* Grammar Linter Lab Styles */
+.grammar-lab-workspace {
+  background: white;
+  border-radius: 16px;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  min-height: 400px;
+}
+
+.grammar-header {
+  background: #f8fafc;
+  padding: 16px 24px;
+  border-bottom: 1px solid #e2e8f0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.grammar-context {
+  font-size: 14px;
+  color: #64748b;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.grammar-content {
+  padding: 40px;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.grammar-instruction {
+  font-size: 16px;
+  font-weight: 600;
+  color: #0f172a;
+  margin-bottom: 32px;
+  text-align: center;
+}
+
+/* Linter / Code View Area */
+.linter-view {
+  background: #f8fafc;
+  border: 1px solid #cbd5e1;
+  border-radius: 12px;
+  padding: 24px;
+  width: 100%;
+  max-width: 700px;
+  font-family: var(--font-mono);
+  font-size: 16px;
+  line-height: 1.8;
+  color: #334155;
+  box-shadow: inset 0 2px 4px rgba(0,0,0,0.02);
+}
+
+.text-segment {
+  display: inline-block;
+  transition: all 0.2s ease;
+}
+
+.text-segment.clickable {
+  cursor: pointer;
+  border-bottom: 2px dashed #94a3b8;
+  padding: 0 2px;
+}
+
+.text-segment.clickable:hover {
+  background: #e2e8f0;
+  border-bottom-color: #475569;
+}
+
+/* Error States */
+.text-segment.shake {
+  animation: shake 0.4s cubic-bezier(.36,.07,.19,.97) both;
+  color: #ef4444;
+  border-bottom-color: #ef4444;
+  background: #fef2f2;
+}
+
+.text-segment.found-error {
+  background: #fef2f2;
+  color: #ef4444;
+  border-bottom: 2px solid #ef4444;
+  font-weight: bold;
+}
+
+.text-segment.corrected {
+  background: #ecfdf5;
+  color: #059669;
+  border-bottom: 2px solid #059669;
+  font-weight: bold;
+}
+
+@keyframes shake {
+  10%, 90% { transform: translate3d(-1px, 0, 0); }
+  20%, 80% { transform: translate3d(2px, 0, 0); }
+  30%, 50%, 70% { transform: translate3d(-4px, 0, 0); }
+  40%, 60% { transform: translate3d(4px, 0, 0); }
+}
+
+/* Options Box */
+.grammar-options-container {
+  margin-top: 32px;
+  width: 100%;
+  max-width: 700px;
+  animation: slideUp 0.3s ease-out;
+}
+
+.options-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.grammar-option-btn {
+  background: white;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 16px;
+  font-family: var(--font-mono);
+  font-size: 15px;
+  color: #1e293b;
+  text-align: left;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.grammar-option-btn:hover:not(:disabled) {
+  border-color: #cbd5e1;
+  background: #f8fafc;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+.grammar-option-btn.correct {
+  background: #ecfdf5;
+  border-color: #10b981;
+  color: #065f46;
+}
+
+.grammar-option-btn.wrong {
+  background: #fef2f2;
+  border-color: #ef4444;
+  color: #991b1b;
+}
+
+/* Explanation Box */
+.grammar-explanation {
+  margin-top: 24px;
+  background: #f0fdf4;
+  border: 1px solid #bbf7d0;
+  border-radius: 12px;
+  padding: 20px;
+  animation: fadeIn 0.4s ease-out;
+}
+
+.grammar-explanation h4 {
+  color: #166534;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 12px;
+  font-size: 16px;
+}
+
+.grammar-explanation p {
+  color: #15803d;
+  font-size: 15px;
+  line-height: 1.6;
+  margin-bottom: 16px;
+}
+
+.btn-next-exercise {
+  background: #10b981;
+  color: white;
+  border: none;
+  padding: 12px 24px;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  width: 100%;
+  transition: background 0.2s;
+}
+
+.btn-next-exercise:hover {
+  background: #059669;
+}
+
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}

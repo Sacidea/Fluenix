@@ -5,6 +5,7 @@
     "web": "pnpm --filter web dev",
     "mobile": "pnpm --filter mobile start",
     "backend": "pnpm --filter backend dev",
+    "seed": "pnpm --filter backend run seed",
     "ai": "cd apps/ai-service && uvicorn main:app --reload"
   }
 }

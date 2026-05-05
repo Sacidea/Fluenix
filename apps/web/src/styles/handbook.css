@@ -1,0 +1,289 @@
+/* FAANG Grammar Handbook Styles */
+
+.handbook-container {
+  display: flex;
+  background: white;
+  border-radius: 16px;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+  overflow: hidden;
+  height: calc(100vh - 220px);
+  min-height: 500px;
+}
+
+/* Sidebar */
+.handbook-sidebar {
+  width: 280px;
+  background: #f8fafc;
+  border-right: 1px solid #e2e8f0;
+  display: flex;
+  flex-direction: column;
+}
+
+.handbook-sidebar-header {
+  padding: 20px 24px;
+  border-bottom: 1px solid #e2e8f0;
+  font-weight: 700;
+  color: #0f172a;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.handbook-sidebar-nav {
+  padding: 16px;
+  overflow-y: auto;
+  flex: 1;
+}
+
+.category-group {
+  margin-bottom: 24px;
+}
+
+.category-title {
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #64748b;
+  font-weight: 700;
+  margin-bottom: 8px;
+  padding-left: 8px;
+}
+
+.rule-link {
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: 8px 12px;
+  border-radius: 6px;
+  color: #475569;
+  font-size: 14px;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s;
+  margin-bottom: 2px;
+}
+
+.rule-link:hover {
+  background: #e2e8f0;
+  color: #0f172a;
+}
+
+.rule-link.active {
+  background: #eff6ff;
+  color: #2563eb;
+  font-weight: 600;
+}
+
+/* Main Content Area */
+.handbook-content {
+  flex: 1;
+  padding: 40px;
+  overflow-y: auto;
+  background: #ffffff;
+}
+
+.handbook-content::-webkit-scrollbar {
+  width: 8px;
+}
+
+.handbook-content::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.handbook-content::-webkit-scrollbar-thumb {
+  background-color: #cbd5e1;
+  border-radius: 20px;
+  border: 2px solid #ffffff;
+}
+
+.handbook-content::-webkit-scrollbar-thumb:hover {
+  background-color: #94a3b8;
+}
+
+.handbook-content-inner {
+  max-width: 800px;
+}
+
+.rule-category-badge {
+  display: inline-block;
+  padding: 4px 12px;
+  background: #f1f5f9;
+  color: #475569;
+  border-radius: 20px;
+  font-size: 13px;
+  font-weight: 600;
+  margin-bottom: 16px;
+}
+
+.rule-header-title {
+  font-size: 32px;
+  font-weight: 800;
+  color: #0f172a;
+  margin-bottom: 24px;
+  letter-spacing: -0.02em;
+}
+
+.rule-explanation {
+  font-size: 16px;
+  line-height: 1.7;
+  color: #334155;
+  margin-bottom: 32px;
+  padding: 20px;
+  background: #f8fafc;
+  border-left: 4px solid #3b82f6;
+  border-radius: 4px 12px 12px 4px;
+}
+
+/* Code-style Diffs */
+.rule-examples {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.example-block {
+  border-radius: 8px;
+  overflow: hidden;
+  border: 1px solid #e2e8f0;
+  font-family: var(--font-mono);
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+.example-header {
+  padding: 8px 16px;
+  font-weight: 600;
+  font-family: var(--font-sans);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.example-header.wrong {
+  background: #fef2f2;
+  color: #991b1b;
+  border-bottom: 1px solid #fecaca;
+}
+
+.example-header.correct {
+  background: #ecfdf5;
+  color: #065f46;
+  border-bottom: 1px solid #a7f3d0;
+}
+
+.example-body {
+  padding: 16px;
+  background: #fafafa;
+  color: #1e293b;
+  white-space: pre-wrap;
+}
+
+.example-body.wrong-text {
+  background: #fff1f2;
+}
+
+.example-body.correct-text {
+  background: #f0fdf4;
+}
+
+/* Tabs */
+.grammar-tabs {
+  display: flex;
+  background: #f1f5f9;
+  padding: 4px;
+  border-radius: 12px;
+  margin-bottom: 24px;
+  width: fit-content;
+}
+
+.grammar-tab {
+  padding: 10px 24px;
+  border: none;
+  background: transparent;
+  color: #64748b;
+  font-weight: 600;
+  font-size: 14px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.grammar-tab:hover:not(.active) {
+  color: #0f172a;
+}
+
+.grammar-tab.active {
+  background: white;
+  color: #0f172a;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+/* Markdown Lesson Styles */
+.lesson-content-markdown h1 {
+  font-size: 24px;
+  font-weight: 800;
+  margin-top: 0;
+  margin-bottom: 16px;
+  color: #0f172a;
+  border-bottom: 2px solid #f1f5f9;
+  padding-bottom: 8px;
+}
+
+.lesson-content-markdown h2 {
+  font-size: 20px;
+  font-weight: 700;
+  margin-top: 24px;
+  margin-bottom: 12px;
+  color: #1e293b;
+}
+
+.lesson-content-markdown h3 {
+  font-size: 16px;
+  font-weight: 700;
+  margin-top: 20px;
+  margin-bottom: 8px;
+  color: #334155;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.lesson-content-markdown p {
+  margin-bottom: 16px;
+}
+
+.lesson-content-markdown ul {
+  list-style-type: disc;
+  padding-left: 24px;
+  margin-bottom: 16px;
+}
+
+.lesson-content-markdown li {
+  margin-bottom: 8px;
+}
+
+.lesson-content-markdown code {
+  background: #f1f5f9;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-family: var(--font-mono);
+  font-size: 13px;
+  color: #db2777;
+}
+
+.lesson-content-markdown blockquote {
+  border-left: 4px solid #f59e0b;
+  background: #fffbeb;
+  padding: 16px;
+  margin: 24px 0;
+  border-radius: 0 8px 8px 0;
+  color: #92400e;
+}
+
+.lesson-content-markdown blockquote p:last-child {
+  margin-bottom: 0;
+}

@@ -5,8 +5,6 @@ import { ChevronDown, Check, Settings2, Sliders } from 'lucide-react'
 import { useLevel } from '@/context/LevelContext'
 
 const LEVEL_MAP = {
-  'beginner': { label: 'INIT - Beginner', desc: 'Baseline starting point', color: '#64748b' },
-  'A1': { label: 'A1 - Starter', desc: 'Functional terminology', color: '#5b7065' },
   'A2': { label: 'A2 - Elementary', desc: 'Standard operations', color: '#4a6fa5' },
   'B1': { label: 'B1 - Intermediate', desc: 'Technical fluency', color: '#8d7b68' },
   'B2': { label: 'B2 - Upper Inter.', desc: 'High-level analysis', color: '#c18161' },
@@ -36,7 +34,7 @@ export function LevelSelector({ isCollapsed = false }: { isCollapsed?: boolean }
 
   if (loading) return <div className="ls-skeleton" />
 
-  const activeObj = LEVEL_MAP[level as keyof typeof LEVEL_MAP] || LEVEL_MAP['beginner']
+  const activeObj = LEVEL_MAP[level as keyof typeof LEVEL_MAP] || LEVEL_MAP['A2']
 
   return (
     <div className="ledger-level-selector" ref={menuRef}>

@@ -78,3 +78,24 @@ model ListeningScenario {
   shadowing Json?
   createdAt DateTime @default(now())
 }
+
+model GrammarExercise {
+  id        String   @id @default(cuid())
+  title     String
+  context   String
+  level     String   @default("B1") // CEFR level: B1, B2, C1
+  segments  Json
+  createdAt DateTime @default(now())
+}
+
+model GrammarRule {
+  id             String   @id @default(cuid())
+  category       String
+  title          String
+  explanation    String
+  correctExample String
+  wrongExample   String
+  lessonContent  String?
+  level          String   @default("B1")
+  createdAt      DateTime @default(now())
+}
