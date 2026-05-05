@@ -159,13 +159,14 @@ export function BehavioralHandbook() {
           </div>
         </div>
 
+        {/* Content Area */}
         <div style={{ flex: 1, padding: '32px', overflowY: 'auto' }}>
           <div className="lesson-content-markdown" style={{ color: '#334155', lineHeight: 1.7 }}>
             <ReactMarkdown>{readingContent.content}</ReactMarkdown>
           </div>
           
           <ReadingQuiz 
-            key={\`\${level}-\${activeReadingIndex}\`} 
+            key={level + '-' + activeReadingIndex}
             vocabulary={readingContent.vocabulary} 
             fillInBlank={readingContent.fillInBlank}
             scenario={readingContent.scenario}
