@@ -665,7 +665,7 @@ export default function Home() {
         .layer-1 { width: 400px; height: 400px; animation: pulse 4s infinite alternate; }
         .layer-2 { width: 250px; height: 250px; border-color: rgba(37, 99, 235, 0.2); animation: pulse 3s infinite alternate-reverse; }
         .layer-3 { width: 100px; height: 100px; background: linear-gradient(135deg, #4f46e5, #3b82f6); box-shadow: 0 0 40px rgba(59,130,246,0.3); }
-        .core-icon { color: white; fill: white; }
+        .core-icon { color: white; }
 
         @keyframes pulse {
           0% { transform: scale(1); opacity: 0.5; }
