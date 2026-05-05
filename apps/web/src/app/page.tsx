@@ -109,7 +109,7 @@ export default function Home() {
                 <p><span className="c-blue">~/fluenix</span> $ analyze-standup --target=senior</p>
                 <p className="c-gray">Analyzing syntax and technical phrasing...</p>
                 <p className="c-pink">♡ Empathy Score: High (Collaborative tone)</p>
-                <p className="c-yellow">⚡ Tip: Replace "delay" with "latency" for impact.</p>
+                <p className="c-lilac">⚡ Tip: Replace "delay" with "latency" for impact.</p>
                 <p className="c-green">✓ Clarity: 98% (Executive Ready)</p>
               </div>
             </motion.div>
@@ -509,6 +509,7 @@ export default function Home() {
         .c-pink { color: #db2777; font-weight: 600; }
         .c-burgundy { color: #9f1239; font-weight: 700; }
         .c-ocean { color: #0891b2; font-weight: 600; }
+        .c-lilac { color: #a855f7; font-weight: 600; }
         .strikethrough { text-decoration: line-through; opacity: 0.7; }
 
 
