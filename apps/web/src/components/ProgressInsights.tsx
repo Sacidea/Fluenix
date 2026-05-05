@@ -3,6 +3,8 @@
 import Link from 'next/link'
 import { AlertCircle, ArrowRight, TrendingUp } from 'lucide-react'
 import { Session } from '@/hooks/useProgressData'
+import { CompetencyRadar } from './CompetencyRadar'
+import { ActivityHeatmap } from './ActivityHeatmap'
 
 type SkillKey = 'scenario' | 'writing' | 'pronunciation'
 
@@ -153,6 +155,11 @@ export function ProgressInsights({ sessions }: { sessions: Session[] }) {
 
   return (
     <section className="insights-root">
+      <div className="advanced-metrics-grid">
+        <ActivityHeatmap sessions={sessions} />
+        <CompetencyRadar sessions={sessions} />
+      </div>
+
       <div className="insights-grid">
         <article className="insight-card trend">
           <div className="card-head">
@@ -230,6 +237,12 @@ export function ProgressInsights({ sessions }: { sessions: Session[] }) {
 
       <style jsx>{`
         .insights-root { margin-bottom: 36px; }
+        .advanced-metrics-grid {
+          display: grid;
+          grid-template-columns: 2fr 1.2fr;
+          gap: 16px;
+          margin-bottom: 16px;
+        }
         .insights-grid {
           display: grid;
           grid-template-columns: 2fr 1.2fr;
@@ -341,7 +354,7 @@ export function ProgressInsights({ sessions }: { sessions: Session[] }) {
           color: #64748b;
         }
         @media (max-width: 900px) {
-          .insights-grid { grid-template-columns: 1fr; }
+          .insights-grid, .advanced-metrics-grid { grid-template-columns: 1fr; }
         }
       `}</style>
     </section>

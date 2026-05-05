@@ -9,36 +9,133 @@ interface StatsCardsProps {
 }
 
 export function StatsCards({ stats }: StatsCardsProps) {
+    const totalSessions = stats?.totalSessions ?? 0
+    const xp = totalSessions * 100
+    const level = Math.floor(xp / 500) + 1
+    const nextLevelXp = level * 500
+    const currentLevelXp = (level - 1) * 500
+    const progressPercent = ((xp - currentLevelXp) / (nextLevelXp - currentLevelXp)) * 100
+
     const config = [
-        { icon: 'Target', value: stats?.totalSessions ?? 0, label: 'Operational Sessions', color: '#6366f1' },
+        { icon: 'Target', value: totalSessions, label: 'Operational Sessions', color: '#6366f1' },
         { icon: 'TrendingUp', value: stats?.averageScore ? `${Math.round(stats.averageScore)}%` : '—', label: 'Technical Accuracy', color: '#0ea5e9' },
         { icon: 'Zap', value: stats?.streak ?? 0, label: 'Consistency Streak', color: '#f59e0b' },
         { icon: 'Calendar', value: stats?.lastSession ? new Date(stats.lastSession).toLocaleDateString('en-US', { day: '2-digit', month: 'short' }) : '—', label: 'Last Activity', color: '#10b981' },
     ]
 
     return (
-        <div className="ledger-stats">
-            {config.map((s) => {
-                const Icon = (Icons as any)[s.icon]
-                return (
-                    <div key={s.label} className="stat-dossier">
-                        <div className="stat-top">
-                            <div className="icon-frame" style={{ color: s.color, background: `${s.color}10` }}>
-                                <Icon size={16} strokeWidth={2.5} />
-                            </div>
-                            <span className="stat-label">{s.label}</span>
-                        </div>
-                        <div className="stat-value" style={{ color: s.color }}>{s.value}</div>
+        <div className="ledger-stats-root">
+            {/* GAMIFICATION BANNER */}
+            <div className="gamification-banner">
+                <div className="g-left">
+                    <div className="level-badge">LVL {level}</div>
+                    <div className="g-text">
+                        <h3>Engineering Proficiency</h3>
+                        <p>{xp} XP / {nextLevelXp} XP to Level {level + 1}</p>
                     </div>
-                )
-            })}
+                </div>
+                <div className="g-right">
+                    <div className="xp-track">
+                        <div className="xp-fill" style={{ width: `${progressPercent}%` }} />
+                    </div>
+                </div>
+            </div>
+
+            {/* STATS DOSSIERS */}
+            <div className="ledger-stats">
+                {config.map((s) => {
+                    const Icon = (Icons as any)[s.icon]
+                    return (
+                        <div key={s.label} className="stat-dossier">
+                            <div className="stat-top">
+                                <div className="icon-frame" style={{ color: s.color, background: `${s.color}10` }}>
+                                    <Icon size={16} strokeWidth={2.5} />
+                                </div>
+                                <span className="stat-label">{s.label}</span>
+                            </div>
+                            <div className="stat-value" style={{ color: s.color }}>{s.value}</div>
+                        </div>
+                    )
+                })}
+            </div>
             
             <style jsx>{`
+                .ledger-stats-root {
+                    display: flex;
+                    flex-direction: column;
+                    gap: 16px;
+                    margin-bottom: 32px;
+                }
+
+                .gamification-banner {
+                    background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+                    border-radius: 16px;
+                    padding: 24px 32px;
+                    display: flex;
+                    align-items: center;
+                    justify-content: space-between;
+                    color: white;
+                    box-shadow: 0 10px 30px -10px rgba(15, 23, 42, 0.5);
+                }
+
+                .g-left {
+                    display: flex;
+                    align-items: center;
+                    gap: 20px;
+                }
+
+                .level-badge {
+                    background: linear-gradient(135deg, #4338ca, #6366f1);
+                    width: 56px;
+                    height: 56px;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    border-radius: 16px;
+                    font-family: var(--font-mono);
+                    font-weight: 800;
+                    font-size: 14px;
+                    color: white;
+                    box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+                }
+
+                .g-text h3 {
+                    font-size: 18px;
+                    font-weight: 700;
+                    margin-bottom: 4px;
+                    letter-spacing: -0.5px;
+                }
+
+                .g-text p {
+                    font-size: 13px;
+                    color: #94a3b8;
+                    font-weight: 500;
+                }
+
+                .g-right {
+                    flex: 1;
+                    max-width: 300px;
+                }
+
+                .xp-track {
+                    width: 100%;
+                    height: 8px;
+                    background: rgba(255, 255, 255, 0.1);
+                    border-radius: 999px;
+                    overflow: hidden;
+                }
+
+                .xp-fill {
+                    height: 100%;
+                    background: linear-gradient(90deg, #38bdf8, #818cf8);
+                    border-radius: 999px;
+                    transition: width 1s cubic-bezier(0.4, 0, 0.2, 1);
+                }
+
                 .ledger-stats {
                     display: grid;
                     grid-template-columns: repeat(4, 1fr);
                     gap: 16px;
-                    margin-bottom: 48px;
                 }
 
                 .stat-dossier {
@@ -90,6 +187,8 @@ export function StatsCards({ stats }: StatsCardsProps) {
                 }
                 @media (max-width: 640px) {
                     .ledger-stats { grid-template-columns: 1fr; }
+                    .gamification-banner { flex-direction: column; align-items: flex-start; gap: 20px; }
+                    .g-right { max-width: 100%; width: 100%; }
                 }
             `}</style>
         </div>
