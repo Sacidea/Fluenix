@@ -48,7 +48,7 @@ export default function Sidebar() {
         <div className="sb-header">
           <div className="header-left">
             <div className="logo-box">
-              <Icons.MessageSquareCode size={24} className="logo-icon" />
+              <Icons.MessageSquareCode size={24} className="logo-icon" fill="none" />
             </div>
             <span className="sb-logo-text">Fluenix <span className="lab-tag">LAB</span></span>
           </div>
