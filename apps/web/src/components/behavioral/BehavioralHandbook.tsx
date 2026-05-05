@@ -1,8 +1,14 @@
 import React from 'react'
-import { BookOpen, AlertCircle, CheckCircle2, XCircle } from 'lucide-react'
+import { BookOpen, AlertCircle, CheckCircle2, XCircle, BookText } from 'lucide-react'
+import ReactMarkdown from 'react-markdown'
+import { useLevel } from '@/context/LevelContext'
+import { starReadingData } from '@/data/starReading'
 import '@/styles/behavioral.css'
 
 export function BehavioralHandbook() {
+  const { level } = useLevel()
+  const readingContent = starReadingData[level] || starReadingData['B2']
+
   return (
     <div className="behavioral-handbook-container">
       <div className="handbook-header">
@@ -10,7 +16,28 @@ export function BehavioralHandbook() {
         <h2>The STAR Method Guide</h2>
       </div>
       
-      <p className="handbook-intro">
+      {/* Graded Reading Section */}
+      <div className="graded-reading-section" style={{
+        background: '#f8fafc',
+        border: '1px solid #e2e8f0',
+        borderRadius: '12px',
+        padding: '24px',
+        marginBottom: '40px'
+      }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px', borderBottom: '1px solid #cbd5e1', paddingBottom: '12px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#0f172a', fontWeight: 700, fontSize: '16px' }}>
+            <BookText size={20} className="text-blue-600" />
+            Graded Reading Practice
+          </div>
+          <div style={{ background: '#dbeafe', color: '#1e40af', padding: '4px 12px', borderRadius: '20px', fontSize: '12px', fontWeight: 800 }}>
+            CEFR LEVEL: {level}
+          </div>
+        </div>
+        
+        <div className="lesson-content-markdown" style={{ color: '#334155', lineHeight: 1.7 }}>
+          <ReactMarkdown>{readingContent}</ReactMarkdown>
+        </div>
+      </div>
         In FAANG and top-tier tech interviews, your technical skills only get you past the coding round. 
         To pass the "Behavioral" or "Leadership" rounds, you must prove you can handle pressure, work in a team, and take ownership.
         The industry standard way to answer these questions is the <strong>STAR Method</strong>.
