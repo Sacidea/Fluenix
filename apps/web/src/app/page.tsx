@@ -110,7 +110,7 @@ export default function Home() {
                 <p className="c-gray">Analyzing syntax and technical phrasing...</p>
                 <p className="c-pink">♡ Empathy Score: High (Collaborative tone)</p>
                 <p className="c-yellow">⚡ Tip: Replace "delay" with "latency" for impact.</p>
-                <p className="c-ocean">✦ Clarity: 98% (Executive Ready)</p>
+                <p className="c-green">✓ Clarity: 98% (Executive Ready)</p>
               </div>
             </motion.div>
 
@@ -123,7 +123,7 @@ export default function Home() {
                 <p className="c-burgundy">✖ Context Missing: Architecture not documented.</p>
                 <p className="c-red strikethrough">I fixed the bug in the login.</p>
                 <p className="c-yellow">⚠️ Action: Avoid passive phrasing in commits.</p>
-                <p className="c-green">Refactored authentication middleware to resolve race condition.</p>
+                <p className="c-ocean">Refactored authentication middleware to resolve race condition.</p>
               </div>
             </motion.div>
           </div>
