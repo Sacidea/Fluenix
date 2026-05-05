@@ -103,6 +103,43 @@ Other times, they change old things. For example, Amazon saw that customers like
         answerIndex: 2,
         explanation: "Leaders find ways to simplify and are not afraid to suggest new inventions, even if others are hesitant."
       }
+    },
+    {
+      id: "are_right_a_lot_a2",
+      title: "3. Are Right, A Lot",
+      content: `
+# Are Right, A Lot
+
+Amazon leaders make good choices. This rule is called **Are Right, A Lot**.
+
+## Finding the Best Answer
+Sometimes, work is very confusing. There is too much noise and too many ideas. A leader must find what is truly important for the customer. 
+Many people think "Are Right, A Lot" means "I must win the argument." They think their idea must be the winner. But this is wrong.
+
+## Listening to Others
+It is not about your ego. It is about finding the best answer for the customer. Good leaders listen to other people. They ask for different ideas. 
+Often, leaders speak last in a meeting. They want to hear everyone else first. They ask themselves: "Is my idea really the best? Can we do better for the customers?" It does not matter whose idea it is, as long as it is the best idea.
+      `,
+      vocabulary: [
+        { word: "Confusing", meaning: "Hard to understand." },
+        { word: "Argument", meaning: "When people disagree and talk angrily." }
+      ],
+      fillInBlank: {
+        sentenceParts: ["It is not about your ", ". It is about finding the best answer for the ", "."],
+        missingWords: ["ego", "customer"],
+        wordBank: ["ego", "money", "customer", "winner"]
+      },
+      scenario: {
+        scenario: "You are in a meeting. You have an idea, but your friend has a better idea for the customer. What do you do?",
+        options: [
+          "I argue until they choose my idea.",
+          "I support my friend's idea because it is better for the customer.",
+          "I stop talking and leave the room.",
+          "I say my idea is still the best."
+        ],
+        answerIndex: 1,
+        explanation: "The goal is the best outcome for the customer, not winning the argument."
+      }
     }
   ],
 
@@ -177,6 +214,42 @@ Other times, it means reinventing an existing business. For example, Amazon noti
         answerIndex: 1,
         explanation: "Building a prototype shows innovation and provides proof that the new idea simplifies the work."
       }
+    },
+    {
+      id: "are_right_a_lot_b1",
+      title: "3. Principle: Are Right, A Lot",
+      content: `
+# Are Right, A Lot
+
+The principle **Are Right, A Lot** is about having strong judgment. In business, you can do many things right, but if you make the wrong decision on a key question for the customer experience, you will have a big issue.
+
+## Ambiguity and Noise
+At Amazon, we work in areas with high ambiguity. This means things are not clear and there are many unknowns. There is a lot of noise, and you must find the true signal that matters to customers. You have to understand what is truly important.
+
+## The Misinterpretation
+When people first hear this rule, they misunderstand it. They think, "If I am right a lot, my idea must win every debate." 
+The reality is very different. We just want the best possible answer for the customer. It does not matter whose idea it is. To get the best answer, leaders bring the right people into a room to give feedback. This is why leaders often speak last in meetings. They want to listen to different perspectives first and question their own beliefs.
+      `,
+      vocabulary: [
+        { word: "Judgment", meaning: "The ability to make good decisions." },
+        { word: "Ambiguity", meaning: "A situation where things are not clear or have more than one meaning." }
+      ],
+      fillInBlank: {
+        sentenceParts: ["In areas with high ", ", leaders must listen to different ", " before they speak."],
+        missingWords: ["ambiguity", "perspectives"],
+        wordBank: ["ambiguity", "noise", "perspectives", "money"]
+      },
+      scenario: {
+        scenario: "You are leading a project meeting. What is the best way to show you 'Are Right, A Lot'?",
+        options: [
+          "Speak first and tell everyone what to do.",
+          "Speak last, ask for feedback, and change your mind if someone has a better idea.",
+          "Only invite people who agree with you.",
+          "Never change your mind."
+        ],
+        answerIndex: 1,
+        explanation: "Leaders speak last to gather diverse perspectives and ensure the best idea wins, not just their own."
+      }
     }
   ],
 
@@ -215,6 +288,43 @@ Amazon debated very animatedly whether they should have a marketplace offering. 
         ],
         answerIndex: 2,
         explanation: "True leaders are externally aware and leverage external tools to simplify their internal architecture."
+      }
+    },
+    {
+      id: "are_right_a_lot_b2",
+      title: "2. Judgment: Are Right, A Lot",
+      content: `
+# Judgment and Ambiguity
+
+Leaders are right, a lot. They have strong judgment and good instincts. They seek diverse perspectives and work to disconfirm their beliefs. This principle is very much a proxy for judgment. You can do a lot of things right, but if you make the wrong decisions on the key questions for customer experience, you will have an issue.
+
+## Sifting Through the Noise
+We operate in areas of high ambiguity. When we invent in a new space, or even when we improve an existing business, we are surrounded by noise. We have to be great at sifting through all the different noise and finding the signal—what really matters for customers.
+
+## The Common Misinterpretation
+When this principle was first put in place, people often got it wrong. They misinterpreted it and thought, "Well, if I'm really great at being right a lot, my idea has to be the one that carries the day in a debate."
+
+The reality is that we are all trying to get to the best possible answer for customers, whoever's idea it is. We need to get the right people in a room to give feedback. This is often why, as leaders, we speak last in the room. We want everybody's input. The key is to listen to different perspectives, question your most closely held beliefs, and then think about the best answer.
+      `,
+      vocabulary: [
+        { word: "Proxy", meaning: "A figure that can be used to represent the value of something in a calculation." },
+        { word: "Sifting", meaning: "Examining something thoroughly so as to isolate that which is most important." }
+      ],
+      fillInBlank: {
+        sentenceParts: ["We have to be great at ", " through all the different noise and finding the ", "."],
+        missingWords: ["sifting", "signal"],
+        wordBank: ["ignoring", "sifting", "signal", "problem"]
+      },
+      scenario: {
+        scenario: "You are absolutely certain your database schema is correct, but a junior developer points out a potential flaw. What does 'Are Right, A Lot' require you to do?",
+        options: [
+          "Ignore the junior developer because you have more experience.",
+          "Work to disconfirm your own beliefs by testing their theory.",
+          "Tell them your idea must 'carry the day' in the debate.",
+          "Change the schema immediately without testing."
+        ],
+        answerIndex: 1,
+        explanation: "Leaders actively work to disconfirm their beliefs and seek diverse perspectives."
       }
     }
   ],
@@ -258,6 +368,45 @@ We debated very animatedly inside the company whether we should have a marketpla
         answerIndex: 2,
         explanation: "The principle explicitly states: 'As we do new things, we accept that we may be misunderstood for long periods of time.'"
       }
+    },
+    {
+      id: "are_right_a_lot_c1",
+      title: "2. The Judgment Proxy: Are Right, A Lot",
+      content: `
+# Are Right, A Lot: A Proxy for Judgment
+
+Leaders are right, a lot. They have strong judgment and good instincts. They seek diverse perspectives and work to disconfirm their beliefs. 
+
+So the "Are Right, A Lot" leadership principle is very much a proxy for judgment. And the truth is that you can do a lot of things right, but if you make the wrong decisions on really the key questions we have to answer for ourselves—for customer experience in the business—you're going to have an issue.
+
+## Operating in High Ambiguity
+And we operate in high areas of ambiguity in many of the businesses that Amazon pursues. We're the first market or we're inventing in that space. Or even when we built a business that works well, we're constantly trying to figure out how to keep changing and improving the customer experience. So we always deal in areas that have lots of ambiguity, lots of noise around it. And we have to be great at this company at sifting through all the different noise and finding the signal and what really matters for customers.
+
+## Misinterpreting the Principle
+And I remember when we first put this leadership principle in place, people often got it wrong and what people misinterpreted was they thought, "Well, if I'm really great at the leadership principle of being right a lot, it means when we're debating something, my idea has to be the one that carries the day because after all, I would be right a lot."
+
+And the reality is what we're all trying to do is to get to the best possible answer for customers, whoever's idea it is. What we need to do when we're thinking about a hard issue is we need to get the right people in a room to give feedback. It's often why as leaders, we speak last in the room. We want everybody's input. We are seeking to try and find a different way. I often question my most closely held beliefs on a particular topic to see, are they really right? Is there another way to think about it?
+      `,
+      vocabulary: [
+        { word: "Proxy", meaning: "A figure that can be used to represent the value of something in a calculation." },
+        { word: "Disconfirm", meaning: "To show that a belief or hypothesis is not true." }
+      ],
+      fillInBlank: {
+        sentenceParts: ["People misinterpreted the principle, thinking their idea had to ", " the day. In reality, leaders work to ", " their own beliefs."],
+        missingWords: ["carry", "disconfirm"],
+        wordBank: ["carry", "disconfirm", "lose", "verify"]
+      },
+      scenario: {
+        scenario: "You have a strong instinct about a product launch strategy. How do you apply 'Are Right, A Lot'?",
+        options: [
+          "Push the strategy through rapidly because your instincts are usually right.",
+          "Actively seek out dissenting opinions and data that disconfirms your instinct before proceeding.",
+          "Let a junior member make the decision to avoid blame.",
+          "Delay the launch indefinitely until ambiguity reaches zero."
+        ],
+        answerIndex: 1,
+        explanation: "Leaders with strong judgment actively work to disconfirm their beliefs by seeking diverse perspectives."
+      }
     }
   ],
 
@@ -299,6 +448,47 @@ Then we really struggled with the right implementation. What we started with was
         ],
         answerIndex: 2,
         explanation: "Failure in implementation (like Auctions or Z-Shops) is an acceptable part of the invention process. Leaders pivot the mechanism while maintaining the goal."
+      }
+    },
+    {
+      id: "are_right_a_lot_c2",
+      title: "2. Strategic Judgment: Are Right, A Lot",
+      content: `
+# Executive Judgment: Are Right, A Lot
+
+Leaders are right, a lot. They have strong judgment and good instincts. They seek diverse perspectives and work to disconfirm their beliefs.
+
+So the right a lot leadership principle is very much proxy for judgment. And the truth is that you can do a lot of things right, but if you make the wrong decisions on really the key questions we have to answer for ourselves—for customer experience in the business—you're going to have an issue.
+
+## Sifting Signal from Noise in Ambiguity
+We operate in high areas of ambiguity in many of the businesses that Amazon pursues. We're the first market or we're inventing in that space. Or even when we built a business that works well, we're constantly trying to figure out how to keep changing and improving the customer experience. So we always deal in areas that have lots of ambiguity, lots of noise around it. And we have to be great at this company at sifting through all the different noise and finding the signal and what really matters for customers.
+
+## The Paradigm Shift in Debate
+I remember when we first put this leadership principle in place, people often got it wrong and what people misinterpreted was they thought, "well, if I'm really great at the leadership principle of being right a lot, it means when we're debating something, my idea has to be the one that carries the day because after all, I would be right a lot."
+
+And the reality is what we're all trying to do is we're trying to get to the best possible answer for customers, whoever's idea it is. And so what we need to do when we're thinking about a hard issue is we need to get the right people in a room to give feedback. It's often why as leaders, we speak last in the room. We want everybody's input. A lot of times in those meetings, what leaders are doing is questioning their incoming opinion, and they're seeking to try and find a different way. 
+
+I often question my most closely held beliefs on a particular topic to see, are they really right? Is there another way to think about it? Can we do better for customers? The key is to get the right people involved in giving feedback, listen to the different perspectives, and then think about what is the best possible answer. In many of the best meetings I'm in, I never even have to express an opinion. The team has sorted it out for themselves. All we care about as leaders is getting to the best possible answer. That's our job.
+      `,
+      vocabulary: [
+        { word: "Paradigm shift", meaning: "A fundamental change in approach or underlying assumptions." },
+        { word: "Ambiguity", meaning: "The quality of being open to more than one interpretation; inexactness." }
+      ],
+      fillInBlank: {
+        sentenceParts: ["In areas with lots of ambiguity and noise, leaders must be great at sifting to find the ", ". To do this, leaders actively work to ", " their most closely held beliefs."],
+        missingWords: ["signal", "disconfirm"],
+        wordBank: ["signal", "disconfirm", "noise", "protect"]
+      },
+      scenario: {
+        scenario: "As a VP, you host a strategy meeting. Your team arrives at a brilliant solution that completely contradicts the strategy you prepared. What is the appropriate executive action?",
+        options: [
+          "Veto the team's solution because it undermines your authority.",
+          "Adopt the team's solution without expressing your original opinion, because the goal is the best customer outcome.",
+          "Compromise by mixing both strategies, even if it dilutes the impact.",
+          "Fire the team members who opposed your strategy."
+        ],
+        answerIndex: 1,
+        explanation: "As stated: 'In many of the best meetings I'm in, I never even have to express an opinion. The team has sorted it out for themselves.'"
       }
     }
   ]
