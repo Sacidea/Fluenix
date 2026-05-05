@@ -1,7 +1,21 @@
+export interface VocabularyWord {
+  word: string;
+  meaning: string;
+}
+
+export interface ReadingQuestion {
+  question: string;
+  options: string[];
+  answerIndex: number;
+  explanation: string;
+}
+
 export interface ReadingPassage {
   id: string;
   title: string;
   content: string;
+  vocabulary: VocabularyWord[];
+  questions: ReadingQuestion[];
 }
 
 export const starReadingData: Record<string, ReadingPassage[]> = {
@@ -25,7 +39,19 @@ Third, you talk about the steps you took. This is the most important part of you
 
 ## R is for Result
 Finally, what happened after your action? Did you fix the problem? Did you save time or money? Use numbers if you can. For example: "The website came back online in ten minutes. I saved the company a lot of money during the sale."
-      `
+      `,
+      vocabulary: [
+        { word: "Situation", meaning: "The place or time when the problem happened." },
+        { word: "Goal", meaning: "Something you want to do successfully in the future." }
+      ],
+      questions: [
+        {
+          question: "Which part of the STAR method is the most important?",
+          options: ["Situation", "Task", "Action", "Result"],
+          answerIndex: 2,
+          explanation: "The Action part is where you show the interviewer exactly what YOU did to solve the problem."
+        }
+      ]
     },
     {
       id: "action_deep_dive",
@@ -48,7 +74,19 @@ Tell the manager your exact thoughts. Show them you understand the technology.
 
 ## Communication is an Action
 Sometimes, talking is an action. If you had to call the DevOps team in the middle of the night, that is an action. If you wrote an email to the customer to say sorry, that is an action. Do not forget to include these soft skills in your story.
-      `
+      `,
+      vocabulary: [
+        { word: "Details", meaning: "Small pieces of information about something." },
+        { word: "Score", meaning: "The number of points a candidate gets in a test or interview." }
+      ],
+      questions: [
+        {
+          question: "Why should you say 'I' instead of 'We'?",
+          options: ["Because 'We' is bad grammar.", "Because the manager wants to know your specific contribution.", "Because team players are not hired at Amazon.", "Because 'I' makes the story shorter."],
+          answerIndex: 1,
+          explanation: "Interviewers need to evaluate your specific skills, not the skills of your team."
+        }
+      ]
     },
     {
       id: "ownership",
@@ -67,7 +105,19 @@ Everyone makes mistakes. But owners do not hide them. If you break the productio
 2. "I fixed it quickly."
 3. "I wrote a test so it does not happen again."
 Do not blame your team. Do not blame the customer. Take the blame and fix the problem. That is what leaders do.
-      `
+      `,
+      vocabulary: [
+        { word: "Ownership", meaning: "Taking responsibility for the success or failure of something." },
+        { word: "Blame", meaning: "To say that someone else caused the problem." }
+      ],
+      questions: [
+        {
+          question: "What should you do if you break the production server?",
+          options: ["Hide the mistake.", "Blame the team.", "Take the blame and fix it.", "Ignore it."],
+          answerIndex: 2,
+          explanation: "A true owner takes responsibility for mistakes and focuses on finding a solution."
+        }
+      ]
     },
     {
       id: "customer",
@@ -86,7 +136,19 @@ When an interviewer asks you a question, think about the user.
 * "I added a new button because users were confused."
 
 Always put the customer first in your stories. Show the interviewer that you work hard to make the customer happy, not just to write cool code.
-      `
+      `,
+      vocabulary: [
+        { word: "Obsession", meaning: "Thinking about someone or something all the time." },
+        { word: "Backend", meaning: "The part of the software that runs on the server." }
+      ],
+      questions: [
+        {
+          question: "How can a backend developer show Customer Obsession?",
+          options: ["By talking on the phone with customers.", "By ignoring the database.", "By writing fast code so the user does not wait.", "By writing complex code."],
+          answerIndex: 2,
+          explanation: "Even if you don't talk to customers, your code's performance directly affects their experience."
+        }
+      ]
     },
     {
       id: "hire_develop",
@@ -101,7 +163,19 @@ When you hire someone, you must ask: "Does this person raise the bar?" This mean
 
 ## Developing People
 Half of this rule is about hiring. The other half is about developing people. If you are a senior engineer, you must help junior engineers. You must teach them. You must review their code and give them good feedback. In an interview, tell a story about a time you helped a junior engineer become better.
-      `
+      `,
+      vocabulary: [
+        { word: "Raise the bar", meaning: "To increase the standard or level of quality." },
+        { word: "Feedback", meaning: "Information about how someone is doing, used to help them improve." }
+      ],
+      questions: [
+        {
+          question: "What does it mean to 'raise the bar' when hiring?",
+          options: ["To hire someone very quickly.", "To hire someone who increases the team's average quality.", "To hire someone who is a beginner.", "To lower expectations."],
+          answerIndex: 1,
+          explanation: "Raising the bar means adding someone who elevates the overall standard of the team."
+        }
+      ]
     }
   ],
 
@@ -119,7 +193,19 @@ Big tech companies like Amazon expect you to use the **STAR method** in behavior
 * **Task (Görev):** What was your specific responsibility? Explain the goal you were trying to achieve. "As the lead backend developer, I had to identify the root cause and restore the data without losing any customer transactions."
 * **Action (Aksiyon):** This is the core of your answer. Detail the exact steps **you** took to solve the problem. Explain your thought process and the technical decisions you made.
 * **Result (Sonuç):** What was the final outcome? Try to use data and metrics. For example, "I restored the database in 15 minutes and reduced the load time by 30%." Tell them what you learned from the experience.
-      `
+      `,
+      vocabulary: [
+        { word: "Predictor", meaning: "Something that can show what will happen in the future." },
+        { word: "Metrics", meaning: "Numbers and data used to measure success." }
+      ],
+      questions: [
+        {
+          question: "Why do interviewers ask about your past behavior?",
+          options: ["Because they want to know your personal life.", "Because past behavior is the best predictor of future success.", "Because they want to check your memory.", "Because they want to find your mistakes."],
+          answerIndex: 1,
+          explanation: "Companies believe that how you handled a situation in the past is how you will handle a similar situation if hired."
+        }
+      ]
     },
     {
       id: "action_deep_dive",
@@ -136,7 +222,19 @@ It is great to be a team player. But in an interview, they are hiring *you*, not
 Instead of saying "I fixed the database," explain the process. "I checked the error logs in AWS CloudWatch. I found that a missing index was causing slow queries. I added the index and monitored the CPU usage." 
 
 Furthermore, explain *why* you chose that action. In software engineering, there are always trade-offs. Did you choose a fast temporary fix because the system was down? Or did you choose a slower, permanent fix? Explain your reasoning to show maturity.
-      `
+      `,
+      vocabulary: [
+        { word: "Trade-off", meaning: "A balance achieved between two desirable but incompatible features." },
+        { word: "Architecture", meaning: "The complex structure or design of a software system." }
+      ],
+      questions: [
+        {
+          question: "What should you do instead of just saying 'I fixed the database'?",
+          options: ["Say 'We fixed the database.'", "Talk about a different topic.", "Explain the exact technical process and reasoning you used.", "Skip to the Result section."],
+          answerIndex: 2,
+          explanation: "Interviewers need to hear your technical depth and the trade-offs you considered during your decision-making."
+        }
+      ]
     },
     {
       id: "ownership",
@@ -151,7 +249,19 @@ To show ownership, talk about a time you fixed a problem that nobody asked you t
 
 ## Owning mistakes
 True owners do not pass the blame. If you push a bug to production, you own it. Explain how you discovered the bug, how you immediately rolled back the deployment, and most importantly, how you created an automated test to prevent the same bug from happening again. This shows accountability.
-      `
+      `,
+      vocabulary: [
+        { word: "Initiative", meaning: "The ability to assess and initiate things independently." },
+        { word: "Accountability", meaning: "The fact or condition of being accountable; responsibility." }
+      ],
+      questions: [
+        {
+          question: "How can you demonstrate Ownership outside of your daily tasks?",
+          options: ["By leaving exactly at 5 PM.", "By fixing an issue or updating documentation even if nobody asked you to.", "By only doing the tasks assigned by your manager.", "By telling someone else to fix it."],
+          answerIndex: 1,
+          explanation: "Ownership means acting on behalf of the entire company, not just doing what is explicitly assigned to you."
+        }
+      ]
     },
     {
       id: "customer",
@@ -167,7 +277,19 @@ When you are designing a new system, you shouldn't just choose the newest techno
 
 ## Internal Customers
 If you work on internal tools or DevOps, your "customers" are the other developers in your company. You can show customer obsession by explaining how you made their lives easier. "I automated the deployment pipeline because the frontend team was spending two hours a day doing manual deployments."
-      `
+      `,
+      vocabulary: [
+        { word: "Obsess", meaning: "Preoccupy or fill the mind of someone continually." },
+        { word: "Internal", meaning: "Existing or occurring within an organization." }
+      ],
+      questions: [
+        {
+          question: "Who are the 'customers' for a DevOps engineer?",
+          options: ["Only people who buy the product.", "The CEO.", "Other developers inside the company who use their tools.", "Competitors."],
+          answerIndex: 2,
+          explanation: "In tech, your customer is anyone who consumes your work, including internal development teams."
+        }
+      ]
     },
     {
       id: "hire_develop",
@@ -182,7 +304,19 @@ When you are in a hiring meeting, you have to ask yourself: "Does this person ra
 
 ## Developing Talent
 The other half of this principle is about developing people. As a senior engineer or manager, you must take seriously your role in coaching others. You have to be thoughtful about what a person does well and what they need to grow. In an interview, share a story about how you mentored a junior colleague and helped them get promoted.
-      `
+      `,
+      vocabulary: [
+        { word: "Exceptional", meaning: "Unusually good; outstanding." },
+        { word: "Mentor", meaning: "Advise or train someone, especially a younger colleague." }
+      ],
+      questions: [
+        {
+          question: "According to the passage, what should you do if a candidate does not 'raise the bar'?",
+          options: ["Hire them anyway if there is time pressure.", "Do not hire them under any circumstances.", "Hire them as an intern.", "Let the team vote."],
+          answerIndex: 1,
+          explanation: "The text emphasizes that you must never lower the hiring bar, even if you are under time pressure to deliver a project."
+        }
+      ]
     }
   ],
 
@@ -200,7 +334,19 @@ The **STAR method** is the standard framework required for behavioral interviews
 * **Task (10%):** Define the challenge. Clearly state what you were responsible for and what the ultimate business or technical goal was.
 * **Action (60%):** This is the most critical part of your narrative. Detail the specific, concrete technical steps **you** took to address the task. Emphasize your individual decision-making process, even when working in a cross-functional team.
 * **Result (20%):** Explain the quantifiable outcome. Use specific metrics whenever possible (e.g., "reduced API latency by 20%," or "prevented 50 hours of manual work per month"). Crucially, if the outcome was a failure, share the post-mortem analysis and the systemic changes you implemented.
-      `
+      `,
+      vocabulary: [
+        { word: "Quantifiable", meaning: "Able to be expressed or measured as a quantity." },
+        { word: "Post-mortem", meaning: "An analysis or discussion of an event held soon after it has occurred, especially a failure." }
+      ],
+      questions: [
+        {
+          question: "What is the recommended time allocation for the 'Action' phase?",
+          options: ["10%", "20%", "60%", "100%"],
+          answerIndex: 2,
+          explanation: "The Action phase should consume approximately 60% of your answer, as it demonstrates your specific problem-solving skills."
+        }
+      ]
     },
     {
       id: "action_deep_dive",
@@ -215,7 +361,19 @@ While software engineering is inherently collaborative, using "We" too often dil
 
 ## Demonstrating Technical Depth
 Avoid generic statements like "I optimized the database." Instead, provide the technical narrative: "I analyzed the slow query logs using AWS Performance Insights, identified a missing compound index on the users table, and ran a zero-downtime migration which reduced query time from 2 seconds to 50 milliseconds." This level of detail proves your technical competence and hands-on experience.
-      `
+      `,
+      vocabulary: [
+        { word: "Articulating", meaning: "Expressing an idea or feeling fluently and coherently." },
+        { word: "Dilute", meaning: "Make something weaker in force, content, or value." }
+      ],
+      questions: [
+        {
+          question: "Why is 'I optimized the database' considered a poor statement in an interview?",
+          options: ["It lacks technical depth and specific narrative detail.", "It is too arrogant.", "It reveals company secrets.", "Databases cannot be optimized."],
+          answerIndex: 0,
+          explanation: "Interviewers need specific details, such as the tools used (AWS Performance Insights) and the specific fix (compound index)."
+        }
+      ]
     },
     {
       id: "ownership",
@@ -230,7 +388,19 @@ Ownership means looking beyond the boundaries of your Jira tickets or sprint pla
 
 ## Handling Production Incidents
 When critical systems fail, an owner steps up immediately. If you caused an outage, explain how you led the incident response, effectively communicated the status to stakeholders, and subsequently wrote a thorough, blameless post-mortem to improve system resilience. Taking accountability without defensiveness is the hallmark of a mature engineer.
-      `
+      `,
+      vocabulary: [
+        { word: "Reversible", meaning: "Able to be turned the other way or undone." },
+        { word: "Resilience", meaning: "The capacity to recover quickly from difficulties; toughness." }
+      ],
+      questions: [
+        {
+          question: "What does 'Bias for Action' imply about decision making?",
+          options: ["All decisions require months of study.", "Speed matters, and many decisions are reversible and don't require extensive study.", "You should never make decisions without your manager.", "You should act recklessly without thinking."],
+          answerIndex: 1,
+          explanation: "Bias for Action acknowledges that speed is crucial in business and that calculated risks are necessary when decisions are reversible."
+        }
+      ]
     },
     {
       id: "customer",
@@ -245,7 +415,19 @@ When answering system design or behavioral questions, always ground your archite
 For example: "Our frontend team (my internal customer) was struggling with inconsistent data structures from our legacy REST APIs, which was slowing down their release cycle. Therefore, I designed and implemented a GraphQL federation layer to standardize their queries, reducing their integration time by half."
 
 Connecting abstract architectural refactoring directly to a tangible improvement in user experience or developer velocity is what separates average coders from senior engineering leaders.
-      `
+      `,
+      vocabulary: [
+        { word: "Federation", meaning: "A group of computing or routing systems acting as a single entity." },
+        { word: "Tangible", meaning: "Perceptible by touch; clear and definite; real." }
+      ],
+      questions: [
+        {
+          question: "What is an example of 'Working Backwards' in system design?",
+          options: ["Choosing GraphQL because it is a trendy technology.", "Starting with the customer's pain point and designing an architecture to solve it.", "Building a feature before checking if the customer wants it.", "Focusing entirely on competitors."],
+          answerIndex: 1,
+          explanation: "Working backwards means identifying the specific problem a customer is facing before selecting the technical solution."
+        }
+      ]
     },
     {
       id: "hire_develop",
@@ -260,7 +442,19 @@ When participating in a hiring loop, you must constantly ask yourself and your t
 
 ## The Responsibility of Development
 The reality is that hiring is only half of the equation; the other half is developing people. As a leader or senior engineer, you must be organized and thoughtful about what a person does well and where they need to grow. In interviews, be prepared to discuss how you have actively mentored peers, conducted rigorous code reviews, or invented mechanisms (like internal training sessions) to elevate your team's overall capability.
-      `
+      `,
+      vocabulary: [
+        { word: "Equation", meaning: "A situation or problem in which several factors must be taken into account." },
+        { word: "Rigorous", meaning: "Extremely thorough, exhaustive, or accurate." }
+      ],
+      questions: [
+        {
+          question: "According to the 'Hire and Develop the Best' principle, what is true about building something world-class?",
+          options: ["It is usually the result of one brilliant individual.", "It requires lowering the hiring bar to get more people fast.", "It is never the result of an individual; it requires a great team.", "It only requires good managers, not developers."],
+          answerIndex: 2,
+          explanation: "The text states that building something big, hard, and world-class is never the result of an individual, but of a great team."
+        }
+      ]
     }
   ],
 
@@ -278,7 +472,19 @@ In top-tier engineering interviews, technical proficiency alone is insufficient 
 * **Task:** Delineate your specific strategic mandate. What was the existential threat to the deliverable, or what organizational objective were you tasked with resolving?
 * **Action:** This constitutes the crux of your narrative. Elaborate on the deliberate engineering decisions, architectural trade-offs, and concrete execution steps **you** spearheaded to navigate ambiguity.
 * **Result:** Articulate the resolution using empirical, quantifiable metrics. For instance, "My caching strategy slashed p99 latency by 45% and reduced infrastructure overhead by $20k annually." 
-      `
+      `,
+      vocabulary: [
+        { word: "Proficiency", meaning: "A high degree of competence or skill; expertise." },
+        { word: "Extraneous", meaning: "Irrelevant or unrelated to the subject being dealt with." }
+      ],
+      questions: [
+        {
+          question: "What is the primary purpose of the STAR method in top-tier interviews?",
+          options: ["To test coding skills.", "To extract high-fidelity signals about your alignment with corporate values.", "To trick candidates.", "To evaluate your resume formatting."],
+          answerIndex: 1,
+          explanation: "Behavioral rounds use STAR to measure cultural fit and alignment with principles like ownership and customer obsession."
+        }
+      ]
     },
     {
       id: "action_deep_dive",
@@ -293,7 +499,19 @@ A senior engineer doesn't merely implement the theoretical "best" solution; they
 
 ## Isolating Your Impact and Influence
 Ruthlessly eliminate the word "we" when describing critical inflection points in your narrative. If you led a cross-functional team, explain your specific leadership and influence mechanisms: "I mentored the junior developers, unblocked their PRs by rewriting the CI pipeline, and established the testing conventions that the entire department subsequently adopted."
-      `
+      `,
+      vocabulary: [
+        { word: "Crucible", meaning: "A situation of severe trial, or in which different elements interact, leading to the creation of something new." },
+        { word: "Pragmatic", meaning: "Dealing with things sensibly and realistically in a way that is based on practical rather than theoretical considerations." }
+      ],
+      questions: [
+        {
+          question: "How does a senior engineer approach implementing solutions?",
+          options: ["They always implement the theoretically perfect solution.", "They implement the most pragmatic solution given the constraints.", "They wait for the manager to decide.", "They copy solutions from previous companies."],
+          answerIndex: 1,
+          explanation: "Senior engineers must balance theory with real-world constraints like time, budget, and legacy technical debt."
+        }
+      ]
     },
     {
       id: "ownership",
@@ -308,7 +526,19 @@ Discuss a scenario where you identified latent architectural decay—such as a t
 
 ## Fostering a Blameless Culture
 If discussing a catastrophic failure, emphasize how you fostered a blameless culture during the subsequent post-mortem. True owners focus on systemic safeguards—like implementing circuit breakers, automated rollbacks, or enhanced telemetry—rather than finding a scapegoat. They ensure the organization learns organically from the failure.
-      `
+      `,
+      vocabulary: [
+        { word: "Transcends", meaning: "Goes beyond the range or limits of something." },
+        { word: "Scapegoat", meaning: "A person who is blamed for the wrongdoings, mistakes, or faults of others." }
+      ],
+      questions: [
+        {
+          question: "What is a characteristic of fostering a blameless culture during a post-mortem?",
+          options: ["Finding the individual who caused the outage and firing them.", "Focusing on systemic safeguards rather than finding a scapegoat.", "Hiding the details from management.", "Ignoring the outage completely."],
+          answerIndex: 1,
+          explanation: "True owners look for systemic flaws (like lack of circuit breakers) instead of blaming individuals for errors."
+        }
+      ]
     },
     {
       id: "customer",
@@ -324,7 +554,19 @@ Illustrate how qualitative user feedback or quantitative telemetry directly infl
 
 ## Invent and Simplify
 Pair customer obsession with the principle to "Invent and Simplify." How did you abstract complex, messy backend orchestration logic into a seamless, intuitive API for your internal integration teams? True innovation often involves removing complexity rather than adding new features.
-      `
+      `,
+      vocabulary: [
+        { word: "Telemetry", meaning: "The process of recording and transmitting the readings of an instrument." },
+        { word: "Eventual consistency", meaning: "A model used in distributed computing to achieve high availability." }
+      ],
+      questions: [
+        {
+          question: "In the example provided, how did the engineer solve the severe database timeouts for users in Southeast Asia?",
+          options: ["By adding a loading spinner to the frontend.", "By ignoring the p99 users.", "By orchestrating a multi-region read-replica strategy.", "By sending an apology email."],
+          answerIndex: 2,
+          explanation: "The engineer used architectural changes (multi-region read-replicas) to solve a fundamental latency issue for remote users."
+        }
+      ]
     },
     {
       id: "hire_develop",
@@ -339,7 +581,19 @@ During hiring loops, the critical question is always: "Does this candidate raise
 
 ## Cultivating Leadership
 The principle explicitly states that leaders develop leaders. As a senior individual contributor, your impact is measured not just by the code you write, but by the engineers you elevate. Be prepared to articulate your specific strategies for coaching others. Did you establish an internal engineering blog, lead architecture review boards, or design a structured mentorship program? You must demonstrate that you are organized and thoughtful about identifying what your peers do well and precisely what they need to grow.
-      `
+      `,
+      vocabulary: [
+        { word: "Unequivocally", meaning: "In a way that leaves no doubt." },
+        { word: "Curriculum", meaning: "The subjects comprising a course of study in a school or college." }
+      ],
+      questions: [
+        {
+          question: "How is the impact of a senior individual contributor measured according to the text?",
+          options: ["Only by the lines of code they write.", "By how many hours they work.", "Not just by the code they write, but by the engineers they elevate.", "By the number of bugs they fix."],
+          answerIndex: 2,
+          explanation: "Senior contributors must demonstrate leadership by coaching, mentoring, and developing the peers around them."
+        }
+      ]
     }
   ],
 
@@ -357,7 +611,19 @@ For Staff and Principal engineering echelons, behavioral interviews represent th
 * **Task:** Crystallize your strategic mandate. What was the existential threat to the organizational deliverable, and what precise technical objective were you obligated to execute?
 * **Action:** This is the analytical core. You must elucidate the nuanced architectural trade-offs, the empirical justification for your decisions, and the exact execution vectors **you** drove across decentralized teams.
 * **Result:** Conclude with definitive, quantifiable business or infrastructural impact (e.g., "yielded a 3x throughput optimization and a $150K reduction in annualized operational expenditure").
-      `
+      `,
+      vocabulary: [
+        { word: "Heuristic", meaning: "A practical approach to problem-solving or learning, typically not perfect but sufficient." },
+        { word: "Elucidate", meaning: "Make something clear; explain." }
+      ],
+      questions: [
+        {
+          question: "At the Principal level, what does the STAR method primarily extrapolate?",
+          options: ["Your ability to write boilerplate code.", "Your macroscopic systemic impact and architectural foresight.", "Your memorization of algorithms.", "Your formatting of resume."],
+          answerIndex: 1,
+          explanation: "Evaluators use STAR to assess large-scale influence, leadership alignment, and deep architectural capabilities at executive levels."
+        }
+      ]
     },
     {
       id: "action_deep_dive",
@@ -372,7 +638,19 @@ Elucidate how you navigated friction constructively. When faced with decentraliz
 
 ## The Illusion of "We"
 Even as an architectural lead orchestrating a 50-person department, you must ruthlessly isolate your agency. Focus explicitly on your strategic interventions: "I redefined the global SLA parameters," or "I vetoed the monolithic migration in favor of the strangler fig pattern based on my rigorous risk assessment." Diffusing credit into "the team" dilutes the specific leadership signal interviewers are actively trying to extract.
-      `
+      `,
+      vocabulary: [
+        { word: "Disparate", meaning: "Essentially different in kind; not allowing comparison." },
+        { word: "Strangler fig pattern", meaning: "A software architecture pattern for migrating from a legacy system to a new system." }
+      ],
+      questions: [
+        {
+          question: "How should a Principal engineer handle describing teamwork in an interview?",
+          options: ["Give all credit to the team.", "Ruthlessly isolate their personal agency and strategic interventions.", "Pretend they worked completely alone.", "Complain about the team's inefficiency."],
+          answerIndex: 1,
+          explanation: "While teamwork is acknowledged, the interviewer must understand your specific architectural decisions and leadership impact."
+        }
+      ]
     },
     {
       id: "ownership",
@@ -387,7 +665,19 @@ Narrate instances where you proactively identified impending bottlenecks in a hy
 
 ## Fostering Systemic Resilience
 Discuss how you championed operational excellence at an organizational scale. Describe your implementation of advanced observability matrices, automated chaos engineering protocols, and strict error-budgeting policies to fundamentally alter the engineering culture and risk-tolerance of your division.
-      `
+      `,
+      vocabulary: [
+        { word: "Evangelize", meaning: "Preach or advocate for a concept or paradigm enthusiastically." },
+        { word: "Topology", meaning: "The way in which constituent parts are interrelated or arranged." }
+      ],
+      questions: [
+        {
+          question: "What is an example of 'founder-level mentality' in engineering?",
+          options: ["Ignoring technical debt to ship features faster.", "Identifying and fixing systemic architectural rot years before it impacts the bottom line.", "Delegating all code reviews to juniors.", "Focusing only on UI improvements."],
+          answerIndex: 1,
+          explanation: "Existential ownership means possessing the foresight to prevent long-term systemic catastrophes."
+        }
+      ]
     },
     {
       id: "customer",
@@ -403,7 +693,19 @@ You must demonstrate the ability to anticipate customer needs long before they m
 
 ## Disagree and Commit in Practice
 When customer empathy conflicts with engineering purity, how do you resolve the dichotomy? Detail a scenario where you compromised on architectural elegance—perhaps incurring calculated technical debt—to deliver critical, timely value to the market, thereby showcasing a highly pragmatic bias for action and an unwavering commitment to the customer over dogma.
-      `
+      `,
+      vocabulary: [
+        { word: "Dichotomy", meaning: "A division or contrast between two things that are or are represented as being opposed or entirely different." },
+        { word: "Sovereignty", meaning: "Supreme power or authority; in tech, often referring to data jurisdiction." }
+      ],
+      questions: [
+        {
+          question: "What does resolving the dichotomy between customer empathy and engineering purity sometimes require?",
+          options: ["Ignoring the customer to maintain perfect code.", "Incurring calculated technical debt to deliver critical value quickly.", "Quitting the project.", "Rewriting the entire application from scratch."],
+          answerIndex: 1,
+          explanation: "A pragmatic leader will prioritize the customer's immediate needs, even if it means sacrificing perfect architectural elegance temporarily."
+        }
+      ]
     },
     {
       id: "hire_develop",
@@ -418,7 +720,19 @@ When participating in hiring loops or calibration meetings, the paramount questi
 
 ## Inventing Mechanisms for Development
 The principle dictates that leaders take seriously their role in coaching others and actively invent mechanisms for development. As a Principal, your responsibility extends beyond ad-hoc mentorship. You must articulate how you have institutionalized growth. Did you design a comprehensive engineering onboarding curriculum? Did you establish a 'Career Choice' equivalent for your department? You must demonstrate a systematic, thoughtful approach to analyzing what individuals do well and orchestrating the necessary opportunities for them to scale their capabilities.
-      `
+      `,
+      vocabulary: [
+        { word: "Paramount", meaning: "More important than anything else; supreme." },
+        { word: "Ad-hoc", meaning: "Created or done for a particular purpose as necessary, not systematic." }
+      ],
+      questions: [
+        {
+          question: "What is expected of a Principal engineer regarding the development of others?",
+          options: ["To provide occasional ad-hoc mentorship.", "To focus exclusively on their own code.", "To invent systemic mechanisms for development, like onboarding curricula.", "To fire anyone who makes a mistake."],
+          answerIndex: 2,
+          explanation: "At the highest levels, leaders must institutionalize growth by creating scalable systems (mechanisms) to develop talent."
+        }
+      ]
     }
   ]
 };
