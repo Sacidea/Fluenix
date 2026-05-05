@@ -38,6 +38,8 @@ export function BehavioralHandbook() {
           <ReactMarkdown>{readingContent}</ReactMarkdown>
         </div>
       </div>
+
+      <p className="handbook-intro">
         In FAANG and top-tier tech interviews, your technical skills only get you past the coding round. 
         To pass the "Behavioral" or "Leadership" rounds, you must prove you can handle pressure, work in a team, and take ownership.
         The industry standard way to answer these questions is the <strong>STAR Method</strong>.
