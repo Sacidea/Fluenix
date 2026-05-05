@@ -504,7 +504,7 @@ export default function Home() {
         .c-gray { color: #475569; }
         .c-green { color: #059669; }
         .c-red { color: #dc2626; }
-        .c-yellow { color: #d97706; font-weight: 600; }
+        .c-yellow { color: #f59e0b; font-weight: 700; }
         .strikethrough { text-decoration: line-through; opacity: 0.7; }
 
 
