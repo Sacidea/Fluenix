@@ -41,12 +41,24 @@ export default function OnboardingPage() {
     { label: 'Documentation', icon: FileText },
   ]
 
+  const [isSubmitting, setIsSubmitting] = useState(false)
+
   const handleComplete = async () => {
-    // In a real app, you would save this to Clerk publicMetadata via your API
-    // await fetch('/api/user/onboarding', { method: 'POST', body: JSON.stringify({ role, level, goal }) })
-    
-    // For now, redirect to dashboard
-    router.push('/dashboard')
+    if (!role || !level || !goal) return
+    setIsSubmitting(true)
+    try {
+      const { completeOnboarding } = await import('@/actions/onboarding')
+      const res = await completeOnboarding({ role, level, goal })
+      if (res.success) {
+        router.push('/dashboard')
+      } else {
+        console.error(res.error)
+        setIsSubmitting(false)
+      }
+    } catch (e) {
+      console.error(e)
+      setIsSubmitting(false)
+    }
   }
 
   return (
@@ -182,10 +194,10 @@ export default function OnboardingPage() {
                 <button className="btn-back" onClick={() => setStep(2)}>Back</button>
                 <button 
                   className="btn-next complete" 
-                  disabled={!goal} 
+                  disabled={!goal || isSubmitting} 
                   onClick={handleComplete}
                 >
-                  Go to Dashboard <Zap size={16} />
+                  {isSubmitting ? 'Saving Profile...' : 'Go to Dashboard'} <Zap size={16} />
                 </button>
               </div>
             </motion.div>
