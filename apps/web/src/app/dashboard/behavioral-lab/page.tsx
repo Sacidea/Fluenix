@@ -9,7 +9,7 @@ import { BehavioralReading } from '@/components/behavioral/BehavioralReading'
 import '@/styles/behavioral.css'
 
 export default function BehavioralLabPage() {
-  const [activeTab, setActiveTab] = useState<'handbook' | 'reading' | 'simulator'>('handbook')
+  const [activeTab, setActiveTab] = useState<'handbook' | 'reading' | 'simulator'>('reading')
 
   return (
     <div className="module-page-container">
@@ -32,18 +32,18 @@ export default function BehavioralLabPage() {
           <div className="header-right">
             <div className="grammar-tabs" style={{ marginBottom: 0 }}>
               <button 
-                className={"grammar-tab " + (activeTab === 'handbook' ? 'active' : '')}
-                onClick={() => setActiveTab('handbook')}
-              >
-                <BookOpen size={16} />
-                Methodology
-              </button>
-              <button 
                 className={"grammar-tab " + (activeTab === 'reading' ? 'active' : '')}
                 onClick={() => setActiveTab('reading')}
               >
                 <BookText size={16} />
                 Reading Practice
+              </button>
+              <button 
+                className={"grammar-tab " + (activeTab === 'handbook' ? 'active' : '')}
+                onClick={() => setActiveTab('handbook')}
+              >
+                <BookOpen size={16} />
+                Methodology
               </button>
               <button 
                 className={"grammar-tab " + (activeTab === 'simulator' ? 'active' : '')}
