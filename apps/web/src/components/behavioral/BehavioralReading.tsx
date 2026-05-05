@@ -19,6 +19,8 @@ export function BehavioralReading() {
   const currentLevelPassages = starReadingData[level] || starReadingData['B2']
   const readingContent = currentLevelPassages[activeReadingIndex]
 
+  if (!readingContent) return null;
+
   return (
     <div className="behavioral-reading-container">
       {/* Graded Reading Section with Chapters and Quiz */}
