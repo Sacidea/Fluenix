@@ -207,3 +207,63 @@ async def analyze_pronunciation(data: dict):
     except Exception as e:
         traceback.print_exc()
         raise HTTPException(status_code=500, detail=str(e))
+
+@app.post("/behavioral/analyze")
+async def analyze_behavioral(data: dict):
+    try:
+        question = data.get("question", "")
+        category = data.get("category", "")
+        context = data.get("context", "")
+        level = data.get("level", "B2")
+        star = data.get("star", {})
+        
+        system_prompt = f"""You are a FAANG Senior Engineering Manager evaluating a candidate's behavioral interview answer.
+The candidate is testing for Amazon Leadership Principles like {category}.
+Their English proficiency is expected to be CEFR {level}.
+
+Context/Expectation for this question:
+{context}
+
+The candidate was asked: "{question}"
+
+They provided the following STAR response:
+[SITUATION]: {star.get('situation', '')}
+[TASK]: {star.get('task', '')}
+[ACTION]: {star.get('action', '')}
+[RESULT]: {star.get('result', '')}
+
+Evaluate their response based on two main criteria:
+1. Leadership Alignment (Did they answer the question well technically? Did they show ownership? Did they use 'I' instead of 'We' in action? Did they have quantifiable results?)
+2. English Quality (Grammar, vocabulary, and professional tone relative to {level}.)
+
+Return ONLY a JSON object matching this exact schema:
+{{
+  "overall_score": <0-100>,
+  "leadership_alignment": <0-100>,
+  "english_quality": <0-100>,
+  "strengths": ["...", "..."],
+  "improvements": ["...", "..."],
+  "detailed_analysis": {{
+    "situation": "Brief critique of their situation.",
+    "task": "Brief critique of their task.",
+    "action": "Critique of action (most important).",
+    "result": "Critique of their result."
+  }}
+}}
+Return ONLY JSON. Do not use markdown blocks."""
+
+        response = client.messages.create(
+            model="claude-sonnet-4-6",
+            max_tokens=1000,
+            system=system_prompt,
+            messages=[{
+                "role": "user",
+                "content": "Evaluate my STAR response."
+            }]
+        )
+        raw = response.content[0].text
+        clean = raw.replace("```json", "").replace("```", "").strip()
+        return {"analysis": clean}
+    except Exception as e:
+        traceback.print_exc()
+        raise HTTPException(status_code=500, detail=str(e))

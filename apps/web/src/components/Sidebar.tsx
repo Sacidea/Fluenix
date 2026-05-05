@@ -15,10 +15,12 @@ export default function Sidebar() {
 
   const links = [
     { href: '/dashboard', label: 'Home', icon: 'Layout' },
+    { href: '/dashboard/behavioral-lab', label: 'Behavioral Prep', icon: 'Target' },
     { href: '/dashboard/scenario', label: 'Scenario Sim', icon: 'MessagesSquare' },
     { href: '/dashboard/writing', label: 'Technical Writing', icon: 'PenTool' },
+    { href: '/dashboard/grammar-lab', label: 'Grammar Intelligence', icon: 'CheckSquare' },
     { href: '/dashboard/pronunciation', label: 'Pronunciation Lab', icon: 'Mic' },
-    { href: '/dashboard/progress', label: 'Progress Map', icon: 'Activity' },
+    { href: '/dashboard/vocabulary', label: 'Tech Lexicon', icon: 'BookOpen' },
   ]
 
   return (

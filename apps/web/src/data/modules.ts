@@ -97,4 +97,16 @@ export const modulesData: ModuleItem[] = [
     bg: '#ecfccb',
     border: '#d9f99d',
   },
+  {
+    id: 'behavioral-lab',
+    title: 'Behavioral STAR Simulator',
+    description: 'Master Amazon Leadership Principles and STAR storytelling',
+    icon: 'Target',
+    href: '/dashboard/behavioral-lab',
+    available: true,
+    tag: 'NEW',
+    color: '#ef4444',
+    bg: '#fee2e2',
+    border: '#fecaca',
+  },
 ]
