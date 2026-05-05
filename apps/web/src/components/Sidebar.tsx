@@ -21,6 +21,7 @@ export default function Sidebar() {
     { href: '/dashboard/grammar-lab', label: 'Grammar Intelligence', icon: 'CheckSquare' },
     { href: '/dashboard/pronunciation', label: 'Pronunciation Lab', icon: 'Mic' },
     { href: '/dashboard/vocabulary', label: 'Tech Lexicon', icon: 'BookOpen' },
+    { href: '/dashboard/progress', label: 'Progress Map', icon: 'Activity' },
   ]
 
   return (

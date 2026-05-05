@@ -12,8 +12,8 @@ export default function BehavioralLabPage() {
   const [activeTab, setActiveTab] = useState<'handbook' | 'reading' | 'simulator'>('reading')
 
   return (
-    <div className="module-page-container behavioral-root">
-      
+    <div className="module-page-container">
+
       {/* Global Header Area */}
       <header className="lab-header">
         <div className="header-content">
@@ -28,24 +28,24 @@ export default function BehavioralLabPage() {
               <p className="sub-title">Advanced interview methodologies tailored for FAANG communications.</p>
             </div>
           </div>
-          
+
           <div className="header-right">
             <div className="grammar-tabs" style={{ marginBottom: 0 }}>
-              <button 
+              <button
                 className={"grammar-tab " + (activeTab === 'reading' ? 'active' : '')}
                 onClick={() => setActiveTab('reading')}
               >
                 <BookText size={16} />
                 Reading Practice
               </button>
-              <button 
+              <button
                 className={"grammar-tab " + (activeTab === 'handbook' ? 'active' : '')}
                 onClick={() => setActiveTab('handbook')}
               >
                 <BookOpen size={16} />
                 Methodology
               </button>
-              <button 
+              <button
                 className={"grammar-tab " + (activeTab === 'simulator' ? 'active' : '')}
                 onClick={() => setActiveTab('simulator')}
               >

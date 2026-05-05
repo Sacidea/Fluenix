@@ -37,18 +37,7 @@ export const modulesData: ModuleItem[] = [
     bg: '#fffbeb',
     border: '#fde68a',
   },
-  {
-    id: 'progress',
-    title: 'Progress Map',
-    description: 'Weekly scores, streaks & personalized insights',
-    icon: 'Activity',
-    href: '/dashboard/progress',
-    available: true,
-    tag: 'ACTIVE',
-    color: '#10b981',
-    bg: '#ecfdf5',
-    border: '#a7f3d0',
-  },
+
   {
     id: 'vocabulary',
     title: 'Vocabulary Builder',

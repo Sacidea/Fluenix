@@ -7,7 +7,6 @@ import { modulesData } from '@/data/modules'
 import { ActivityHeatmap } from './ActivityHeatmap'
 import { RecentActivity } from './RecentActivity'
 import { CompetencyMatrix } from './CompetencyMatrix'
-import { ProgressInsights } from '@/components/ProgressInsights'
 
 interface Session {
   id: string
@@ -74,8 +73,6 @@ export default function DashboardClient({ user, stats, sessions }: Props) {
               )
             })}
           </div>
-
-          <ProgressInsights sessions={sessions} />
 
           <div className="analytics-grid">
             <div className="analytics-left">
