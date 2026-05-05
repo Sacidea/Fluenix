@@ -25,7 +25,7 @@ export function BehavioralReading() {
     <div className="behavioral-reading-container">
       {/* Graded Reading Section with Chapters and Quiz */}
       <div className="graded-reading-section" style={{
-        background: '#ffffff',
+        background: '#f8fafc',
         border: '1px solid #e2e8f0',
         borderRadius: '12px',
         padding: '0',

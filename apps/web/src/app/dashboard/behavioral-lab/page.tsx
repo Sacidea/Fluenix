@@ -12,7 +12,7 @@ export default function BehavioralLabPage() {
   const [activeTab, setActiveTab] = useState<'handbook' | 'reading' | 'simulator'>('reading')
 
   return (
-    <div className="module-page-container">
+    <div className="module-page-container behavioral-root">
       
       {/* Global Header Area */}
       <header className="lab-header">
