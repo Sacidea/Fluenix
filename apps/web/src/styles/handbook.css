@@ -6,8 +6,8 @@
   border-radius: 16px;
   border: 1px solid #e2e8f0;
   box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
-  overflow: hidden;
   min-height: 600px;
+  align-items: flex-start;
 }
 
 /* Sidebar */
@@ -17,6 +17,10 @@
   border-right: 1px solid #e2e8f0;
   display: flex;
   flex-direction: column;
+  position: sticky;
+  top: 24px;
+  max-height: calc(100vh - 48px);
+  border-radius: 16px 0 0 16px;
 }
 
 .handbook-sidebar-header {
@@ -33,6 +37,20 @@
   padding: 16px;
   overflow-y: auto;
   flex: 1;
+}
+
+.handbook-sidebar-nav::-webkit-scrollbar {
+  width: 6px;
+}
+.handbook-sidebar-nav::-webkit-scrollbar-track {
+  background: transparent;
+}
+.handbook-sidebar-nav::-webkit-scrollbar-thumb {
+  background-color: #cbd5e1;
+  border-radius: 10px;
+}
+.handbook-sidebar-nav::-webkit-scrollbar-thumb:hover {
+  background-color: #94a3b8;
 }
 
 .category-group {
