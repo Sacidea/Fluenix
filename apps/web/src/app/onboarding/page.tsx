@@ -54,7 +54,7 @@ export default function OnboardingPage() {
       <div className="onboarding-container">
         
         <div className="progress-bar">
-          <div className="progress-fill" style={{ width: \`\${(step / 3) * 100}%\` }} />
+          <div className="progress-fill" style={{ width: `${(step / 3) * 100}%` }} />
         </div>
 
         <AnimatePresence mode="wait">
@@ -77,7 +77,7 @@ export default function OnboardingPage() {
                   return (
                     <button
                       key={r.label}
-                      className={\`option-card \${role === r.label ? 'selected' : ''}\`}
+                      className={`option-card ${role === r.label ? 'selected' : ''}`}
                       onClick={() => setRole(r.label)}
                     >
                       <div className="option-icon"><Icon size={24} /></div>
@@ -120,7 +120,7 @@ export default function OnboardingPage() {
                 {levels.map(l => (
                   <button
                     key={l.label}
-                    className={\`list-card \${level === l.label ? 'selected' : ''}\`}
+                    className={`list-card ${level === l.label ? 'selected' : ''}`}
                     onClick={() => setLevel(l.label)}
                   >
                     <div className="level-badge">{l.label}</div>
@@ -165,7 +165,7 @@ export default function OnboardingPage() {
                   return (
                     <button
                       key={g.label}
-                      className={\`option-card \${goal === g.label ? 'selected' : ''}\`}
+                      className={`option-card ${goal === g.label ? 'selected' : ''}`}
                       onClick={() => setGoal(g.label)}
                     >
                       <div className="option-icon"><Icon size={24} /></div>
