@@ -1,5 +1,12 @@
 /* Behavioral/STAR Lab Styles */
 
+.module-page-container {
+  min-height: 100vh;
+  background: #faf5ff; /* Premium light lilac */
+  display: flex;
+  flex-direction: column;
+}
+
 /* ── Premium Header Styles ── */
 .lab-header {
   background: white;
