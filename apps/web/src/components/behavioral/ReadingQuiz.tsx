@@ -189,7 +189,7 @@ export function ReadingQuiz({ vocabulary, fillInBlank, scenario }: ReadingQuizPr
                 color: scenarioAnswer === scenario.answerIndex ? '#166534' : '#991b1b',
                 fontSize: '15px',
                 lineHeight: 1.6,
-                borderLeft: \`4px solid \${scenarioAnswer === scenario.answerIndex ? '#22c55e' : '#ef4444'}\`
+                borderLeft: '4px solid ' + (scenarioAnswer === scenario.answerIndex ? '#22c55e' : '#ef4444')
               }}>
                 <strong>Why this is {scenarioAnswer === scenario.answerIndex ? 'Correct' : 'Incorrect'}:</strong> {scenario.explanation}
               </div>
