@@ -2,12 +2,13 @@
 
 import React, { useState } from 'react'
 import Link from 'next/link'
-import { ChevronLeft, Target, BookOpen } from 'lucide-react'
+import { ChevronLeft, Target, BookOpen, BookText } from 'lucide-react'
 import { BehavioralWorkspace } from '@/components/behavioral/BehavioralWorkspace'
 import { BehavioralHandbook } from '@/components/behavioral/BehavioralHandbook'
+import { BehavioralReading } from '@/components/behavioral/BehavioralReading'
 
 export default function BehavioralLabPage() {
-  const [activeTab, setActiveTab] = useState<'handbook' | 'simulator'>('handbook')
+  const [activeTab, setActiveTab] = useState<'handbook' | 'reading' | 'simulator'>('handbook')
 
   return (
     <div className="module-page-container">
@@ -29,14 +30,21 @@ export default function BehavioralLabPage() {
           <div className="header-right">
             <div className="grammar-tabs" style={{ marginBottom: 0 }}>
               <button 
-                className={`grammar-tab ${activeTab === 'handbook' ? 'active' : ''}`}
+                className={"grammar-tab " + (activeTab === 'handbook' ? 'active' : '')}
                 onClick={() => setActiveTab('handbook')}
               >
                 <BookOpen size={16} />
                 Methodology
               </button>
               <button 
-                className={`grammar-tab ${activeTab === 'simulator' ? 'active' : ''}`}
+                className={"grammar-tab " + (activeTab === 'reading' ? 'active' : '')}
+                onClick={() => setActiveTab('reading')}
+              >
+                <BookText size={16} />
+                Reading Practice
+              </button>
+              <button 
+                className={"grammar-tab " + (activeTab === 'simulator' ? 'active' : '')}
                 onClick={() => setActiveTab('simulator')}
               >
                 <Target size={16} />
@@ -49,7 +57,9 @@ export default function BehavioralLabPage() {
 
       {/* Main Content Area */}
       <main className="lab-main" style={{ padding: '40px', width: '100%' }}>
-        {activeTab === 'handbook' ? <BehavioralHandbook /> : <BehavioralWorkspace />}
+        {activeTab === 'handbook' && <BehavioralHandbook />}
+        {activeTab === 'reading' && <BehavioralReading />}
+        {activeTab === 'simulator' && <BehavioralWorkspace />}
       </main>
 
     </div>
