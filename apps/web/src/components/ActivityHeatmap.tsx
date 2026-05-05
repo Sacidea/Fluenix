@@ -28,7 +28,7 @@ function generateHeatmapData(sessions: Session[]) {
   const countMap = new Map<string, number>()
   sessions.forEach(s => {
     const d = new Date(s.createdAt)
-    const key = \`\${d.getFullYear()}-\${d.getMonth()}-\${d.getDate()}\`
+    const key = `${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`
     countMap.set(key, (countMap.get(key) || 0) + 1)
   })
 
@@ -36,7 +36,7 @@ function generateHeatmapData(sessions: Session[]) {
   let curr = new Date(start)
   for (let w = 0; w < WEEKS; w++) {
     for (let d = 0; d < DAYS; d++) {
-      const key = \`\${curr.getFullYear()}-\${curr.getMonth()}-\${curr.getDate()}\`
+      const key = `${curr.getFullYear()}-${curr.getMonth()}-${curr.getDate()}`
       const count = countMap.get(key) || 0
       
       let intensity = 0
@@ -83,12 +83,12 @@ export function ActivityHeatmap({ sessions }: ActivityHeatmapProps) {
 
                 const title = cell.intensity === -1 
                   ? '' 
-                  : \`\${cell.count} sessions on \${cell.date.toLocaleDateString()}\`
+                  : `${cell.count} sessions on ${cell.date.toLocaleDateString()}`
 
                 return (
                   <div 
                     key={cIndex} 
-                    className={\`heatmap-cell \${colorClass}\`}
+                    className={`heatmap-cell ${colorClass}`}
                     title={title}
                   />
                 )
