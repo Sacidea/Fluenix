@@ -227,14 +227,24 @@ Half of this rule is about hiring. The other half is about developing people. If
       content: `
 # Invent and Simplify
 
-Amazon has a rule called **Invent and Simplify**. Leaders must find new ideas and make things easy. 
+Amazon has a leadership rule called **Invent and Simplify**. Leaders must find new ideas. They must also make things easy. They look for good ideas everywhere. Sometimes, when you do something new, people will not understand you. That is okay.
 
 ## One Idea is Not Enough
-Many companies start with one good idea. But later, it is very hard to find a new idea. In the technology world, things change very fast. If you do not invent new things, your company will fail. You cannot just use your first idea forever.
+Many companies start with one very good idea. Because of this idea, they become a real business. But later, it becomes very hard to find a new idea. Many companies just make very small changes to their first idea. 
+In the technology world, things change very fast. If you do not invent new things, your company cannot stay successful. You must always reinvent yourself.
 
-## Amazon's Inventions
-Amazon always tries to invent. Sometimes they make completely new things, like AWS (Cloud) or Alexa. 
-Other times, they change old things. For example, Amazon saw that customers liked buying from other sellers on eBay. Amazon managers talked about this a lot. They were worried. Would other sellers be nice to the customers? But they decided to do it because it was good for the buyers. They wanted lower prices and more choices for the customer.
+## Amazon's New Inventions
+For 29 years, Amazon has tried hard to invent new things. Sometimes, they make completely new things from zero. For example, AWS (Cloud computing) or Alexa (a device that understands your voice). 
+
+## Changing the Old Business
+Other times, Amazon does not make something from zero. Instead, they completely change their old business. The Amazon Marketplace is a good example.
+Many years ago, Amazon saw that customers liked eBay. On eBay, many different people could sell things. Amazon managers talked about this a lot. They asked: "Should we let other people sell things on Amazon?"
+Many people at Amazon said no. They were worried. They said: "Will these other sellers be nice to our customers?" But they fought about it and finally decided to do it. Why? Because more choices and lower prices are always better for the customer.
+
+## Failing Before Winning
+But making the Marketplace was very hard. First, Amazon tried to build an "Auctions" website, just like eBay. It failed completely. Nobody used it.
+Then, Amazon made a special place on the website called "Z-Shops" for other sellers. That failed too.
+Finally, Amazon invented the "Single Detail Page". This means all sellers use the same page for one product. This was a huge success. They failed many times, but they did not stop inventing.
       `,
       vocabulary: [
         { word: "Invent", meaning: "To make or design something new." },
@@ -263,15 +273,21 @@ Other times, they change old things. For example, Amazon saw that customers like
       content: `
 # Are Right, A Lot
 
-Amazon leaders make good choices. This rule is called **Are Right, A Lot**.
+Amazon leaders make good choices. This rule is called **Are Right, A Lot**. Leaders have good instincts. They ask other people for their ideas. They also try to prove that their own ideas are wrong.
 
-## Finding the Best Answer
-Sometimes, work is very confusing. There is too much noise and too many ideas. A leader must find what is truly important for the customer. 
-Many people think "Are Right, A Lot" means "I must win the argument." They think their idea must be the winner. But this is wrong.
+## Making the Right Choice
+You can do many things right in your job. But if you make a bad choice about the customer experience, you will have a big problem. 
+At Amazon, work is sometimes very confusing. There are many new things and many unknowns. There is a lot of "noise" (too much information). A leader must look through all the noise. They must find the "signal"—the true thing that is important for the customer.
 
-## Listening to Others
-It is not about your ego. It is about finding the best answer for the customer. Good leaders listen to other people. They ask for different ideas. 
-Often, leaders speak last in a meeting. They want to hear everyone else first. They ask themselves: "Is my idea really the best? Can we do better for the customers?" It does not matter whose idea it is, as long as it is the best idea.
+## A Big Misunderstanding
+When Amazon first made this rule, people misunderstood it. They thought: "If I am right a lot, my idea must always win." They thought they must always win every argument in a meeting.
+
+But this is not true. The real goal is to find the best answer for the customer. It does not matter whose idea it is. It can be your idea, or your friend's idea.
+
+## How to Find the Best Answer
+To find the best answer, you need the right people in a room. You need them to give feedback. This is why good leaders often speak last in a meeting. They want to hear everyone else first. 
+
+A good leader asks: "Is my idea really the best? Is there another way to do this? Can we do better for the customer?" They listen to different perspectives. Often, a leader does not need to speak at all. The team talks and finds the best answer together. A leader only cares about one thing: getting the best answer for the customer.
       `,
       vocabulary: [
         { word: "Confusing", meaning: "Hard to understand." },
@@ -477,16 +493,23 @@ The other half of this principle is about developing people. As a senior enginee
       id: "invent_simplify_b1",
       title: "6. Principle: Invent and Simplify",
       content: `
-# Invent and Simplify
+# Principle: Invent and Simplify
 
-The leadership principle **Invent and Simplify** means leaders expect innovation from their teams. They look for new ideas everywhere and they accept that people might misunderstand them at first.
+The leadership principle **Invent and Simplify** means leaders expect innovation from their teams. They look for new ideas everywhere. They are not limited by thinking "we didn't invent this, so we won't use it." They also accept that when you do new things, people might misunderstand you for a long time.
 
 ## The Challenge of Reinvention
-Many companies survive the startup stage because they have one great innovative idea. However, it becomes very difficult to invent something else. Instead of making new things, they just iterate and make small changes to the original idea. In a fast-changing world, you must constantly reinvent yourself to stay successful.
+Many companies survive the startup stage because they have one great innovative idea. However, it becomes very difficult for them to invent something else. Instead of making new things, they just iterate and make small changes to the original idea. In a dynamic, fast-changing world, it is impossible to stay successful if you do not constantly reinvent yourself.
 
 ## Whole Cloth vs. Reinvention
 Amazon has been very vigilant about inventing for 29 years. Sometimes this is "whole cloth" invention, which means creating something completely new from nothing, like AWS (cloud computing) or Alexa. 
-Other times, it means reinventing an existing business. For example, Amazon noticed customers liked eBay because of third-party sellers. Amazon debated animatedly if they should allow third-party sellers too. People were resistant because they worried about customer service. Eventually, they decided to build a marketplace because broader selection and lower prices are better for the customer.
+
+Other times, it means completely reinventing an existing business. A great example is the Amazon Marketplace. In the late nineties, Amazon noticed customers were responding well to companies like eBay, which had third-party sellers. Amazon debated animatedly inside the company if they should allow third-party sellers too. 
+People were resistant. They worried that third-party sellers would not take good care of the customers. Eventually, Amazon decided to build a marketplace because having a broader selection and lower prices is always better for the customer.
+
+## The Struggle of Implementation
+However, the implementation was very difficult. First, Amazon tried to build an auctions website like eBay. That was a "me too" offering that failed miserably. 
+Then, they took all the third-party sellers and put them in a separate area called "Z-Shops." That failed too. 
+Finally, they invented the "single detail page," where all sellers offer their product on the exact same page. This changed everything and became a massive success. They failed multiple times, but they never stopped trying to simplify the customer experience.
       `,
       vocabulary: [
         { word: "Iterate", meaning: "To do something again and again, usually to improve it." },
@@ -513,16 +536,22 @@ Other times, it means reinventing an existing business. For example, Amazon noti
       id: "are_right_a_lot_b1",
       title: "7. Principle: Are Right, A Lot",
       content: `
-# Are Right, A Lot
+# Principle: Are Right, A Lot
 
-The principle **Are Right, A Lot** is about having strong judgment. In business, you can do many things right, but if you make the wrong decision on a key question for the customer experience, you will have a big issue.
+The principle **Are Right, A Lot** is about having strong judgment. Leaders have good instincts. They seek diverse perspectives and actively work to disconfirm their own beliefs. 
+In business, you can do many things right, but if you make the wrong decision on a key question for the customer experience, you will have a massive issue.
 
-## Ambiguity and Noise
-At Amazon, we work in areas with high ambiguity. This means things are not clear and there are many unknowns. There is a lot of noise, and you must find the true signal that matters to customers. You have to understand what is truly important.
+## Ambiguity and Finding the Signal
+At Amazon, we operate in areas with high ambiguity. This means things are not clear and there are many unknowns. Whether we are inventing a new space or improving an old business, there is a lot of noise. You must be great at sifting through all the different noise to find the true signal—the core thing that really matters to customers.
 
 ## The Misinterpretation
-When people first hear this rule, they misunderstand it. They think, "If I am right a lot, my idea must win every debate." 
-The reality is very different. We just want the best possible answer for the customer. It does not matter whose idea it is. To get the best answer, leaders bring the right people into a room to give feedback. This is why leaders often speak last in meetings. They want to listen to different perspectives first and question their own beliefs.
+When this principle was first introduced, people misunderstood it. They thought, "If I am right a lot, it means my idea must carry the day and win every debate." 
+The reality is very different. We just want the best possible answer for the customer, whoever's idea it is. It is not about your ego or winning an argument.
+
+## Seeking Diverse Perspectives
+To get the best answer, leaders bring the right people into a room to give feedback. This is why leaders often speak last in meetings. They want everybody's input first. 
+Often, leaders are questioning their own incoming opinions. They ask themselves: "Are my closely held beliefs really right? Is there another way to think about this? Can we do better for customers?" 
+The key is to listen to different perspectives. In many of the best meetings, the leader never even has to express an opinion because the team sorts it out for themselves. The only thing that matters is getting to the best possible answer.
       `,
       vocabulary: [
         { word: "Judgment", meaning: "The ability to make good decisions." },
