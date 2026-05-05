@@ -108,9 +108,9 @@ export default function Home() {
               <div className="mock-body">
                 <p><span className="c-blue">~/fluenix</span> $ analyze-standup --target=senior</p>
                 <p className="c-gray">Analyzing syntax and technical phrasing...</p>
+                <p className="c-pink">♡ Empathy Score: High (Collaborative tone)</p>
                 <p className="c-yellow">⚡ Tip: Replace "delay" with "latency" for impact.</p>
                 <p className="c-green">✓ Clarity: 98% (Executive Ready)</p>
-                <p className="c-green">✓ Vocabulary: Advanced FAANG lexicon</p>
               </div>
             </motion.div>
 
@@ -120,9 +120,10 @@ export default function Home() {
                 <span>PR Review Analysis</span>
               </div>
               <div className="mock-body p-code">
+                <p className="c-burgundy">✖ Context Missing: Architecture not documented.</p>
                 <p className="c-red strikethrough">I fixed the bug in the login.</p>
                 <p className="c-yellow">⚠️ Action: Avoid passive phrasing in commits.</p>
-                <p className="c-green">Refactored authentication middleware to resolve race condition during token refresh.</p>
+                <p className="c-green">Refactored authentication middleware to resolve race condition.</p>
               </div>
             </motion.div>
           </div>
@@ -505,6 +506,8 @@ export default function Home() {
         .c-green { color: #059669; }
         .c-red { color: #dc2626; }
         .c-yellow { color: #f59e0b; font-weight: 700; }
+        .c-pink { color: #db2777; font-weight: 600; }
+        .c-burgundy { color: #9f1239; font-weight: 700; }
         .strikethrough { text-decoration: line-through; opacity: 0.7; }
 
 
