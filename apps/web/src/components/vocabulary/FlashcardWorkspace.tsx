@@ -26,6 +26,15 @@ export function FlashcardWorkspace() {
 
   useEffect(() => {
     setSessionWords(shuffle(mockVocabulary).slice(0, SESSION_SIZE))
+    
+    // Pre-load voices to prevent race condition on first TTS play
+    if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
+      window.speechSynthesis.getVoices()
+      // Some browsers (like Chrome) load voices asynchronously
+      window.speechSynthesis.onvoiceschanged = () => {
+        window.speechSynthesis.getVoices()
+      }
+    }
   }, [])
 
   const handleNext = (status: 'review' | 'got_it') => {

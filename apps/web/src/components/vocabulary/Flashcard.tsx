@@ -12,9 +12,22 @@ export function Flashcard({ word, isFlipped, setIsFlipped }: FlashcardProps) {
   const playAudio = (e: React.MouseEvent) => {
     e.stopPropagation()
     if ('speechSynthesis' in window) {
+      window.speechSynthesis.cancel() // Cancel any ongoing speech
+      
       const utterance = new SpeechSynthesisUtterance(word.word)
       utterance.lang = 'en-US'
       utterance.rate = 0.9
+      
+      const voices = window.speechSynthesis.getVoices()
+      const preferredVoice = voices.find(v => v.name.includes('Google US English')) ||
+                             voices.find(v => v.lang === 'en-US' && v.name.includes('Female')) ||
+                             voices.find(v => v.lang.startsWith('en-US')) ||
+                             voices[0]
+                             
+      if (preferredVoice) {
+        utterance.voice = preferredVoice
+      }
+      
       window.speechSynthesis.speak(utterance)
     }
   }
