@@ -278,7 +278,7 @@ export default function Home() {
         
         .logo-icon-box.small { width: 24px; height: 24px; border-radius: 6px; }
 
-        .logo-bolt { color: white; fill: white; }
+        .logo-bolt { color: white; }
 
         .logo-text {
           font-size: 20px;
