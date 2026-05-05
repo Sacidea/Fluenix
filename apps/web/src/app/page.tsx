@@ -4,7 +4,7 @@ import React, { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { motion, useScroll, useTransform } from 'framer-motion'
 import { useUser } from "@clerk/nextjs"
-import { Terminal, ShieldCheck, PenTool, Activity, ChevronRight, MessageSquare, Target, CheckSquare, Mic, BookOpen, Headphones, BookA, GitMerge, FileCode2 } from 'lucide-react'
+import { Terminal, ShieldCheck, PenTool, Activity, ChevronRight, MessageSquare, Target, CheckSquare, Mic, BookOpen, Headphones, BookA, GitMerge, FileCode2, MessageSquareCode } from 'lucide-react'
 
 export default function Home() {
   const { isLoaded, isSignedIn } = useUser()
@@ -34,7 +34,7 @@ export default function Home() {
       <nav className="glass-nav">
         <div className="nav-container">
           <div className="nav-logo">
-            <div className="logo-icon-box"><BookA size={20} className="logo-bolt" /></div>
+            <div className="logo-icon-box"><MessageSquareCode size={20} className="logo-bolt" /></div>
             <span className="logo-text">Fluenix <span className="logo-badge">LABS</span></span>
           </div>
           <div className="nav-links">
@@ -208,7 +208,7 @@ export default function Home() {
               <div className="circle-layer layer-1"></div>
               <div className="circle-layer layer-2"></div>
               <div className="circle-layer layer-3">
-                <BookA size={40} className="core-icon" />
+                <MessageSquareCode size={40} className="core-icon" />
               </div>
             </div>
           </motion.div>
@@ -219,7 +219,7 @@ export default function Home() {
       <footer className="modern-footer">
         <div className="footer-container">
           <div className="footer-left">
-            <div className="logo-icon-box small"><BookA size={14} color="white" /></div>
+            <div className="logo-icon-box small"><MessageSquareCode size={14} color="white" /></div>
             <span className="footer-logo">Fluenix <span className="logo-badge">LABS</span></span>
           </div>
           <div className="footer-right">
