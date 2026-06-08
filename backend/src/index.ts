@@ -32,6 +32,7 @@ import vocabularyRouter from './routes/vocabulary'
 import scenarioRouter from './routes/scenario.routes'
 
 const app = express()
+app.set('trust proxy', 1)
 const PORT = process.env.PORT || 3001
 
 const parseCorsOrigins = (rawOrigins?: string): string[] => {
