@@ -3,7 +3,7 @@ FROM node:20-alpine AS base
 # Install pnpm and native build tools
 ENV PNPM_HOME="/pnpm"
 ENV PATH="$PNPM_HOME:$PATH"
-RUN apk add --no-cache python3 make g++ && corepack enable
+RUN apk add --no-cache python3 make g++ linux-headers && corepack enable
 
 FROM base AS builder
 # Set working directory
@@ -16,7 +16,7 @@ COPY apps ./apps
 COPY backend ./backend
 
 # Install dependencies only for backend and its local packages
-RUN pnpm config set ignore-scripts false && pnpm install --frozen-lockfile --filter backend...
+RUN pnpm install --frozen-lockfile --filter backend... --config.ignore-scripts=false
 
 # Generate Prisma client and build the backend
 WORKDIR /app/backend
