@@ -15,8 +15,8 @@ COPY packages ./packages
 COPY apps ./apps
 COPY backend ./backend
 
-# Install dependencies
-RUN pnpm install --frozen-lockfile
+# Install dependencies only for backend and its local packages
+RUN pnpm install --frozen-lockfile --filter backend...
 
 # Generate Prisma client and build the backend
 WORKDIR /app/backend
