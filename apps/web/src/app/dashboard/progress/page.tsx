@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react'
 import Link from 'next/link'
-import { useUser } from '@clerk/nextjs'
+import { useUser, useAuth } from '@clerk/nextjs'
 import { motion } from 'framer-motion'
 import { Layout, Terminal, ShieldCheck, AlertTriangle, Inbox } from 'lucide-react'
 import { useProgressData } from '@/hooks/useProgressData'
@@ -14,8 +14,28 @@ import type { Session } from '@/hooks/useProgressData'
 
 export default function ProgressPage() {
   const { user } = useUser()
+  const { getToken } = useAuth()
   const { stats, sessions, loading, error, refetch } = useProgressData(user?.id)
   const [selectedSession, setSelectedSession] = useState<Session | null>(null)
+
+  const handleDelete = async (id: string) => {
+    if (!window.confirm('Are you sure you want to delete this session record?')) return
+    
+    try {
+      const token = await getToken()
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'}/api/sessions/${id}`, {
+        method: 'DELETE',
+        headers: token ? { Authorization: `Bearer ${token}` } : {}
+      })
+      if (res.ok) {
+        refetch() // Reload progress data
+      } else {
+        alert('Failed to delete session')
+      }
+    } catch (err) {
+      alert('Network error')
+    }
+  }
 
   return (
     <div className="ledger-progress-root">
@@ -81,6 +101,7 @@ export default function ProgressPage() {
                       session={session}
                       index={i}
                       onSelect={setSelectedSession}
+                      onDelete={handleDelete}
                     />
                   ))}
                 </div>

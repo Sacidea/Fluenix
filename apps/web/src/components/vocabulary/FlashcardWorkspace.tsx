@@ -1,9 +1,9 @@
 'use client'
 
 import React, { useState, useEffect } from 'react'
-import { mockVocabulary } from '@/data/vocabulary'
 import { Flashcard } from './Flashcard'
-import { X, Check, Trophy } from 'lucide-react'
+import { X, Check, Trophy, Loader2 } from 'lucide-react'
+import { useVocabularySession } from '@/hooks/useVocabularySession'
 
 function shuffle(array: any[]) {
   const arr = [...array]
@@ -17,15 +17,16 @@ function shuffle(array: any[]) {
 const SESSION_SIZE = 10
 
 export function FlashcardWorkspace() {
-  const [sessionWords, setSessionWords] = useState<typeof mockVocabulary>([])
+  const { sessionWords, loading, error, fetchSession, completeSession } = useVocabularySession(SESSION_SIZE)
+  
   const [currentIndex, setCurrentIndex] = useState(0)
   const [isFlipped, setIsFlipped] = useState(false)
   const [isFinished, setIsFinished] = useState(false)
-  const [needsReview, setNeedsReview] = useState(0)
-  const [mastered, setMastered] = useState(0)
+  
+  const [masteredIds, setMasteredIds] = useState<string[]>([])
+  const [needsReviewIds, setNeedsReviewIds] = useState<string[]>([])
 
   useEffect(() => {
-    setSessionWords(shuffle(mockVocabulary).slice(0, SESSION_SIZE))
     
     // Pre-load voices to prevent race condition on first TTS play
     if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
@@ -37,30 +38,66 @@ export function FlashcardWorkspace() {
     }
   }, [])
 
-  const handleNext = (status: 'review' | 'got_it') => {
-    if (status === 'review') setNeedsReview(p => p + 1)
-    else setMastered(p => p + 1)
+  const handleNext = async (status: 'review' | 'got_it') => {
+    const wordId = sessionWords[currentIndex].id
+    
+    let newMastered = [...masteredIds]
+    let newReview = [...needsReviewIds]
+    
+    if (status === 'review') {
+      newReview.push(wordId)
+      setNeedsReviewIds(newReview)
+    } else {
+      newMastered.push(wordId)
+      setMasteredIds(newMastered)
+    }
 
     setIsFlipped(false)
-    setTimeout(() => {
-      if (currentIndex < sessionWords.length - 1) setCurrentIndex(p => p + 1)
-      else setIsFinished(true)
+    
+    setTimeout(async () => {
+      if (currentIndex < sessionWords.length - 1) {
+        setCurrentIndex(p => p + 1)
+      } else {
+        setIsFinished(true)
+        await completeSession(newMastered, newReview)
+      }
     }, 350)
   }
 
   const handleRestart = () => {
-    setSessionWords(shuffle(mockVocabulary).slice(0, SESSION_SIZE))
+    fetchSession()
     setCurrentIndex(0)
     setIsFlipped(false)
     setIsFinished(false)
-    setNeedsReview(0)
-    setMastered(0)
+    setMasteredIds([])
+    setNeedsReviewIds([])
+  }
+
+  if (loading) {
+    return (
+      <div className="vocab-workspace" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '400px' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '16px', color: '#64748b' }}>
+          <Loader2 className="animate-spin" size={32} />
+          <p style={{ fontWeight: 500, letterSpacing: '-0.3px' }}>Loading vocabulary session...</p>
+        </div>
+      </div>
+    )
+  }
+
+  if (error) {
+    return (
+      <div className="vocab-workspace" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '400px' }}>
+        <p style={{ color: '#ef4444', fontWeight: 600 }}>{error}</p>
+      </div>
+    )
   }
 
   if (sessionWords.length === 0) return null
 
   if (isFinished) {
-    const masteredPct = Math.round((mastered / SESSION_SIZE) * 100)
+    const masteredCount = masteredIds.length
+    const reviewCount = needsReviewIds.length
+    const masteredPct = Math.round((masteredCount / sessionWords.length) * 100)
     return (
       <div className="vocab-workspace">
         <div className="completion-state">
@@ -68,11 +105,11 @@ export function FlashcardWorkspace() {
             <Trophy size={34} />
           </div>
           <h2>Session Complete</h2>
-          <p>You reviewed {SESSION_SIZE} FAANG-level technical terms.</p>
+          <p>You reviewed {sessionWords.length} FAANG-level technical terms.</p>
 
           <div className="stats-row">
             <div className="stat-item">
-              <div className="stat-num" style={{ color: '#059669' }}>{mastered}</div>
+              <div className="stat-num" style={{ color: '#059669' }}>{masteredCount}</div>
               <div className="stat-label">Mastered</div>
             </div>
             <div className="stat-item">
@@ -80,7 +117,7 @@ export function FlashcardWorkspace() {
               <div className="stat-label">Score</div>
             </div>
             <div className="stat-item">
-              <div className="stat-num" style={{ color: '#dc2626' }}>{needsReview}</div>
+              <div className="stat-num" style={{ color: '#dc2626' }}>{reviewCount}</div>
               <div className="stat-label">Review</div>
             </div>
           </div>

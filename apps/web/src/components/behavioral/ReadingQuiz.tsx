@@ -1,7 +1,7 @@
 'use client'
 
 import React, { useState } from 'react'
-import { VocabularyWord, FillInBlankExercise, ScenarioExercise } from '@/data/starReading'
+import { VocabularyWord, FillInBlankExercise, ScenarioExercise } from '@fluenix/shared'
 import { BookA, Edit3, MessageSquare, CheckCircle2, XCircle } from 'lucide-react'
 
 interface ReadingQuizProps {
@@ -135,10 +135,10 @@ export function ReadingQuiz({ vocabulary, fillInBlank, scenario }: ReadingQuizPr
             <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
               {scenario.options.map((opt, optIndex) => {
                 const hasAnswered = scenarioAnswer !== null;
-                let btnStyle = {
-                  padding: '16px',
-                  borderRadius: '8px',
-                  border: '1px solid #cbd5e1',
+                const btnStyle: React.CSSProperties = {
+                  padding: '16px 20px',
+                  borderRadius: '12px',
+                  border: '1.5px solid #e2e8f0',
                   background: '#ffffff',
                   color: '#334155',
                   textAlign: 'left' as const,

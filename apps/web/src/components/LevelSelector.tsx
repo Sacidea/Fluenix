@@ -89,10 +89,10 @@ export function LevelSelector({ isCollapsed = false }: { isCollapsed?: boolean }
           display: flex;
           align-items: center;
           justify-content: space-between;
-          padding: 12px;
+          padding: 8px 10px;
           background: #f8fafc;
           border: 1px solid #e2e8f0;
-          border-radius: 12px;
+          border-radius: 10px;
           cursor: pointer;
           transition: all 0.2s;
         }
@@ -106,15 +106,15 @@ export function LevelSelector({ isCollapsed = false }: { isCollapsed?: boolean }
         .btn-left {
           display: flex;
           align-items: center;
-          gap: 12px;
+          gap: 10px;
         }
 
         .icon-box {
-          width: 32px;
-          height: 32px;
+          width: 28px;
+          height: 28px;
           background: white;
           border: 1px solid #e2e8f0;
-          border-radius: 8px;
+          border-radius: 6px;
           display: flex;
           align-items: center;
           justify-content: center;
@@ -129,17 +129,17 @@ export function LevelSelector({ isCollapsed = false }: { isCollapsed?: boolean }
 
         .eyebrow {
           font-family: var(--font-mono);
-          font-size: 8px;
+          font-size: 7px;
           font-weight: 800;
           text-transform: uppercase;
-          letter-spacing: 2px;
+          letter-spacing: 1.5px;
           color: #94a3b8;
           margin-bottom: 2px;
         }
 
         .current-val {
           font-family: var(--font-serif);
-          font-size: 15px;
+          font-size: 13px;
           font-weight: 900;
           letter-spacing: -0.2px;
         }

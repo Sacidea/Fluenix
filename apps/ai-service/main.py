@@ -8,16 +8,20 @@ import traceback
 load_dotenv()
 
 app = FastAPI(title="Fluenix AI Service")
-client = Anthropic(api_key=os.getenv("ANTHROPIC_API_KEY"))
+client = Anthropic(
+    api_key=os.getenv("ANTHROPIC_API_KEY"),
+    max_retries=2, # Otomatik tekrar deneme (Rate limit 429 için)
+    timeout=60.0
+)
 
-raw_origins = os.getenv("CORS_ORIGINS", "http://localhost:3000")
-allowed_origins = [origin.strip() for origin in raw_origins.split(",") if origin.strip()]
+raw_origins = os.getenv("CORS_ORIGINS", "*")
+allowed_origins = ["*"]
 
 app.add_middleware(
     CORSMiddleware,
     allow_origins=allowed_origins,
-    allow_methods=["GET", "POST", "OPTIONS"],
-    allow_headers=["Content-Type", "Authorization"],
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
 
 SCENARIO_PROMPTS = {
@@ -55,8 +59,11 @@ def get_level_steering(level: str):
 def health():
     return {"status": "ok"}
 
+from fastapi.responses import StreamingResponse
+import json
+
 @app.post("/scenario/chat")
-async def scenario_chat(data: dict):
+def scenario_chat(data: dict):
     try:
         scenario = data.get("scenario", "interview")
         level = data.get("level", "B2")
@@ -69,20 +76,80 @@ async def scenario_chat(data: dict):
         if context:
             system_prompt += f"\n\n[SCENARIO CONTEXT: {context}. You must strictly adhere to this exact context. Initiate the conversation by addressing this scenario directly.]"
         
-        response = client.messages.create(
-            # Using the name provided in the snippet as it is confirmed working for the user
-            model="claude-sonnet-4-6",
-            max_tokens=500,
-            system=system_prompt,
-            messages=messages
-        )
-        return {"reply": response.content[0].text}
+        def stream_generator():
+            with client.messages.stream(
+                model="claude-sonnet-4-6",
+                max_tokens=4096,
+                system=[{
+                    "type": "text",
+                    "text": system_prompt,
+                    "cache_control": {"type": "ephemeral"}
+                }],
+                extra_headers={"anthropic-beta": "prompt-caching-2024-07-31"},
+                messages=messages
+            ) as stream:
+                for text in stream.text_stream:
+                    yield text
+
+        # Check if client explicitly requested a stream via query or body
+        # For backwards compatibility, if stream: true is passed, use StreamingResponse
+        if data.get("stream", False):
+            return StreamingResponse(stream_generator(), media_type="text/event-stream")
+        else:
+            # Non-streaming fallback
+            full_text = ""
+            for text in stream_generator():
+                full_text += text
+            return {"reply": full_text}
+
     except Exception as e:
         traceback.print_exc()
         raise HTTPException(status_code=500, detail=str(e))
 
+@app.post("/writing/generate")
+def generate_writing(data: dict):
+    try:
+        level = data.get("level", "B2")
+        category = data.get("category", "pr_description")
+        
+        system_prompt = f"""You are a FAANG Senior Engineering Manager preparing a technical writing exercise for a candidate.
+Their English proficiency is expected to be CEFR {level}.
+The writing category is {category} (e.g., pr_description, architecture_decision, post_mortem).
+
+Return ONLY a JSON object matching this exact schema (do not wrap in markdown code blocks):
+{{
+  "mission": {{
+    "title": "A short, descriptive title for the task",
+    "context": "A 2-3 sentence context explaining the situation and what the engineer needs to write.",
+    "referenceData": "Mock data, code diff, or ticket description they should base their writing on."
+  }}
+}}"""
+
+        import json
+        response = client.messages.create(
+            model="claude-sonnet-4-6",
+            max_tokens=4096,
+            system=[{
+                "type": "text",
+                "text": system_prompt,
+                "cache_control": {"type": "ephemeral"}
+            }],
+            extra_headers={"anthropic-beta": "prompt-caching-2024-07-31"},
+            messages=[{
+                "role": "user",
+                "content": f"Generate a new writing mission for {{category}}."
+            }]
+        )
+        raw = response.content[0].text
+        clean = raw.replace("```json", "").replace("```", "").strip()
+        return json.loads(clean)
+    except Exception as e:
+        import traceback
+        traceback.print_exc()
+        raise HTTPException(status_code=500, detail=str(e))
+
 @app.post("/writing/analyze")
-async def analyze_writing(data: dict):
+def analyze_writing(data: dict):
     try:
         exercise = data.get("exercise", "pr_description")
         text = data.get("text", "")
@@ -120,8 +187,13 @@ Do NOT wrap the JSON in markdown code blocks. Start immediately with {{."""
 
         response = client.messages.create(
             model="claude-sonnet-4-6",
-            max_tokens=1000,
-            system=system_msg,
+            max_tokens=4096,
+            system=[{
+                "type": "text",
+                "text": system_msg,
+                "cache_control": {"type": "ephemeral"}
+            }],
+            extra_headers={"anthropic-beta": "prompt-caching-2024-07-31"},
             messages=[{
                 "role": "user",
                 "content": "Analyze my draft."
@@ -133,7 +205,7 @@ Do NOT wrap the JSON in markdown code blocks. Start immediately with {{."""
         raise HTTPException(status_code=500, detail=str(e))
 
 @app.post("/scenario/analyze")
-async def analyze_scenario(data: dict):
+def analyze_scenario(data: dict):
     try:
         messages = data.get("messages", [])
         scenario = data.get("scenario", "interview")
@@ -160,8 +232,13 @@ async def analyze_scenario(data: dict):
 
         response = client.messages.create(
             model="claude-sonnet-4-6",
-            max_tokens=800,
-            system=system_prompt,
+            max_tokens=4096,
+            system=[{
+                "type": "text",
+                "text": system_prompt,
+                "cache_control": {"type": "ephemeral"}
+            }],
+            extra_headers={"anthropic-beta": "prompt-caching-2024-07-31"},
             messages=[{
                 "role": "user",
                 "content": f"Scenario: {scenario}\n\nConversation:\n{transcript}"
@@ -175,7 +252,7 @@ async def analyze_scenario(data: dict):
         raise HTTPException(status_code=500, detail=str(e))
 
 @app.post("/pronunciation/analyze")
-async def analyze_pronunciation(data: dict):
+def analyze_pronunciation(data: dict):
     try:
         transcript = data.get("transcript", "")
         target_word = data.get("target_word", "")
@@ -194,8 +271,13 @@ async def analyze_pronunciation(data: dict):
 
         response = client.messages.create(
             model="claude-sonnet-4-6",
-            max_tokens=600,
-            system=system_prompt,
+            max_tokens=4096,
+            system=[{
+                "type": "text",
+                "text": system_prompt,
+                "cache_control": {"type": "ephemeral"}
+            }],
+            extra_headers={"anthropic-beta": "prompt-caching-2024-07-31"},
             messages=[{
                 "role": "user",
                 "content": f"Target word: {target_word}\nUser said: {transcript}"
@@ -208,8 +290,49 @@ async def analyze_pronunciation(data: dict):
         traceback.print_exc()
         raise HTTPException(status_code=500, detail=str(e))
 
+@app.post("/behavioral/generate")
+def generate_behavioral(data: dict):
+    try:
+        level = data.get("level", "B2")
+        
+        system_prompt = f"""You are a FAANG Senior Engineering Manager preparing a behavioral interview.
+Generate a realistic behavioral interview question for a software engineer.
+Their English proficiency is expected to be CEFR {level}.
+
+Return ONLY a JSON object matching this exact schema (do not wrap in markdown):
+{{
+  "question": {{
+    "category": "e.g., Customer Obsession, Ownership, Dive Deep, Deliver Results",
+    "context": "A brief 1-2 sentence context or expectation for why this question is being asked in a FAANG interview.",
+    "question": "The actual behavioral interview question (e.g., 'Tell me about a time...')"
+  }}
+}}"""
+
+        import json
+        response = client.messages.create(
+            model="claude-sonnet-4-6",
+            max_tokens=4096,
+            system=[{
+                "type": "text",
+                "text": system_prompt,
+                "cache_control": {"type": "ephemeral"}
+            }],
+            extra_headers={"anthropic-beta": "prompt-caching-2024-07-31"},
+            messages=[{
+                "role": "user",
+                "content": "Generate a new behavioral interview question."
+            }]
+        )
+        raw = response.content[0].text
+        clean = raw.replace("```json", "").replace("```", "").strip()
+        return json.loads(clean)
+    except Exception as e:
+        import traceback
+        traceback.print_exc()
+        raise HTTPException(status_code=500, detail=str(e))
+
 @app.post("/behavioral/analyze")
-async def analyze_behavioral(data: dict):
+def analyze_behavioral(data: dict):
     try:
         question = data.get("question", "")
         category = data.get("category", "")
@@ -254,8 +377,13 @@ Return ONLY JSON. Do not use markdown blocks."""
 
         response = client.messages.create(
             model="claude-sonnet-4-6",
-            max_tokens=1000,
-            system=system_prompt,
+            max_tokens=4096,
+            system=[{
+                "type": "text",
+                "text": system_prompt,
+                "cache_control": {"type": "ephemeral"}
+            }],
+            extra_headers={"anthropic-beta": "prompt-caching-2024-07-31"},
             messages=[{
                 "role": "user",
                 "content": "Evaluate my STAR response."
@@ -265,5 +393,119 @@ Return ONLY JSON. Do not use markdown blocks."""
         clean = raw.replace("```json", "").replace("```", "").strip()
         return {"analysis": clean}
     except Exception as e:
+        traceback.print_exc()
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.post("/error-decoder/generate")
+def generate_error_scenario(data: dict):
+    try:
+        level = data.get("level", "B2")
+        role = data.get("role", "Full Stack") # From onboarding metadata
+        
+        system_prompt = f"""You are a FAANG Senior Staff Engineer designing a technical training exercise.
+Generate a highly realistic, challenging technical error scenario tailored to a {role} engineer.
+Their English proficiency is expected to be CEFR {level}.
+
+Return ONLY a JSON object matching this exact schema (do not wrap in markdown):
+{{
+  "title": "Short title",
+  "type": "stack-trace",
+  "difficulty": "Intermediate",
+  "content": "The actual error log, stack trace, or doc text",
+  "eli5": "Yapay Zeka Özeti: Explain like I'm 5 in Turkish",
+  "highlights": [{{ "word": "specific term from content", "tooltip": "Turkish explanation" }}],
+  "question": "A technical multiple choice question based on the content",
+  "options": [
+    {{ "id": "o1", "text": "Option 1", "isCorrect": false, "explanation": "Why this is incorrect" }},
+    {{ "id": "o2", "text": "Option 2", "isCorrect": true, "explanation": "Why this is correct" }},
+    {{ "id": "o3", "text": "Option 3", "isCorrect": false, "explanation": "Why this is incorrect" }}
+  ]
+}}"""
+
+        import json
+        response = client.messages.create(
+            model="claude-sonnet-4-6",
+            max_tokens=4096,
+            system=[{
+                "type": "text",
+                "text": system_prompt,
+                "cache_control": {"type": "ephemeral"}
+            }],
+            extra_headers={"anthropic-beta": "prompt-caching-2024-07-31"},
+            messages=[{
+                "role": "user",
+                "content": "Generate a new error scenario."
+            }]
+        )
+        raw = response.content[0].text
+        clean = raw.replace("```json", "").replace("```", "").strip()
+        return {"scenario": json.loads(clean)}
+    except Exception as e:
+        import traceback
+        traceback.print_exc()
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.post("/listening/generate")
+def generate_listening_scenario(data: dict):
+    try:
+        level = data.get("level", "B2")
+        
+        system_prompt = f"""You are a FAANG Senior Staff Engineer designing a listening comprehension exercise.
+Generate a highly realistic technical conversation or monologue tailored to a Software Engineer.
+Their English proficiency is expected to be CEFR {level}.
+
+Return ONLY a JSON object matching this exact schema (do not wrap in markdown):
+{{
+  "title": "Short title (e.g. System Design Interview)",
+  "context": "Context of the audio (e.g. An interviewer is asking about scaling databases)",
+  "dialogue": [
+    {{ "speaker": "Interviewer", "text": "Can you explain how you would shard a relational database?" }},
+    {{ "speaker": "Candidate", "text": "Sure, sharding involves..." }}
+  ],
+  "questions": [
+    {{
+      "id": "q1",
+      "text": "What is the primary benefit of sharding discussed here?",
+      "options": [
+        {{ "id": "o1", "text": "Option 1", "isCorrect": true, "explanation": "Correct because..." }},
+        {{ "id": "o2", "text": "Option 2", "isCorrect": false, "explanation": "Incorrect because..." }}
+      ]
+    }}
+  ],
+  "dictation": [
+    "A challenging technical sentence from the dialogue to dictate."
+  ],
+  "shadowing": [
+    "A key phrase to practice speaking."
+  ]
+}}"""
+
+        import json
+        response = client.messages.create(
+            model="claude-sonnet-4-6",
+            max_tokens=4096,
+            system=[{
+                "type": "text",
+                "text": system_prompt,
+                "cache_control": {"type": "ephemeral"}
+            }],
+            extra_headers={"anthropic-beta": "prompt-caching-2024-07-31"},
+            messages=[{
+                "role": "user",
+                "content": "Generate a new listening scenario."
+            }]
+        )
+        raw = response.content[0].text
+        clean = raw.replace("```json", "").replace("```", "").strip()
+        try:
+            return {"scenario": json.loads(clean)}
+        except json.JSONDecodeError as e:
+            print("FAILED TO PARSE JSON. RAW OUTPUT:")
+            print(raw)
+            raise e
+    except Exception as e:
+        import traceback
         traceback.print_exc()
         raise HTTPException(status_code=500, detail=str(e))

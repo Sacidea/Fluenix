@@ -32,10 +32,11 @@ export function useProgressData(userId?: string) {
         setLoading(true)
         try {
             const token = await getToken()
-            const headers = token ? { Authorization: `Bearer ${token}` } : undefined
+            if (!token) return // Wait for Clerk to initialize
+            const headers = { Authorization: `Bearer ${token}` }
             const [statsRes, sessionsRes] = await Promise.all([
-                axios.get(`${process.env.NEXT_PUBLIC_API_URL}/api/sessions/stats/${userId}`, { headers }),
-                axios.get(`${process.env.NEXT_PUBLIC_API_URL}/api/sessions/user/${userId}`, { headers })
+                axios.get(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'}/api/sessions/stats/${userId}`, { headers }),
+                axios.get(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'}/api/sessions/user/${userId}`, { headers })
             ])
             setStats(statsRes.data)
             setSessions(sessionsRes.data)

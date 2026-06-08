@@ -6,6 +6,11 @@
     "mobile": "pnpm --filter mobile start",
     "backend": "pnpm --filter backend dev",
     "seed": "pnpm --filter backend run seed",
-    "ai": "cd apps/ai-service && uvicorn main:app --reload"
+    "ai": "cd apps/ai-service && uvicorn main:app --reload",
+    "test": "vitest run"
+  },
+  "devDependencies": {
+    "@vitest/coverage-v8": "^4.1.8",
+    "vitest": "^4.1.8"
   }
 }

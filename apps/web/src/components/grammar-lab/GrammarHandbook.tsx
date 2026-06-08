@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react'
 import axios from 'axios'
+import { useAuth } from '@clerk/nextjs'
 import { BookOpen, CheckCircle2, XCircle, AlertCircle, Loader2, ChevronRight } from 'lucide-react'
 import ReactMarkdown from 'react-markdown'
 import '@/styles/handbook.css'
@@ -22,6 +23,7 @@ export function GrammarHandbook() {
   const [isLoading, setIsLoading] = useState(true)
   const [activeRuleId, setActiveRuleId] = useState<string | null>(null)
   const [showLesson, setShowLesson] = useState(false)
+  const { getToken } = useAuth()
 
   // Reset showLesson when rule changes
   useEffect(() => {
@@ -29,8 +31,13 @@ export function GrammarHandbook() {
   }, [activeRuleId])
 
   useEffect(() => {
-    setIsLoading(true)
-    axios.get(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'}/api/handbook/rules`)
+    const loadRules = async () => {
+      const token = await getToken()
+      if (!token) return
+      setIsLoading(true)
+      axios.get(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'}/api/handbook/rules`, {
+        headers: { Authorization: `Bearer ${token}` }
+      })
       .then(res => {
         if (res.data.success) {
           const rules = res.data.data
@@ -44,7 +51,9 @@ export function GrammarHandbook() {
       })
       .catch(err => console.error("Failed to load grammar rules", err))
       .finally(() => setIsLoading(false))
-  }, [])
+    }
+    loadRules()
+  }, [getToken])
 
   if (isLoading) {
     return (

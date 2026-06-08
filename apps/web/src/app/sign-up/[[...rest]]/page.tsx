@@ -1,9 +1,19 @@
+'use client'
+
 import { SignUp } from '@clerk/nextjs'
+import { AuthLayout } from '@/components/auth/AuthLayout'
+import { sharedClerkAppearance } from '@/lib/clerk-appearance'
 
 export default function SignUpPage() {
   return (
-    <div className="flex min-h-screen items-center justify-center">
-      <SignUp />
-    </div>
+    <AuthLayout 
+      title="Create account" 
+      subtitle="Start your journey to FAANG level communication"
+    >
+      <SignUp
+        forceRedirectUrl="/dashboard"
+        appearance={sharedClerkAppearance}
+      />
+    </AuthLayout>
   )
 }

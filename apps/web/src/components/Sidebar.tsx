@@ -7,6 +7,7 @@ import { usePathname } from 'next/navigation'
 import { UserButton } from '@clerk/nextjs'
 import { LevelSelector } from './LevelSelector'
 import * as Icons from 'lucide-react'
+import { Logo } from './Logo'
 import { useSidebarStore } from '@/store/useSidebarStore'
 
 export default function Sidebar() {
@@ -14,13 +15,15 @@ export default function Sidebar() {
   const { isOpen, toggle, setIsOpen } = useSidebarStore()
 
   const links = [
-    { href: '/dashboard', label: 'Home', icon: 'Layout' },
-    { href: '/dashboard/behavioral-lab', label: 'Behavioral Prep', icon: 'Target' },
-    { href: '/dashboard/scenario', label: 'Scenario Sim', icon: 'MessagesSquare' },
+    { href: '/dashboard', label: 'Dashboard', icon: 'LayoutDashboard' },
+    { href: '/dashboard/scenario', label: 'Scenario Cockpit', icon: 'TerminalSquare' },
     { href: '/dashboard/writing', label: 'Technical Writing', icon: 'PenTool' },
-    { href: '/dashboard/grammar-lab', label: 'Grammar Intelligence', icon: 'CheckSquare' },
     { href: '/dashboard/pronunciation', label: 'Pronunciation Lab', icon: 'Mic' },
     { href: '/dashboard/vocabulary', label: 'Tech Lexicon', icon: 'BookOpen' },
+    { href: '/dashboard/error-decoding', label: 'Error Decoder Lab', icon: 'Terminal' },
+    { href: '/dashboard/listening-lab', label: 'Listening Lab', icon: 'Headphones' },
+    { href: '/dashboard/grammar-lab', label: 'Grammar Intelligence', icon: 'Cpu' },
+    { href: '/dashboard/behavioral-lab', label: 'Behavioral Prep', icon: 'Target' },
     { href: '/dashboard/progress', label: 'Progress Map', icon: 'Activity' },
   ]
 
@@ -48,7 +51,7 @@ export default function Sidebar() {
         <div className="sb-header">
           <div className="header-left">
             <div className="logo-box">
-              <Icons.MessageSquareCode size={24} className="logo-icon" fill="none" />
+              <Logo size={18} color="white" />
             </div>
             <span className="sb-logo-text">Fluenix <span className="lab-tag">LAB</span></span>
           </div>
@@ -102,7 +105,7 @@ export default function Sidebar() {
           </div>
         </div>
 
-        <style jsx>{`
+        <style jsx global>{`
           .sb-toggle-btn {
             position: fixed;
             top: 24px;
@@ -175,20 +178,20 @@ export default function Sidebar() {
             }
           }
 
-          .sb-header { padding: 40px 24px 24px; display: flex; align-items: center; justify-content: space-between; gap: 12px; }
-          .sb-root.collapsed .sb-header { padding: 40px 0 24px; justify-content: center; }
+          .sb-header { padding: 24px 24px 16px; display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+          .sb-root.collapsed .sb-header { padding: 24px 0 16px; justify-content: center; }
           
           .header-left { display: flex; align-items: center; gap: 12px; }
           .sb-root.collapsed .header-left { display: none; }
           
-          .logo-box { width: 40px; height: 40px; background: #0f172a; border-radius: 10px; display: flex; align-items: center; justify-content: center; color: white; flex-shrink: 0; }
+          .logo-box { width: 28px; height: 28px; background: #09090b; border-radius: 6px; display: flex; align-items: center; justify-content: center; color: white; flex-shrink: 0; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
           
           .collapse-btn {
             display: flex;
             align-items: center;
             justify-content: center;
-            width: 32px;
-            height: 32px;
+            width: 28px;
+            height: 28px;
             border-radius: 8px;
             border: 1px solid transparent;
             background: transparent;
@@ -206,10 +209,10 @@ export default function Sidebar() {
           }
           
           .sb-logo-text { 
-            font-family: var(--font-serif);
-            font-size: 22px; 
-            font-weight: 900; 
-            color: #0f172a; 
+            font-family: var(--font-dm-sans);
+            font-size: 16px; 
+            font-weight: 800; 
+            color: #09090b; 
             letter-spacing: -0.5px; 
             display: flex; 
             align-items: center; 
@@ -226,44 +229,55 @@ export default function Sidebar() {
             border-radius: 4px; 
           }
 
-          .sb-nav { flex: 1; padding: 20px 16px; display: flex; flex-direction: column; gap: 4px; overflow: hidden; }
+          .sb-nav { flex: 1; padding: 12px 16px; display: flex; flex-direction: column; gap: 2px; overflow-y: auto; overflow-x: hidden; scrollbar-width: none; }
+          .sb-nav::-webkit-scrollbar { display: none; }
+          
           .sb-link { 
             display: flex; 
             align-items: center; 
-            gap: 14px; 
-            padding: 12px 16px; 
-            border-radius: 12px; 
-            text-decoration: none; 
-            color: #64748b; 
+            gap: 12px; 
+            padding: 10px 14px; 
+            border-radius: 10px; 
+            text-decoration: none !important; 
+            color: #0f172a !important; 
             transition: all 0.2s; 
             white-space: nowrap;
           }
-          .sb-link:hover, .sb-link.active { background: #f1f5f9; color: #0f172a; }
+          .sb-link:hover, .sb-link.active { 
+            background: #f1f5f9; 
+          }
 
           .sb-link-label {
             font-family: var(--font-serif);
-            font-size: 16px;
+            font-size: 15px;
             font-weight: 700;
             letter-spacing: -0.2px;
-            transition: opacity 0.2s;
+            transition: all 0.2s;
+            text-decoration: underline !important;
+            text-underline-offset: 4px;
+            text-decoration-color: #cbd5e1 !important;
           }
 
-          .sb-root.collapsed .sb-link { padding: 12px; justify-content: center; }
+          .sb-link:hover .sb-link-label, .sb-link.active .sb-link-label {
+            text-decoration-color: #0f172a !important;
+          }
+
+          .sb-root.collapsed .sb-link { padding: 10px; justify-content: center; }
           .sb-root.collapsed .sb-link-label { display: none; }
           .sb-root.collapsed .sb-link-icon { margin: 0; }
 
           .sb-footer { 
-            padding: 24px; 
+            padding: 16px; 
             border-top: 1px solid #f1f5f9; 
             display: flex; 
             flex-direction: column; 
-            gap: 24px; 
+            gap: 16px; 
             background: #fafafa;
             overflow: visible;
           }
-          .sb-root.collapsed .sb-footer { padding: 24px 0; align-items: center; }
+          .sb-root.collapsed .sb-footer { padding: 16px 0; align-items: center; }
 
-          .footer-section { display: flex; flex-direction: column; gap: 8px; overflow: visible; width: 100%; }
+          .footer-section { display: flex; flex-direction: column; gap: 6px; overflow: visible; width: 100%; }
           .sb-root.collapsed .footer-section { align-items: center; }
 
           .footer-label { 

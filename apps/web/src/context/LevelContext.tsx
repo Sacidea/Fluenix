@@ -25,14 +25,22 @@ export function LevelProvider({ children }: { children: ReactNode }) {
     const fetchUserLevel = async () => {
       try {
         const token = await getToken()
-        const res = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/api/users/${user.id}`, {
-          headers: token ? { Authorization: `Bearer ${token}` } : undefined
+        if (!token) {
+          console.warn('No token available from Clerk yet.')
+          return
+        }
+        const res = await axios.get(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'}/api/users/${user.id}`, {
+          headers: { Authorization: `Bearer ${token}` }
         })
         if (res.data?.level) {
           setInternalLevel(res.data.level)
         }
-      } catch (err) {
-        console.error('Failed to fetch initial level', err)
+      } catch (err: any) {
+        if (err?.code === 'ERR_NETWORK') {
+          console.warn('[Fluenix] Backend unavailable — using default level (B2).')
+        } else {
+          console.warn('Failed to fetch initial level', err?.message)
+        }
       } finally {
         setLoading(false)
       }
@@ -49,7 +57,7 @@ export function LevelProvider({ children }: { children: ReactNode }) {
 
     try {
       const token = await getToken()
-      await axios.put(`${process.env.NEXT_PUBLIC_API_URL}/api/users/${user.id}/level`, {
+      await axios.put(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'}/api/users/${user.id}/level`, {
         email: user.primaryEmailAddress?.emailAddress,
         name: user.fullName,
         level: newLevel

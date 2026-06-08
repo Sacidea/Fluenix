@@ -25,4 +25,38 @@ export class SessionRepository extends BaseRepository<any> implements ISessionRe
       })
     )
   }
+
+  async getStatsAggregations(userId: string): Promise<{ totalSessions: number, averageScore: number }> {
+    return this.withRetry(async () => {
+      const aggregations = await this.prisma.session.aggregate({
+        where: { userId },
+        _count: true,
+        _avg: { score: true }
+      })
+      return {
+        totalSessions: aggregations._count || 0,
+        averageScore: aggregations._avg.score || 0
+      }
+    })
+  }
+
+  async getLastSessionDate(userId: string): Promise<Date | null> {
+    return this.withRetry(async () => {
+      const lastSession = await this.prisma.session.findFirst({
+        where: { userId },
+        orderBy: { createdAt: 'desc' },
+        select: { createdAt: true }
+      })
+      return lastSession?.createdAt || null
+    })
+  }
+
+  async deleteSession(sessionId: string, userId: string): Promise<boolean> {
+    return this.withRetry(async () => {
+      const result = await this.prisma.session.deleteMany({
+        where: { id: sessionId, userId }
+      })
+      return result.count > 0
+    })
+  }
 }

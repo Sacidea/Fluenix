@@ -1,10 +1,10 @@
 import { Router } from 'express'
-import { PrismaClient } from '@prisma/client'
+import prisma from '../config/prisma'
+import { requireAuth } from '../middleware/auth'
 
 const router = Router()
-const prisma = new PrismaClient()
 
-router.get('/rules', async (req, res) => {
+router.get('/rules', requireAuth, async (req, res) => {
   try {
     const rules = await prisma.grammarRule.findMany({
       orderBy: { category: 'asc' }

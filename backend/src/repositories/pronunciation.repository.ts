@@ -17,8 +17,29 @@ export class PronunciationRepository
     })
   }
 
+  async getUnmasteredWords(userId: string): Promise<PronunciationWord[]> {
+    return this.prisma.pronunciationWord.findMany({
+      where: {
+        masteredBy: {
+          none: { userId }
+        }
+      },
+      orderBy: { createdAt: 'asc' }
+    })
+  }
+
   async createWord(data: Prisma.PronunciationWordCreateInput): Promise<PronunciationWord> {
     return this.prisma.pronunciationWord.create({ data })
+  }
+
+  async markWordAsMastered(userId: string, wordId: string): Promise<void> {
+    try {
+      await this.prisma.userMasteredPronunciation.create({
+        data: { userId, wordId }
+      })
+    } catch (e: any) {
+      if (e.code !== 'P2002') throw e // ignore if already mastered
+    }
   }
 }
 

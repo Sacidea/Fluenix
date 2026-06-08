@@ -7,10 +7,13 @@
     "dev:webpack": "next dev --webpack",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "test": "vitest run"
   },
   "dependencies": {
     "@clerk/nextjs": "^7.0.1",
+    "@fluenix/shared": "workspace:*",
+    "@sentry/nextjs": "^10.56.0",
     "aos": "^2.3.4",
     "axios": "^1.13.6",
     "framer-motion": "^12.38.0",

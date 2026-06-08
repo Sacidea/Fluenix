@@ -2,21 +2,8 @@
 
 import React from 'react'
 import Link from 'next/link'
-import { motion } from 'framer-motion'
 import * as Icons from 'lucide-react'
-
-export type ModuleItem = {
-    id: string
-    title: string
-    description: string
-    icon: string
-    href: string
-    available: boolean
-    tag: string
-    color: string
-    bg: string
-    border: string
-}
+import { ModuleItem } from '@fluenix/shared'
 
 interface ModuleCardProps {
     moduleData: ModuleItem
@@ -24,12 +11,17 @@ interface ModuleCardProps {
 }
 
 export function ModuleCard({ moduleData, index }: ModuleCardProps) {
-    const { available, href, color, icon, title, description } = moduleData
+    const { available, href, color, icon, title, description, image } = moduleData
     const IconComponent = (Icons as any)[icon] || Icons.HelpCircle
 
     if (!available) {
         return (
-            <div className="saas-module-card disabled">
+            <div 
+                className="saas-module-card disabled"
+                data-aos="fade-up" 
+                data-aos-delay={index * 100}
+                data-aos-once="true"
+            >
                 <style jsx>{`
                     .saas-module-card.disabled {
                         background: #ffffff;
@@ -44,6 +36,7 @@ export function ModuleCard({ moduleData, index }: ModuleCardProps) {
                         align-items: center;
                         justify-content: center;
                         text-align: center;
+                        overflow: hidden;
                     }
                     .lock-icon {
                         color: #94a3b8;
@@ -79,151 +72,171 @@ export function ModuleCard({ moduleData, index }: ModuleCardProps) {
             className="card-link" 
             style={{ textDecoration: 'none', color: 'inherit', display: 'block', height: '100%' }}
         >
-            <div className="saas-module-card">
-                <div className="card-top-accent" style={{ background: color }} />
+            <div 
+                className="saas-module-card" 
+                data-aos="fade-up" 
+                data-aos-delay={index * 100}
+                data-aos-once="true"
+            >
                 
-                <div className="card-content">
-                    <div className="card-header">
-                        <div className="icon-wrapper" style={{ color: color, backgroundColor: `${color}15` }}>
-                            <IconComponent size={24} strokeWidth={2.5} />
+                <div className="asymmetric-wrapper">
+                    {/* The colored background block that is offset to bottom-left */}
+                    <div className="colored-backdrop" style={{ backgroundColor: `${color}30` }} />
+                    
+                    {/* The image offset to top-right */}
+                    {image && (
+                        <div className="card-image-container">
+                            <img 
+                                src={image} 
+                                alt={title} 
+                                className="card-image"
+                                style={{ objectPosition: moduleData.imagePosition || 'center' }}
+                            />
                         </div>
-                        <div className="badge-wrapper">
-                            <span className="mod-badge">MODULE {index + 1}</span>
-                        </div>
-                    </div>
-
-                    <div className="card-body">
+                    )}
+                    
+                    <div className="card-content">
                         <h3 className="module-title">{title}</h3>
                         <p className="module-desc">{description}</p>
                     </div>
-
-                    <div className="card-footer">
-                        <span className="cta-text" style={{ color: color }}>Launch Application</span>
-                        <div className="cta-arrow" style={{ background: color }}>
-                            <Icons.ArrowRight size={14} color="white" strokeWidth={3} />
-                        </div>
-                    </div>
+                </div>
+                
+                <div 
+                    className="premium-cta" 
+                    style={{ 
+                        background: color, 
+                        color: '#ffffff',
+                        boxShadow: `0 4px 10px -2px ${color}60`
+                    }}
+                >
+                    <span className="cta-text">ENTER MODULE</span>
                 </div>
             </div>
 
             <style jsx>{`
+                .card-link, .card-link:focus, .card-link:active {
+                    outline: none !important;
+                    box-shadow: none !important;
+                    -webkit-tap-highlight-color: transparent;
+                }
+
                 .saas-module-card {
-                    background: #ffffff;
-                    border: 1px solid #f1f5f9;
-                    border-radius: 24px;
+                    background: transparent;
+                    border: none;
                     position: relative;
-                    overflow: hidden;
                     height: 100%;
                     display: flex;
                     flex-direction: column;
-                    box-shadow: 0 10px 40px -10px rgba(15, 23, 42, 0.04);
+                    align-items: center;
                     transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+                    padding-bottom: 16px;
                 }
 
                 .saas-module-card:hover {
                     transform: translateY(-6px);
-                    box-shadow: 0 20px 50px -15px rgba(15, 23, 42, 0.08);
-                    border-color: #e2e8f0;
                 }
 
-                .card-top-accent {
-                    height: 4px;
+                .asymmetric-wrapper {
+                    position: relative;
                     width: 100%;
-                    position: absolute;
-                    top: 0;
-                    left: 0;
-                    opacity: 0.8;
-                    transition: opacity 0.3s;
+                    margin-bottom: 8px; /* Reduced margin to bring button closer */
                 }
 
-                .saas-module-card:hover .card-top-accent {
-                    opacity: 1;
+                .colored-backdrop {
+                    position: absolute;
+                    top: 24px; 
+                    left: 0;
+                    right: 32px; 
+                    bottom: 0px; /* Fully extend to the bottom of the card content area */
+                    border-radius: 12px;
+                    z-index: 1;
+                    transition: all 0.4s ease;
+                }
+
+                .saas-module-card:hover .colored-backdrop {
+                    transform: scale(1.02);
+                }
+
+                .card-image-container {
+                    position: relative;
+                    z-index: 2;
+                    width: calc(100% - 32px);
+                    margin-left: auto;
+                    aspect-ratio: 1.15;
+                    border-radius: 12px;
+                    overflow: hidden;
+                    box-shadow: 0 10px 20px rgba(0,0,0,0.12);
+                    transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+                }
+
+                .saas-module-card:hover .card-image-container {
+                    transform: scale(1.04) rotate(1deg);
+                }
+
+                .card-image {
+                    width: 100%;
+                    height: 100%;
+                    object-fit: cover;
                 }
 
                 .card-content {
-                    padding: 32px;
-                    display: flex;
-                    flex-direction: column;
-                    height: 100%;
-                }
-
-                .card-header {
-                    display: flex;
-                    justify-content: space-between;
-                    align-items: center;
-                    margin-bottom: 32px;
-                }
-
-                .icon-wrapper {
-                    width: 56px;
-                    height: 56px;
-                    border-radius: 16px;
-                    display: flex;
-                    align-items: center;
-                    justify-content: center;
-                    transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
-                }
-
-                .saas-module-card:hover .icon-wrapper {
-                    transform: scale(1.1) rotate(-5deg);
-                }
-
-                .mod-badge {
-                    font-family: var(--font-mono);
-                    font-size: 10px;
-                    font-weight: 800;
-                    color: #64748b;
-                    background: #f8fafc;
-                    padding: 6px 12px;
-                    border-radius: 99px;
-                    letter-spacing: 1px;
+                    position: relative;
+                    z-index: 2;
+                    width: calc(100% - 32px);
+                    padding: 16px 16px 16px 16px; /* Restored more breathing room at the bottom */
+                    text-align: center;
                 }
 
                 .module-title {
                     font-family: var(--font-base);
-                    font-size: 22px;
-                    font-weight: 800;
-                    color: #0f172a;
-                    margin-bottom: 12px;
-                    letter-spacing: -0.5px;
+                    font-size: 20px;
+                    font-weight: 700;
+                    color: #1e293b;
+                    margin-bottom: 8px;
+                    letter-spacing: -0.3px;
                 }
 
                 .module-desc {
                     font-family: var(--font-base);
-                    font-size: 15px;
+                    font-size: 13px;
                     color: #64748b;
-                    line-height: 1.6;
-                    margin-bottom: 40px;
+                    line-height: 1.5;
                     font-weight: 500;
+                    max-width: 280px;
+                    margin: 0 auto;
+                    
+                    /* Clamp to 2 lines to prevent the box from stretching too tall */
+                    display: -webkit-box;
+                    -webkit-line-clamp: 2;
+                    -webkit-box-orient: vertical;
+                    overflow: hidden;
                 }
 
-                .card-footer {
-                    margin-top: auto;
-                    display: flex;
-                    justify-content: space-between;
+                .premium-cta {
+                    display: inline-flex;
                     align-items: center;
-                    padding-top: 24px;
-                    border-top: 1px solid #f1f5f9;
+                    justify-content: center;
+                    padding: 10px 24px;
+                    border-radius: 8px;
+                    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+                    margin-top: 8px;
+                    
+                    /* Align to the bottom right of the background block */
+                    align-self: flex-end;
+                    margin-right: 32px;
                 }
 
                 .cta-text {
                     font-family: var(--font-base);
-                    font-weight: 700;
-                    font-size: 14px;
+                    font-weight: 800;
+                    font-size: 13px;
+                    letter-spacing: 1px;
                 }
 
-                .cta-arrow {
-                    width: 32px;
-                    height: 32px;
-                    border-radius: 50%;
-                    display: flex;
-                    align-items: center;
-                    justify-content: center;
-                    transition: transform 0.3s;
-                }
-
-                .saas-module-card:hover .cta-arrow {
-                    transform: translateX(4px);
+                .saas-module-card:hover .premium-cta {
+                    transform: translateY(-2px);
+                    filter: brightness(1.1);
+                    box-shadow: 0 8px 16px -2px rgba(0,0,0,0.2) !important;
                 }
             `}</style>
         </Link>

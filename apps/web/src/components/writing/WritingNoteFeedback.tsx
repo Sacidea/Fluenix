@@ -15,9 +15,17 @@ interface Feedback {
 
 interface Props {
   feedback: Feedback
+  theme?: 'lilac' | 'yellow' | 'blue'
 }
 
-export function WritingNoteFeedback({ feedback }: Props) {
+export function WritingNoteFeedback({ feedback, theme = 'blue' }: Props) {
+  const themes = {
+    lilac: { bg: '#f5f3ff', text: '#5b21b6', border: '#c4b5fd', pin: '#8b5cf6' },
+    yellow: { bg: '#fffbeb', text: '#92400e', border: '#fde68a', pin: '#f59e0b' },
+    blue: { bg: '#f0f9ff', text: '#0369a1', border: '#bae6fd', pin: '#0ea5e9' }
+  }
+  const t = themes[theme]
+
   return (
     <motion.div 
       className="note-container"
@@ -25,22 +33,22 @@ export function WritingNoteFeedback({ feedback }: Props) {
       animate={{ opacity: 1, x: 0, rotate: -2 }}
       transition={{ type: 'spring', damping: 15, stiffness: 100 }}
     >
-      <div className="note-sticky">
-        <Pin size={24} className="note-pin" />
+      <div className="note-sticky" style={{ background: t.bg, color: t.text }}>
+        <Pin size={24} className="note-pin" style={{ color: t.pin }} />
         
         <header className="note-header">
           <Sparkles size={16} />
           <span>AI REVIEW</span>
         </header>
 
-        <div className="note-score-circle">
+        <div className="note-score-circle" style={{ borderColor: t.pin }}>
           <span className="score-val">{feedback.overall_score}</span>
           <span className="score-label">GRADE</span>
         </div>
 
         <div className="note-content">
           <div className="note-section">
-            <h4 className="note-title">Highlights</h4>
+            <h4 className="note-title" style={{ borderBottomColor: t.border }}>Highlights</h4>
             <ul className="note-list">
               {feedback.strengths.slice(0, 2).map((s, i) => (
                 <li key={i}>{s}</li>
@@ -49,7 +57,7 @@ export function WritingNoteFeedback({ feedback }: Props) {
           </div>
 
           <div className="note-section">
-            <h4 className="note-title">Advice</h4>
+            <h4 className="note-title" style={{ borderBottomColor: t.border }}>Advice</h4>
             <ul className="note-list">
               {feedback.improvements.slice(0, 2).map((s, i) => (
                 <li key={i}>{s}</li>
@@ -57,7 +65,7 @@ export function WritingNoteFeedback({ feedback }: Props) {
             </ul>
           </div>
           
-          <p className="note-summary">
+          <p className="note-summary" style={{ borderTopColor: t.border }}>
             {feedback.overall_feedback.substring(0, 100)}...
           </p>
         </div>
@@ -75,14 +83,12 @@ export function WritingNoteFeedback({ feedback }: Props) {
 
         .note-sticky {
           pointer-events: auto;
-          background: #e0f2fe; /* Technical Blue note */
           padding: 32px 24px 24px;
           box-shadow: 
             2px 4px 10px rgba(0,0,0,0.08),
             0 10px 30px rgba(0,0,0,0.04);
           border-bottom-right-radius: 40px 5px;
           position: relative;
-          color: #0369a1; /* Dark blue text */
         }
 
         .note-pin {
@@ -90,7 +96,6 @@ export function WritingNoteFeedback({ feedback }: Props) {
           top: -12px;
           left: 50%;
           transform: translateX(-50%);
-          color: #38bdf8; /* Blue pin */
           filter: drop-shadow(0 2px 2px rgba(0,0,0,0.1));
         }
 
@@ -108,7 +113,8 @@ export function WritingNoteFeedback({ feedback }: Props) {
         .note-score-circle {
           width: 70px;
           height: 70px;
-          border: 2px dashed #0ea5e9;
+          border-width: 2px;
+          border-style: dashed;
           border-radius: 50%;
           margin: 0 auto 20px;
           display: flex;
@@ -137,7 +143,8 @@ export function WritingNoteFeedback({ feedback }: Props) {
           font-weight: 800;
           text-transform: uppercase;
           margin-bottom: 6px;
-          border-bottom: 1px solid rgba(14, 165, 233, 0.2);
+          border-bottom-width: 1px;
+          border-bottom-style: solid;
         }
 
         .note-list {
@@ -165,7 +172,8 @@ export function WritingNoteFeedback({ feedback }: Props) {
           line-height: 1.5;
           font-style: italic;
           opacity: 0.8;
-          border-top: 1px dashed rgba(14, 165, 233, 0.3);
+          border-top-width: 1px;
+          border-top-style: dashed;
           padding-top: 12px;
         }
 

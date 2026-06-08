@@ -3,43 +3,14 @@ import axios from 'axios'
 import { useUser, useAuth } from '@clerk/nextjs'
 import { useLevel } from '@/context/LevelContext'
 
-export type Message = {
-  role: 'user' | 'assistant'
-  content: string
-}
-
-export type ScenarioType = 'interview' | 'standup' | 'code_review'
-
-export const scenarios = [
-  { id: 'interview', label: 'Technical Interview', icon: 'Terminal', desc: 'FAANG-style technical questions', color: '#6366f1' },
-  { id: 'standup', label: 'Daily Standup', icon: 'Users', desc: 'Agile team communication', color: '#0ea5e9' },
-  { id: 'code_review', label: 'Code Review', icon: 'FileCode', desc: 'Explain your code decisions', color: '#10b981' },
-]
-
-export const missionPool: Record<ScenarioType, string[]> = {
-  interview: [
-    "System Design: Design a highly available, scalable rate limiter for an API gateway.",
-    "Architecture: Explain the tradeoffs between microservices and a monolithic architecture for a fast-growing startup.",
-    "Algorithms: Optimize a Python function that finds the top K frequent elements in a massive 50GB log file."
-  ],
-  standup: [
-    "Backend Sync: You are migrating a legacy payment service to Stripe. You are blocked by a CORS issue on the staging environment.",
-    "Frontend Sync: You just finished implementing React Server Components, but the build time increased by 40%. Explain your next steps.",
-    "DevOps Sync: The production Kubernetes cluster is experiencing OOM (Out of Memory) kills. Give a concise update on your investigation."
-  ],
-  code_review: [
-    "Database Migration: You wrote a PR to add a new column to a 50GB PostgreSQL table, but you didn't include CONCURRENTLY in your index creation.",
-    "Security Flaw: The Senior Architect noticed your new API endpoint doesn't validate user roles before returning sensitive PII data.",
-    "Performance Issue: You used an O(N^2) nested loop to process a dataset of 100,000 records. The reviewer rejected the PR."
-  ]
-}
+import { Message, ScenarioType, scenarios, ScenarioMission } from '@fluenix/shared'
 
 export function useScenarioSession() {
   const { user } = useUser()
   const { getToken } = useAuth()
   const { level } = useLevel()
   const [scenario, setScenario] = useState<ScenarioType>('interview')
-  const [activeMission, setActiveMission] = useState<string>('')
+  const [activeMission, setActiveMission] = useState<ScenarioMission | null>(null)
   const [messages, setMessages] = useState<Message[]>([])
   const [input, setInput] = useState('')
   const [loading, setLoading] = useState(false)
@@ -47,6 +18,8 @@ export function useScenarioSession() {
   const [startTime, setStartTime] = useState<Date | null>(null)
   const [durationStr, setDurationStr] = useState('00:00')
   const [listening, setListening] = useState(false)
+  const [analysisResult, setAnalysisResult] = useState<any>(null)
+  const [isLoadingMission, setIsLoadingMission] = useState(false)
   
   // Voice Selection State
   const [availableVoices, setAvailableVoices] = useState<SpeechSynthesisVoice[]>([])
@@ -58,7 +31,10 @@ export function useScenarioSession() {
   // Unmount Cleanup & Load Voices
   useEffect(() => {
     const loadVoices = () => {
-      const voices = window.speechSynthesis.getVoices().filter(v => v.lang.startsWith('en'))
+      const voices = window.speechSynthesis.getVoices().filter(v => {
+        // Sadece İngilizce sesleri al, fakat "US English" isimli jenerik/kalitesiz sesi filtrele
+        return v.lang.startsWith('en') && !v.name.toLowerCase().includes('us english')
+      })
       setAvailableVoices(voices)
       if (voices.length > 0 && !selectedVoiceURI) {
         // Default to a Google US voice if available, else first english voice
@@ -101,7 +77,15 @@ export function useScenarioSession() {
   const speakAIResponse = (text: string) => {
     window.speechSynthesis.cancel()
     setTimeout(() => {
-      const cleanText = text.replace(/\*\*(.*?)\*\*/g, '$1').replace(/`/g, '')
+      const cleanText = text
+        .replace(/\*\*(.*?)\*\*/g, '$1') // Remove bold asterisks
+        .replace(/`/g, '')               // Remove backticks
+        .replace(/[-*_]{3,}/g, '')       // Remove horizontal rules (---, ***, ___)
+        .replace(/^#+\s+/gm, '')         // Remove heading hashes (###)
+        .replace(/^[-*]\s+/gm, '')       // Remove bullet points (- or *)
+        .replace(/\[([^\]]+)\]/g, '$1')  // Remove brackets but keep text inside
+        .trim()
+        
       const utterance = new SpeechSynthesisUtterance(cleanText)
       utterance.lang = 'en-US'
       utterance.rate = 0.95
@@ -121,21 +105,36 @@ export function useScenarioSession() {
   }
 
   const startScenario = async () => {
-    const missions = missionPool[scenario]
-    const selectedMission = missions[Math.floor(Math.random() * missions.length)]
-    setActiveMission(selectedMission)
-
     setStarted(true)
     setLoading(true)
     setMessages([])
     setStartTime(new Date())
     setDurationStr('00:00')
+    setIsLoadingMission(true)
+    
     try {
-      const res = await axios.post(`${process.env.NEXT_PUBLIC_AI_URL}/scenario/chat`, {
+      const token = await getToken()
+      const missionRes = await axios.post(
+        `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'}/api/scenario/next`,
+        { category: scenario, level },
+        { headers: { Authorization: `Bearer ${token}` } }
+      )
+      
+      let missionContent = ''
+      if (missionRes.data.success && missionRes.data.data) {
+        setActiveMission(missionRes.data.data)
+        missionContent = missionRes.data.data.content
+      } else {
+        throw new Error('Failed to load mission')
+      }
+
+      const res = await axios.post(`${process.env.NEXT_PUBLIC_AI_URL || 'http://localhost:8000'}/scenario/chat`, {
         scenario,
         level,
-        context: selectedMission,
+        context: missionContent,
         messages: [{ role: 'user', content: 'Begin terminal session.' }]
+      }, {
+        headers: { Authorization: `Bearer ${token}` }
       })
       const reply = res.data.reply
       setMessages([
@@ -143,9 +142,18 @@ export function useScenarioSession() {
       ])
       speakAIResponse(reply)
     } catch (err) {
+      if (axios.isAxiosError(err)) {
+        console.error('Status:', err.response?.status);
+        console.error('Data:', err.response?.data);
+        console.error('Message:', err.message);
+        if (!err.response) {
+          console.error('Network error - backend çalışmıyor olabilir');
+        }
+      }
       console.error(err)
     } finally {
       setLoading(false)
+      setIsLoadingMission(false)
     }
   }
 
@@ -158,16 +166,27 @@ export function useScenarioSession() {
     if (!overrideInput) setInput('') 
     setLoading(true)
     try {
-      const res = await axios.post(`${process.env.NEXT_PUBLIC_AI_URL}/scenario/chat`, {
+      const token = await getToken()
+      const res = await axios.post(`${process.env.NEXT_PUBLIC_AI_URL || 'http://localhost:8000'}/scenario/chat`, {
         scenario,
         level,
-        context: activeMission,
+        context: activeMission?.content || '',
         messages: newMessages
+      }, {
+        headers: { Authorization: `Bearer ${token}` }
       })
       const reply = res.data.reply
       setMessages([...newMessages, { role: 'assistant', content: reply }])
       speakAIResponse(reply)
     } catch (err) {
+      if (axios.isAxiosError(err)) {
+        console.error('Status:', err.response?.status);
+        console.error('Data:', err.response?.data);
+        console.error('Message:', err.message);
+        if (!err.response) {
+          console.error('Network error - backend çalışmıyor olabilir');
+        }
+      }
       console.error(err)
     } finally {
       setLoading(false)
@@ -221,13 +240,16 @@ export function useScenarioSession() {
     setStarted(false)
     setMessages([])
     setStartTime(null)
-    setActiveMission('')
+    setActiveMission(null)
+    setAnalysisResult(null)
     window.speechSynthesis.cancel()
     if (listening) stopListening()
   }
 
   const endAndAnalyzeSession = async () => {
-    if (!started || messages.length === 0) {
+    // If the user hasn't said anything (messages only contains the AI's first greeting), don't analyze
+    if (!started || messages.length <= 1) {
+      alert("Not enough conversation to analyze. Session ended.")
       endSession()
       return
     }
@@ -235,21 +257,41 @@ export function useScenarioSession() {
     setLoading(true)
     window.speechSynthesis.cancel()
     try {
-      const res = await axios.post(`${process.env.NEXT_PUBLIC_AI_URL}/scenario/analyze`, {
+      const token = await getToken()
+      const res = await axios.post(`${process.env.NEXT_PUBLIC_AI_URL || 'http://localhost:8000'}/scenario/analyze`, {
         scenario,
         level,
         messages
+      }, {
+        headers: { Authorization: `Bearer ${token}` }
       })
       const raw = res.data.analysis
-      const clean = raw.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim()
-      const parsedAnalysis = JSON.parse(clean)
+      const match = raw.match(/\{[\s\S]*\}/)
+      const clean = match ? match[0] : raw.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim()
+      
+      let parsedAnalysis;
+      try {
+        parsedAnalysis = JSON.parse(clean)
+      } catch (parseError) {
+        console.error("JSON Parse Error:", parseError, "Raw text:", raw)
+        // Fallback analysis object so the app doesn't crash
+        parsedAnalysis = {
+          overall_score: 0,
+          fluency_score: 0,
+          vocabulary_score: 0,
+          technical_accuracy: 0,
+          strengths: [],
+          improvements: ["Not enough data or AI failed to format response."],
+          overall_feedback: "The simulation was incomplete or the AI encountered an error while formatting the analysis."
+        }
+      }
 
       if (user) {
         const token = await getToken()
         const diffSeconds = startTime ? Math.floor((new Date().getTime() - startTime.getTime()) / 1000) : 0
 
         await axios.post(
-          `${process.env.NEXT_PUBLIC_API_URL}/api/sessions`,
+          `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'}/api/sessions`,
           {
             userId: user.id,
             type: 'scenario',
@@ -263,20 +305,36 @@ export function useScenarioSession() {
               strengths: parsedAnalysis.strengths,
               improvements: parsedAnalysis.improvements,
               overall: parsedAnalysis.overall_feedback,
-              context: activeMission
+              context: activeMission?.content || ''
             }
           },
           {
             headers: { Authorization: `Bearer ${token}` }
           }
         )
+
+        if (activeMission?.id) {
+          await axios.post(
+            `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'}/api/scenario/complete`,
+            {
+              userId: user.id,
+              missionId: activeMission.id
+            },
+            {
+              headers: { Authorization: `Bearer ${token}` }
+            }
+          )
+        }
       }
 
-      alert(`Simulation Analyzed! Overall Score: ${parsedAnalysis.overall_score}/100. Check 'My Progress' for details.`)
-      endSession()
+      // Store the analysis result in state instead of alerting
+      setAnalysisResult(parsedAnalysis)
+      // Stop the simulation from continuing, but don't clear the messages yet so we can show feedback
+      setStarted(false)
 
     } catch (err) {
       console.error('Failed to analyze/save session:', err)
+      alert("Failed to analyze session. Please check console.")
       endSession()
     } finally {
       setLoading(false)
@@ -287,6 +345,7 @@ export function useScenarioSession() {
     scenario,
     setScenario,
     activeMission,
+    isLoadingMission,
     messages,
     input,
     setInput,
@@ -304,6 +363,8 @@ export function useScenarioSession() {
     stopListening,
     availableVoices,
     selectedVoiceURI,
-    setSelectedVoiceURI
+    setSelectedVoiceURI,
+    analysisResult,
+    setAnalysisResult
   }
 }

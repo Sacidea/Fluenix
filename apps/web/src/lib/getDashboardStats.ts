@@ -1,6 +1,6 @@
 export async function getDashboardStats(userId: string, token?: string | null) {
     try {
-        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/sessions/stats/${userId}`, {
+        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'}/api/sessions/stats/${userId}`, {
             cache: 'no-store',
             headers: token ? { Authorization: `Bearer ${token}` } : undefined
         })
@@ -12,7 +12,7 @@ export async function getDashboardStats(userId: string, token?: string | null) {
 
 export async function getDashboardSessions(userId: string, token?: string | null) {
     try {
-        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/sessions/user/${userId}`, {
+        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'}/api/sessions/user/${userId}`, {
             cache: 'no-store',
             headers: token ? { Authorization: `Bearer ${token}` } : undefined
         })

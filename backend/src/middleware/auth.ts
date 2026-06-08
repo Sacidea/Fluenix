@@ -33,6 +33,7 @@ let hasWarnedMissingKey = false
 export const requireAuth = (req: Request, res: Response, next: NextFunction) => {
   const token = getBearerToken(req.headers.authorization)
   if (!token) {
+    console.log('[Auth] 401: Missing bearer token. Headers:', req.headers)
     return res.status(401).json({ error: 'Missing bearer token' })
   }
 
@@ -50,6 +51,7 @@ export const requireAuth = (req: Request, res: Response, next: NextFunction) => 
     const decoded = jwt.decode(token)
     const auth = parseAuthPayload(decoded as string | JwtPayload)
     if (!auth) {
+      console.log('[Auth] 401: Invalid payload. Decoded:', decoded)
       return res.status(401).json({ error: 'Invalid auth token payload' })
     }
     req.auth = auth

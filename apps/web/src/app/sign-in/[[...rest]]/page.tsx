@@ -1,9 +1,19 @@
+'use client'
+
 import { SignIn } from '@clerk/nextjs'
+import { AuthLayout } from '@/components/auth/AuthLayout'
+import { sharedClerkAppearance } from '@/lib/clerk-appearance'
 
 export default function SignInPage() {
   return (
-    <div className="flex min-h-screen items-center justify-center">
-      <SignIn forceRedirectUrl="/dashboard" />
-    </div>
+    <AuthLayout 
+      title="Welcome back" 
+      subtitle="Sign in to continue to your dashboard"
+    >
+      <SignIn
+        forceRedirectUrl="/dashboard"
+        appearance={sharedClerkAppearance}
+      />
+    </AuthLayout>
   )
 }

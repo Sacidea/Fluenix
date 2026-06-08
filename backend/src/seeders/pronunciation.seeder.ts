@@ -152,4 +152,58 @@ export const DEFAULT_PRONUNCIATION_WORDS: Prisma.PronunciationWordCreateInput[] 
   { word: 'inference',        category: 'AI',            phonetic: 'IN-fer-uns' },
   { word: 'embedding',        category: 'AI',            phonetic: 'em-BED-ing' },
   { word: 'tokenization',     category: 'AI',            phonetic: 'toh-ken-ih-ZAY-shun' },
+  
+  // System Design
+  { word: 'quorum',           category: 'System Design', phonetic: 'KWOR-um' },
+  { word: 'bottleneck',       category: 'System Design', phonetic: 'BOT-ul-nek' },
+  { word: 'distributed',      category: 'System Design', phonetic: 'dih-STRIB-yoo-ted' },
+  { word: 'partitioning',     category: 'System Design', phonetic: 'par-TISH-uh-ning' },
+  { word: 'consensus',        category: 'System Design', phonetic: 'kun-SEN-sus' },
+  { word: 'pagination',       category: 'System Design', phonetic: 'paj-ih-NAY-shun' },
+  { word: 'resilience',       category: 'System Design', phonetic: 'rih-ZIL-yuns' },
+  { word: 'availability',     category: 'System Design', phonetic: 'uh-vay-luh-BIL-ih-tee' },
+  { word: 'redundancy',       category: 'System Design', phonetic: 'rih-DUN-dun-see' },
+  { word: 'monolith',         category: 'System Design', phonetic: 'MON-uh-lith' },
+  
+  // Mobile & Native
+  { word: 'emulator',         category: 'Mobile',        phonetic: 'EM-yuh-lay-ter' },
+  { word: 'simulator',        category: 'Mobile',        phonetic: 'SIM-yuh-lay-ter' },
+  { word: 'native',           category: 'Mobile',        phonetic: 'NAY-tiv' },
+  { word: 'cross-platform',   category: 'Mobile',        phonetic: 'kros-PLAT-form' },
+  { word: 'gradle',           category: 'Mobile',        phonetic: 'GRAY-dul' },
+  { word: 'composable',       category: 'Mobile',        phonetic: 'kum-POH-zuh-bul' },
+  { word: 'permissions',      category: 'Mobile',        phonetic: 'per-MISH-unz' },
+  { word: 'lifecycle',        category: 'Mobile',        phonetic: 'LYF-sy-kul' },
+  
+  // QA & Testing
+  { word: 'assertion',        category: 'Testing',       phonetic: 'uh-SUR-shun' },
+  { word: 'fixture',          category: 'Testing',       phonetic: 'FIKS-chur' },
+  { word: 'mutation',         category: 'Testing',       phonetic: 'myoo-TAY-shun' },
+  { word: 'coverage',         category: 'Testing',       phonetic: 'KUV-er-ij' },
+  { word: 'mocking',          category: 'Testing',       phonetic: 'MOK-ing' },
+  { word: 'stubbing',         category: 'Testing',       phonetic: 'STUB-ing' },
+  { word: 'integration',      category: 'Testing',       phonetic: 'in-teh-GRAY-shun' },
+  { word: 'usability',        category: 'Testing',       phonetic: 'yoo-zuh-BIL-ih-tee' },
+  
+  // Data Engineering
+  { word: 'pipeline',         category: 'Data Eng',      phonetic: 'PYP-lyn' },
+  { word: 'warehouse',        category: 'Data Eng',      phonetic: 'WAIR-hows' },
+  { word: 'analytics',        category: 'Data Eng',      phonetic: 'an-uh-LIT-iks' },
+  { word: 'visualization',    category: 'Data Eng',      phonetic: 'vizh-oo-uh-lih-ZAY-shun' },
+  { word: 'map-reduce',       category: 'Data Eng',      phonetic: 'map rih-DOOS' },
+  { word: 'dashboard',        category: 'Data Eng',      phonetic: 'DASH-bord' },
+  { word: 'streaming',        category: 'Data Eng',      phonetic: 'STREE-ming' },
+  
+  // Core Computer Science
+  { word: 'deadlock',         category: 'Computer Science', phonetic: 'DED-lok' },
+  { word: 'semaphore',        category: 'Computer Science', phonetic: 'SEM-uh-for' },
+  { word: 'mutex',            category: 'Computer Science', phonetic: 'MYOO-teks' },
+  { word: 'pointer',          category: 'Computer Science', phonetic: 'POYN-ter' },
+  { word: 'memory leak',      category: 'Computer Science', phonetic: 'MEM-uh-ree leek' },
+  { word: 'heap',             category: 'Computer Science', phonetic: 'heep' },
+  { word: 'stack',            category: 'Computer Science', phonetic: 'stak' },
+  { word: 'queue',            category: 'Computer Science', phonetic: 'kyoo' },
+  { word: 'linked list',      category: 'Computer Science', phonetic: 'linkt list' },
+  { word: 'binary tree',      category: 'Computer Science', phonetic: 'BY-nuh-ree tree' },
+  { word: 'hash map',         category: 'Computer Science', phonetic: 'hash map' },
 ]

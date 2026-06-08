@@ -1,9 +1,7 @@
 'use client'
 
 import React, { useState, useEffect, useRef } from 'react'
-import axios from 'axios'
-import { DialogueLine } from '@/data/listening-scenarios'
-import { useLevel } from '@/context/LevelContext'
+import { useListeningSession } from '@/hooks/useListeningSession'
 import { Play, Square, Eye, EyeOff, CheckCircle2, XCircle, Mic, Keyboard, ListChecks, Loader2 } from 'lucide-react'
 
 // --- Types & Globals ---
@@ -18,13 +16,13 @@ declare global {
 }
 
 // --- Helpers ---
-function renderLineWithIdioms(line: DialogueLine) {
-  if (!line.idiomHighlight) return line.text
+function renderLineWithIdioms(line: any) {
+  if (!line.idiomHighlight || !line.idiomHighlight.word) return line.text
 
   const { word, meaning } = line.idiomHighlight
   const parts = line.text.split(new RegExp("(" + word + ")", 'gi'))
 
-  return parts.map((part, i) => {
+  return parts.map((part: string, i: number) => {
     if (part.toLowerCase() === word.toLowerCase()) {
       return (
         <span key={i} className="idiom-highlight">
@@ -39,11 +37,8 @@ function renderLineWithIdioms(line: DialogueLine) {
 
 // --- Component ---
 export function ListeningWorkspace() {
-  const { level } = useLevel()
-  const [scenarios, setScenarios] = useState<any[]>([])
-  const [isLoading, setIsLoading] = useState(true)
+  const { activeScenario: scenario, isLoadingScenario, loadNextScenario, error } = useListeningSession()
 
-  const [currentIndex, setCurrentIndex] = useState(0)
   const [isPlaying, setIsPlaying] = useState(false)
   const [showTranscript, setShowTranscript] = useState(false)
   
@@ -66,28 +61,6 @@ export function ListeningWorkspace() {
 
   const synthRef = useRef<SpeechSynthesis | null>(null)
   const recognitionRef = useRef<any>(null)
-
-  // Fetch scenarios when level changes
-  useEffect(() => {
-    setIsLoading(true)
-    axios.get(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'}/api/listening?level=${level}`)
-      .then(res => {
-        if (res.data.success) {
-          setScenarios(res.data.data)
-          // Reset UI state for new level
-          setCurrentIndex(0)
-          setCurrentQuestionIdx(0)
-          setSelectedOptionId(null)
-          setIsAnswered(false)
-          setShowTranscript(false)
-          setActiveMode('quiz')
-          if (synthRef.current) synthRef.current.cancel()
-          setIsPlaying(false)
-        }
-      })
-      .catch(err => console.error("Failed to load scenarios", err))
-      .finally(() => setIsLoading(false))
-  }, [level])
 
   // Initialize Speech APIs
   useEffect(() => {
@@ -122,48 +95,32 @@ export function ListeningWorkspace() {
       if (synthRef.current) synthRef.current.cancel()
       if (recognitionRef.current && isRecording) recognitionRef.current.stop()
     }
-  }, [currentIndex, isRecording])
+  }, [isRecording])
 
-  const scenario = scenarios[currentIndex]
-
-  // Initialize dictation answers array when scenario changes
+  // Reset state when scenario changes
   useEffect(() => {
-    if (scenario && scenario.dictation) {
+    if (synthRef.current) synthRef.current.cancel()
+    setIsPlaying(false)
+    setCurrentQuestionIdx(0)
+    setSelectedOptionId(null)
+    setIsAnswered(false)
+    setShowTranscript(false)
+    setActiveMode('quiz')
+    
+    if (scenario && scenario.dictation && scenario.dictation.answers) {
       setDictationAnswers(new Array(scenario.dictation.answers.length).fill(''))
       setDictationChecked(false)
     }
     setShadowScore(null)
     setSpokenText('')
-  }, [currentIndex, scenario])
+  }, [scenario])
 
-  if (isLoading) {
+  if (isLoadingScenario || !scenario) {
     return (
-      <div className="listening-workspace" style={{ alignItems: 'center', justifyContent: 'center', padding: '60px', background: 'white', borderRadius: '16px', border: '1px solid #e2e8f0' }}>
-        <Loader2 className="animate-spin text-cyan-500" size={48} style={{ marginBottom: '16px', color: '#06b6d4' }} />
-        <h2 style={{ color: '#0f172a' }}>Loading Scenarios...</h2>
-      </div>
-    )
-  }
-
-  // --- End of Session UI ---
-  if (currentIndex >= scenarios.length && scenarios.length > 0) {
-    return (
-      <div className="listening-workspace" style={{ alignItems: 'center', justifyContent: 'center', textAlign: 'center', background: 'white', padding: '60px', borderRadius: '16px', border: '1px solid #e2e8f0' }}>
-        <h2 style={{ fontSize: '24px', fontWeight: 900, marginBottom: '10px' }}>Session Complete!</h2>
-        <p style={{ color: '#64748b', marginBottom: '30px' }}>You have completed all listening scenarios.</p>
-        <button 
-          className="l-btn-next" 
-          style={{ width: 'auto', padding: '12px 30px' }}
-          onClick={() => {
-            setCurrentIndex(0)
-            setCurrentQuestionIdx(0)
-            setSelectedOptionId(null)
-            setIsAnswered(false)
-            setShowTranscript(false)
-          }}
-        >
-          Restart Session
-        </button>
+      <div className="listening-workspace" style={{ alignItems: 'center', justifyContent: 'center', textAlign: 'center', padding: '60px', background: 'white', borderRadius: '16px', border: '1px solid #e2e8f0', minHeight: '400px' }}>
+        <Loader2 className="animate-spin text-cyan-500" size={48} style={{ marginBottom: '16px', color: '#06b6d4', margin: '0 auto 16px auto' }} />
+        <h2 style={{ fontSize: '24px', fontWeight: 900, marginBottom: '10px', color: '#0f172a' }}>Generating Audio Scenario...</h2>
+        <p style={{ color: '#64748b' }}>Our AI is preparing a new FAANG-style listening comprehension task for you.</p>
       </div>
     )
   }
@@ -191,10 +148,10 @@ export function ListeningWorkspace() {
       const utterance = new SpeechSynthesisUtterance(line.text)
       
       const voices = synthRef.current?.getVoices() || []
-      const englishVoices = voices.filter(v => v.lang.startsWith('en'))
+      const englishVoices = voices.filter(v => v.lang.startsWith('en') && !v.name.toLowerCase().includes('us english'))
       
       if (englishVoices.length > 0) {
-        const voiceIdx = line.speaker.length % englishVoices.length
+        const voiceIdx = (line.speaker.length || 0) % englishVoices.length
         utterance.voice = englishVoices[voiceIdx]
       }
 
@@ -211,7 +168,7 @@ export function ListeningWorkspace() {
   }
 
   // --- Mode: Quiz Logic ---
-  const currentQuestion = scenario.questions[currentQuestionIdx]
+  const currentQuestion = scenario.questions ? scenario.questions[currentQuestionIdx] : null
   const handleOptionClick = (id: string) => {
     if (isAnswered) return
     setSelectedOptionId(id)
@@ -237,13 +194,13 @@ export function ListeningWorkspace() {
     const parts = scenario.dictation.textWithBlanks.split('____')
     return (
       <div className="dictation-line">
-        {parts.map((part, i) => (
+        {parts.map((part: string, i: number) => (
           <React.Fragment key={i}>
             {part}
             {i < parts.length - 1 && (
               <input 
                 type="text" 
-                className={"dictation-input " + (dictationChecked ? (dictationAnswers[i].toLowerCase().trim() === scenario.dictation.answers[i].toLowerCase() ? 'correct' : 'incorrect') : '')}
+                className={"dictation-input " + (dictationChecked ? (dictationAnswers[i]?.toLowerCase().trim() === scenario.dictation.answers[i]?.toLowerCase() ? 'correct' : 'incorrect') : '')}
                 value={dictationAnswers[i] || ''}
                 onChange={(e) => handleDictationChange(i, e.target.value)}
                 placeholder="type here"
@@ -281,28 +238,13 @@ export function ListeningWorkspace() {
     const spokenWords = spoken.toLowerCase().replace(/[.,?!]/g, '').split(' ')
     
     let matchCount = 0
-    targetWords.forEach(word => {
+    targetWords.forEach((word: string) => {
       if (spokenWords.includes(word)) matchCount++
     })
     
     const accuracy = Math.round((matchCount / targetWords.length) * 100)
     setShadowScore(Math.min(100, accuracy))
   }
-
-  // --- Next Scenario Logic ---
-  const handleNextScenario = () => {
-    if (synthRef.current) synthRef.current.cancel()
-    setIsPlaying(false)
-    setCurrentIndex(p => p + 1)
-    setCurrentQuestionIdx(0)
-    setSelectedOptionId(null)
-    setIsAnswered(false)
-    setShowTranscript(false)
-    setActiveMode('quiz')
-  }
-
-  // Fallback check
-  if (!scenario) return null
 
   return (
     <div className="listening-workspace">
@@ -331,7 +273,7 @@ export function ListeningWorkspace() {
 
         {showTranscript && (
           <div className="transcript-panel">
-            {scenario.dialogue.map((line, idx) => (
+            {scenario.dialogue.map((line: any, idx: number) => (
               <div key={idx} className="dialogue-line">
                 <span className="speaker-name">{line.speaker}</span>
                 <span className="speaker-text">{renderLineWithIdioms(line)}</span>
@@ -358,7 +300,7 @@ export function ListeningWorkspace() {
         </div>
 
         {/* --- QUIZ MODE --- */}
-        {activeMode === 'quiz' && (
+        {activeMode === 'quiz' && currentQuestion && (
           <div>
             <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '24px' }}>
               <h3 className="l-question-text" style={{ margin: 0 }}>{currentQuestion.text}</h3>
@@ -368,7 +310,7 @@ export function ListeningWorkspace() {
             </div>
             
             <div className="options-list">
-              {currentQuestion.options.map(opt => {
+              {currentQuestion.options.map((opt: any) => {
                 const isSelected = selectedOptionId === opt.id
                 let btnClass = 'l-option-btn'
                 
@@ -392,15 +334,36 @@ export function ListeningWorkspace() {
               })}
             </div>
 
-            {isAnswered && selectedOption && (
-              <div className={"l-feedback " + (selectedOption.isCorrect ? 'correct' : 'incorrect')}>
-                <div className="feedback-header" style={{ fontWeight: 800, marginBottom: '8px', display: 'flex', alignItems: 'center', gap: '8px', color: selectedOption.isCorrect ? '#059669' : '#dc2626' }}>
-                  {selectedOption.isCorrect ? <><CheckCircle2 size={20} /> Correct!</> : <><XCircle size={20} /> Incorrect</>}
+            {(() => {
+              const selectedOption = currentQuestion.options.find((o: any) => o.id === selectedOptionId)
+              return isAnswered && selectedOption && (
+                <div className={"l-feedback " + (selectedOption.isCorrect ? 'correct' : 'incorrect')}>
+                  <div className="feedback-header" style={{ fontWeight: 800, marginBottom: '8px', display: 'flex', alignItems: 'center', gap: '8px', color: selectedOption.isCorrect ? '#059669' : '#dc2626' }}>
+                    {selectedOption.isCorrect ? <><CheckCircle2 size={20} /> Correct!</> : <><XCircle size={20} /> Incorrect</>}
+                  </div>
+                  <p className="feedback-explanation" style={{ fontSize: '14px', lineHeight: 1.6, color: '#475569', margin: 0 }}>
+                    {selectedOption.explanation}
+                  </p>
                 </div>
-                <p className="feedback-explanation" style={{ fontSize: '14px', lineHeight: 1.6, color: '#475569', margin: 0 }}>
-                  {selectedOption.explanation}
-                </p>
-              </div>
+              )
+            })()}
+
+            {isAnswered && (
+              <button 
+                className="l-btn-next" 
+                onClick={() => {
+                  if (currentQuestionIdx < scenario.questions.length - 1) {
+                    setCurrentQuestionIdx(p => p + 1)
+                    setSelectedOptionId(null)
+                    setIsAnswered(false)
+                  } else {
+                    // All questions done
+                  }
+                }}
+                style={{ marginTop: '24px', display: currentQuestionIdx < scenario.questions.length - 1 ? 'flex' : 'none' }}
+              >
+                Next Question
+              </button>
             )}
           </div>
         )}
@@ -450,10 +413,10 @@ export function ListeningWorkspace() {
 
         <button 
           className="l-btn-next" 
-          onClick={handleNextScenario}
-          style={{ marginTop: '32px' }}
+          onClick={loadNextScenario}
+          style={{ marginTop: '32px', background: '#0891b2' }}
         >
-          {currentIndex === scenarios.length - 1 ? 'Finish Session' : 'Next Scenario'}
+          Next AI Scenario
         </button>
 
       </div>

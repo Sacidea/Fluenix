@@ -19,8 +19,9 @@ export function useDashboardData(userId?: string) {
         setLoading(true)
         try {
             const token = await getToken()
-            const res = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/api/sessions/stats/${userId}`, {
-                headers: token ? { Authorization: `Bearer ${token}` } : undefined
+            if (!token) return // Wait for Clerk to initialize
+            const res = await axios.get(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'}/api/sessions/stats/${userId}`, {
+                headers: { Authorization: `Bearer ${token}` }
             })
             setStats(res.data)
         } catch {

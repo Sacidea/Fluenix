@@ -3,7 +3,7 @@
 import React from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { ClipboardList, PenLine, Send } from 'lucide-react'
-import { WritingExercise, WritingMission } from '@/data/writingExercises'
+import { WritingExercise, WritingMission } from '@fluenix/shared'
 import { WritingNoteFeedback } from './WritingNoteFeedback'
 
 interface Props {
@@ -16,6 +16,7 @@ interface Props {
   loading?: boolean
   feedback?: any
   error?: string | null
+  onNext?: () => void
 }
 
 export function WritingPaperCanvas({ 
@@ -27,8 +28,41 @@ export function WritingPaperCanvas({
   disabled,
   loading,
   feedback,
-  error
+  error,
+  onNext
 }: Props) {
+  const renderReferenceData = (text: string) => {
+    const isDiff = text.includes('diff --git') || text.includes('--- a/') || text.includes('+++ b/');
+    
+    if (isDiff) {
+      return text.split('\n').map((line, i) => {
+        if (line.startsWith('+') && !line.startsWith('+++')) {
+          return <div key={i} className="diff-line diff-add">{line}</div>
+        } else if (line.startsWith('-') && !line.startsWith('---')) {
+          return <div key={i} className="diff-line diff-remove">{line}</div>
+        } else if (line.startsWith('@@')) {
+          return <div key={i} className="diff-line diff-meta">{line}</div>
+        } else if (line.startsWith('diff') || line.startsWith('index') || line.startsWith('---') || line.startsWith('+++')) {
+          return <div key={i} className="diff-line diff-header">{line}</div>
+        }
+        return <div key={i} className="diff-line">{line}</div>
+      })
+    }
+
+    return text.split('\n').map((line, i) => {
+      const colonIndex = line.indexOf(':');
+      if (colonIndex !== -1 && colonIndex < 25) {
+        return (
+          <div key={i} className="ref-line-kv">
+            <strong className="ref-key">{line.substring(0, colonIndex + 1)}</strong>
+            <span className="ref-val">{line.substring(colonIndex + 1)}</span>
+          </div>
+        )
+      }
+      return <div key={i} className="ref-line-normal">{line}</div>
+    })
+  }
+
   return (
     <motion.div 
       className="ide-workspace"
@@ -51,7 +85,7 @@ export function WritingPaperCanvas({
               
               {activeMission.referenceData && (
                 <div className="code-diff">
-                  {activeMission.referenceData}
+                  {renderReferenceData(activeMission.referenceData)}
                 </div>
               )}
             </>
@@ -79,20 +113,37 @@ export function WritingPaperCanvas({
         />
 
         <AnimatePresence>
-          {feedback && <WritingNoteFeedback feedback={feedback} />}
+          {feedback && (
+            <WritingNoteFeedback 
+              feedback={feedback} 
+              theme={exercise.id === 'pr_description' ? 'lilac' : exercise.id === 'commit_message' ? 'yellow' : 'blue'}
+            />
+          )}
         </AnimatePresence>
 
         <footer className="editor-footer">
           {error && <span style={{ color: '#ef4444', marginRight: 'auto', fontSize: '14px' }}>{error}</span>}
           
-          <button
-            className="submit-btn"
-            onClick={onSubmit}
-            disabled={disabled || loading || !value.trim()}
-          >
-            <Send size={16} className={loading ? 'spinning' : ''} />
-            <span>{loading ? 'ANALYZING...' : 'SUBMIT DRAFT'}</span>
-          </button>
+          <div style={{ display: 'flex', gap: '12px', marginLeft: 'auto' }}>
+            <button
+              className="submit-btn"
+              onClick={onSubmit}
+              disabled={disabled || loading || !value.trim() || !!feedback}
+            >
+              <Send size={16} className={loading ? 'spinning' : ''} />
+              <span>{loading ? 'ANALYZING...' : 'SUBMIT DRAFT'}</span>
+            </button>
+            
+            {feedback && onNext && (
+              <button
+                className="submit-btn"
+                style={{ background: '#10b981', borderColor: '#059669' }}
+                onClick={onNext}
+              >
+                <span>NEXT TASK</span>
+              </button>
+            )}
+          </div>
         </footer>
       </section>
     </motion.div>

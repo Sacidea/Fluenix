@@ -8,16 +8,6 @@
 
 /* ─── NAV ─────────────────────────────────────────────── */
 @media (max-width: 640px) {
-  .nav, .sc-nav, .wr-nav, .pr-nav, .pn-nav {
-    padding: 0 20px;
-    height: 60px;/* ─── BREAKPOINTS ────────────────────────────
-   sm: 640px  (telefon)
-   md: 768px  (tablet)
-   lg: 1024px (küçük masaüstü)
-─────────────────────────────────────────────── */
-
-/* ─── Nav ────────────────────────────────── */
-@media (max-width: 640px) {
   .pageNav {
     padding: 0 20px;
   }
@@ -41,8 +31,6 @@
   }
   .pageTitle {
     font-size: 22px;
-  }
-}
   }
 }
 

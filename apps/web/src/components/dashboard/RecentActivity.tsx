@@ -1,5 +1,6 @@
 import React, { useState } from 'react'
-import { CheckCircle2, Terminal, FileCode, Users, PenLine, Mic, GitPullRequest, X } from 'lucide-react'
+import { CheckCircle2, Terminal, FileCode, Users, PenLine, Mic, GitPullRequest, X, Trash2 } from 'lucide-react'
+import * as Icons from 'lucide-react'
 
 interface Session {
   id: string
@@ -12,6 +13,7 @@ interface Session {
 
 interface Props {
   sessions: Session[]
+  onDelete?: (id: string) => void
 }
 
 const getIcon = (type: string, scenario: string) => {
@@ -36,7 +38,7 @@ const getScoreColor = (score: number | null) => {
   return '#ef4444'
 }
 
-export function RecentActivity({ sessions }: Props) {
+export function RecentActivity({ sessions, onDelete }: Props) {
   const [selectedSession, setSelectedSession] = useState<Session | null>(null)
   const recent = sessions.slice(0, 5)
 
@@ -76,36 +78,47 @@ export function RecentActivity({ sessions }: Props) {
 
       <div className="activity-list">
         {recent.map((s, i) => (
-          <div 
-            key={s.id || i} 
-            className="activity-item" 
-            onClick={() => setSelectedSession(s)}
-          >
-            <div className="activity-icon-wrapper" style={{ color: getScoreColor(s.score) }}>
-              {getIcon(s.type, s.scenario)}
+          <div key={s.id || i} className="activity-item-wrapper">
+            <div 
+              className="activity-item" 
+              onClick={() => setSelectedSession(s)}
+            >
+              <div className="activity-icon-wrapper" style={{ color: getScoreColor(s.score) }}>
+                {getIcon(s.type, s.scenario)}
+              </div>
+              
+              <div className="activity-content">
+                <div className="activity-main">
+                  <span className="activity-type">
+                    {s.type.toUpperCase()} 
+                    <span className="activity-dot">•</span> 
+                    {s.scenario.replace(/_/g, ' ')}
+                  </span>
+                  <span className="activity-time">
+                    {new Date(s.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}
+                  </span>
+                </div>
+                <div className="activity-score-wrapper">
+                  {s.score !== null ? (
+                    <span className="activity-score" style={{ color: getScoreColor(s.score) }}>
+                      {Math.round(s.score)}
+                    </span>
+                  ) : (
+                    <span className="activity-score" style={{ color: '#64748b' }}>-</span>
+                  )}
+                </div>
+              </div>
             </div>
             
-            <div className="activity-content">
-              <div className="activity-main">
-                <span className="activity-type">
-                  {s.type.toUpperCase()} 
-                  <span className="activity-dot">•</span> 
-                  {s.scenario.replace(/_/g, ' ')}
-                </span>
-                <span className="activity-time">
-                  {new Date(s.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}
-                </span>
-              </div>
-              <div className="activity-score-wrapper">
-                {s.score !== null ? (
-                  <span className="activity-score" style={{ color: getScoreColor(s.score) }}>
-                    {Math.round(s.score)}
-                  </span>
-                ) : (
-                  <span className="activity-score" style={{ color: '#64748b' }}>-</span>
-                )}
-              </div>
-            </div>
+            {onDelete && (
+              <button 
+                className="delete-activity-btn" 
+                onClick={(e) => { e.stopPropagation(); onDelete(s.id); }}
+                title="Delete Session"
+              >
+                <Icons.Trash2 size={16} />
+              </button>
+            )}
           </div>
         ))}
       </div>
@@ -185,7 +198,14 @@ export function RecentActivity({ sessions }: Props) {
           gap: 12px;
         }
 
+        .activity-item-wrapper {
+          display: flex;
+          align-items: center;
+          gap: 8px;
+        }
+
         .activity-item {
+          flex: 1;
           display: flex;
           align-items: center;
           gap: 16px;
@@ -202,6 +222,25 @@ export function RecentActivity({ sessions }: Props) {
           border-color: var(--color-border-mid);
           transform: translateY(-1px);
           box-shadow: var(--shadow-sm);
+        }
+
+        .delete-activity-btn {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          width: 48px;
+          height: 74px;
+          background: #fef2f2;
+          color: #ef4444;
+          border: 1px solid #fee2e2;
+          border-radius: var(--radius-md);
+          cursor: pointer;
+          transition: all 0.2s ease;
+        }
+
+        .delete-activity-btn:hover {
+          background: #fee2e2;
+          transform: translateY(-1px);
         }
 
         .activity-icon-wrapper {

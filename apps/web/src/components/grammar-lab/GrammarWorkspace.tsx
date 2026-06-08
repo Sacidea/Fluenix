@@ -1,8 +1,9 @@
 'use client'
 
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useCallback } from 'react'
 import axios from 'axios'
 import { useLevel } from '@/context/LevelContext'
+import { useAuth } from '@clerk/nextjs'
 import { CheckCircle2, XCircle, AlertCircle, Loader2, MessageSquare } from 'lucide-react'
 
 // --- Types ---
@@ -26,10 +27,12 @@ type GrammarExercise = {
 // --- Component ---
 export function GrammarWorkspace() {
   const { level } = useLevel()
-  const [exercises, setExercises] = useState<GrammarExercise[]>([])
+  const { getToken } = useAuth()
+  
+  const [exercise, setExercise] = useState<GrammarExercise | null>(null)
   const [isLoading, setIsLoading] = useState(true)
+  const [sessionCount, setSessionCount] = useState(0)
 
-  const [currentIndex, setCurrentIndex] = useState(0)
   const [wrongShakeIndex, setWrongShakeIndex] = useState<number | null>(null)
   
   // State for the currently found error
@@ -37,20 +40,35 @@ export function GrammarWorkspace() {
   const [selectedFix, setSelectedFix] = useState<string | null>(null)
   const [isAnswered, setIsAnswered] = useState(false)
 
-  // Fetch exercises when level changes
-  useEffect(() => {
+  const fetchExercise = useCallback(async () => {
     setIsLoading(true)
-    axios.get(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'}/api/grammar?level=${level}`)
-      .then(res => {
-        if (res.data.success) {
-          setExercises(res.data.data)
-          setCurrentIndex(0)
-          resetExerciseState()
-        }
-      })
-      .catch(err => console.error("Failed to load grammar exercises", err))
-      .finally(() => setIsLoading(false))
-  }, [level])
+    try {
+      const token = await getToken()
+      if (!token) return // Wait for token
+      const res = await axios.post(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'}/api/grammar/next`, 
+        { level },
+        { headers: { Authorization: `Bearer ${token}` } }
+      )
+      
+      if (res.data.success && res.data.data) {
+        setExercise(res.data.data)
+      } else {
+        setExercise(null)
+      }
+    } catch (err) {
+      console.error("Failed to load grammar exercise", err)
+      setExercise(null)
+    } finally {
+      setIsLoading(false)
+    }
+  }, [level, getToken])
+
+  // Fetch when level changes or we reset
+  useEffect(() => {
+    setSessionCount(0)
+    resetExerciseState()
+    fetchExercise()
+  }, [level, fetchExercise])
 
   const resetExerciseState = () => {
     setWrongShakeIndex(null)
@@ -60,8 +78,9 @@ export function GrammarWorkspace() {
   }
 
   const handleNext = () => {
-    setCurrentIndex(p => p + 1)
+    setSessionCount(p => p + 1)
     resetExerciseState()
+    fetchExercise()
   }
 
   const handleSegmentClick = (segment: TextSegment, index: number) => {
@@ -75,10 +94,24 @@ export function GrammarWorkspace() {
     }
   }
 
-  const handleOptionSelect = (option: string) => {
-    if (isAnswered) return
+  const handleOptionSelect = async (option: string) => {
+    if (isAnswered || !exercise) return
     setSelectedFix(option)
     setIsAnswered(true)
+
+    const errorSegment = foundErrorIndex !== null ? exercise.segments[foundErrorIndex] : null
+    const isCorrect = errorSegment && option === errorSegment.correctOption
+
+    // Her durumda (doğru veya yanlış) soruyu gördü olarak işaretle ki bir sonraki soruya geçebilsin.
+    try {
+      const token = await getToken()
+      await axios.post(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'}/api/grammar/mark-seen`, 
+        { exerciseId: exercise.id },
+        { headers: token ? { Authorization: `Bearer ${token}` } : undefined }
+      )
+    } catch (err) {
+      console.error('Failed to mark exercise as seen', err)
+    }
   }
 
   if (isLoading) {
@@ -90,14 +123,12 @@ export function GrammarWorkspace() {
     )
   }
 
-  const exercise = exercises[currentIndex]
-
   if (!exercise) {
     return (
       <div className="grammar-lab-workspace" style={{ alignItems: 'center', justifyContent: 'center', textAlign: 'center', padding: '60px' }}>
         <CheckCircle2 size={64} color="#10b981" style={{ marginBottom: '24px' }} />
-        <h2 style={{ fontSize: '24px', fontWeight: 900, marginBottom: '10px' }}>Level Complete!</h2>
-        <p style={{ color: '#64748b' }}>You have resolved all grammar issues for this level.</p>
+        <h2 style={{ fontSize: '24px', fontWeight: 900, marginBottom: '10px' }}>Generating Scenarios...</h2>
+        <p style={{ color: '#64748b' }}>Our AI is preparing new advanced grammar exercises for you. Check back in a few seconds!</p>
       </div>
     )
   }
@@ -118,7 +149,7 @@ export function GrammarWorkspace() {
           </div>
         </div>
         <div style={{ background: '#e2e8f0', padding: '6px 12px', borderRadius: '20px', fontSize: '13px', fontWeight: 700, color: '#475569' }}>
-          Exercise {currentIndex + 1} of {exercises.length}
+          Exercise {sessionCount + 1}
         </div>
       </div>
 
@@ -201,7 +232,7 @@ export function GrammarWorkspace() {
                 </h4>
                 <p>{errorSegment.explanation}</p>
                 <button className="btn-next-exercise" onClick={handleNext}>
-                  {currentIndex === exercises.length - 1 ? 'Finish Module' : 'Next Exercise'}
+                  Next Exercise
                 </button>
               </div>
             )}

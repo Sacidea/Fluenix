@@ -8,12 +8,13 @@ import { requireAuth, requireBodyUserMatch, requireUserParamMatch } from '../mid
 
 const router = Router()
 const sessionRepo: ISessionRepository = new SessionRepository(prisma)
-const sessionService = new SessionService(sessionRepo)
+const sessionService = new SessionService(sessionRepo, prisma)
 const sessionController = new SessionController(sessionService)
 
 router.use(requireAuth)
 router.post('/', requireBodyUserMatch(), sessionController.createSession)
 router.get('/user/:userId', requireUserParamMatch(), sessionController.getUserSessions)
 router.get('/stats/:userId', requireUserParamMatch(), sessionController.getUserStats)
+router.delete('/:id', requireAuth, sessionController.deleteSession)
 
 export default router

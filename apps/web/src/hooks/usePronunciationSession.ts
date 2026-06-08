@@ -38,15 +38,20 @@ export function usePronunciationSession() {
 
   useEffect(() => {
     // Fetch Words
-    axios.get(`${process.env.NEXT_PUBLIC_API_URL}/api/pronunciation/words`)
-      .then(res => {
+    const fetchWords = async () => {
+      try {
+        const token = await getToken()
+        const res = await axios.get(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'}/api/pronunciation/words`, {
+          headers: { Authorization: `Bearer ${token}` }
+        })
         setWords(res.data)
         localStorage.setItem('fluenix_words_cache', JSON.stringify(res.data))
-      })
-      .catch(() => {
+      } catch {
         const cached = localStorage.getItem('fluenix_words_cache')
         if (cached) setWords(JSON.parse(cached))
-      })
+      }
+    }
+    fetchWords()
 
     if (typeof window !== 'undefined') {
       const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition
@@ -106,11 +111,14 @@ export function usePronunciationSession() {
     setLoading(true)
     setResult(null)
     try {
+      const token = await getToken()
       // 1. Get AI Analysis
-      const res = await axios.post(`${process.env.NEXT_PUBLIC_AI_URL}/pronunciation/analyze`, {
+      const res = await axios.post(`${process.env.NEXT_PUBLIC_AI_URL || 'http://localhost:8000'}/pronunciation/analyze`, {
         transcript: heard,
         target_word: words[currentIndex].word,
         level: userLevel
+      }, {
+        headers: { Authorization: `Bearer ${token}` }
       })
       const raw = res.data.result
       const clean = raw.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim()
@@ -119,9 +127,8 @@ export function usePronunciationSession() {
 
       // 2. Save Session to Backend (if user is logged in)
       if (user) {
-        const token = await getToken()
         await axios.post(
-          `${process.env.NEXT_PUBLIC_API_URL}/api/sessions`,
+          `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'}/api/sessions`,
           {
             userId: user.id,
             type: 'pronunciation',
@@ -156,12 +163,13 @@ export function usePronunciationSession() {
     // Wrap in a tiny timeout to ensure the cancel operation completes 
     // before we queue the new utterance. This prevents race conditions.
     setTimeout(() => {
-      const utterance = new SpeechSynthesisUtterance(words[currentIndex].word)
+      // Kelimenin başına virgül ekleyerek TTS motorunun ilk sesi yutmasını engelliyoruz
+      const utterance = new SpeechSynthesisUtterance(", " + words[currentIndex].word)
       utterance.lang = 'en-US'
       utterance.rate = 0.8
       
       // Try to explicitly set an English voice if loaded, improves reliability
-      const voices = window.speechSynthesis.getVoices()
+      const voices = window.speechSynthesis.getVoices().filter(v => !v.name.toLowerCase().includes('us english'))
       const usVoice = voices.find(v => v.lang === 'en-US' || v.lang === 'en_US')
       if (usVoice) utterance.voice = usVoice
 

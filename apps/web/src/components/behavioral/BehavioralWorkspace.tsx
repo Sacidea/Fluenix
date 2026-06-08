@@ -9,9 +9,9 @@ import '@/styles/behavioral.css'
 export function BehavioralWorkspace() {
   const { level } = useLevel()
   const {
-    questions,
     activeQuestion,
-    changeQuestion,
+    isLoadingQuestion,
+    loadNextQuestion,
     situation, setSituation,
     task, setTask,
     action, setAction,
@@ -22,35 +22,30 @@ export function BehavioralWorkspace() {
     analyzeAnswer
   } = useBehavioralSession()
 
+  if (isLoadingQuestion || !activeQuestion) {
+    return (
+      <div className="behavioral-workspace" style={{ alignItems: 'center', justifyContent: 'center', textAlign: 'center', padding: '60px' }}>
+        <Loader2 className="animate-spin" size={48} style={{ marginBottom: '16px', color: '#3b82f6' }} />
+        <h2 style={{ fontSize: '24px', fontWeight: 900, marginBottom: '10px', color: '#0f172a' }}>Generating Scenario...</h2>
+        <p style={{ color: '#64748b' }}>Our AI is preparing a new FAANG-style behavioral interview question for you.</p>
+      </div>
+    )
+  }
+
   return (
     <div className="behavioral-workspace">
-      {/* Sidebar / Question Selector */}
-      <div style={{ marginBottom: '32px', display: 'flex', gap: '12px', overflowX: 'auto', paddingBottom: '12px' }}>
-        {questions.map(q => (
-          <button
-            key={q.id}
-            onClick={() => changeQuestion(q.id)}
-            style={{
-              padding: '8px 16px',
-              borderRadius: '20px',
-              border: '1px solid',
-              borderColor: activeQuestion.id === q.id ? '#3b82f6' : '#e2e8f0',
-              background: activeQuestion.id === q.id ? '#eff6ff' : 'white',
-              color: activeQuestion.id === q.id ? '#1d4ed8' : '#64748b',
-              fontWeight: 600,
-              fontSize: '14px',
-              whiteSpace: 'nowrap',
-              cursor: 'pointer',
-              transition: 'all 0.2s'
-            }}
-          >
-            {q.category}
-          </button>
-        ))}
+      {/* Header Panel */}
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
+        <div className="question-category" style={{ margin: 0 }}>{activeQuestion.category}</div>
+        <button 
+          onClick={loadNextQuestion} 
+          style={{ padding: '8px 16px', background: '#eff6ff', color: '#1d4ed8', borderRadius: '20px', fontSize: '13px', fontWeight: 700, border: '1px solid #bfdbfe', cursor: 'pointer' }}
+        >
+          Skip / Next Question
+        </button>
       </div>
 
       <div className="question-panel">
-        <div className="question-category">{activeQuestion.category}</div>
         <h2 className="question-text">{activeQuestion.question}</h2>
         <div className="question-context">
           <Lightbulb size={16} style={{ display: 'inline', marginRight: '6px', color: '#f59e0b' }} />
@@ -65,7 +60,7 @@ export function BehavioralWorkspace() {
           </label>
           <textarea
             className="star-textarea"
-            placeholder={activeQuestion.tips[0]}
+            placeholder="Describe the background and context. What was the challenge?"
             value={situation}
             onChange={e => setSituation(e.target.value)}
             disabled={isAnalyzing}
@@ -78,7 +73,7 @@ export function BehavioralWorkspace() {
           </label>
           <textarea
             className="star-textarea"
-            placeholder={activeQuestion.tips[1]}
+            placeholder="What exactly were you responsible for in this situation?"
             value={task}
             onChange={e => setTask(e.target.value)}
             disabled={isAnalyzing}
@@ -91,7 +86,7 @@ export function BehavioralWorkspace() {
           </label>
           <textarea
             className="star-textarea"
-            placeholder={activeQuestion.tips[2]}
+            placeholder="What specific steps did you take? Focus on 'I', not 'we'."
             value={action}
             onChange={e => setAction(e.target.value)}
             disabled={isAnalyzing}
@@ -104,7 +99,7 @@ export function BehavioralWorkspace() {
           </label>
           <textarea
             className="star-textarea"
-            placeholder={activeQuestion.tips[3]}
+            placeholder="What was the outcome? Use metrics or data if possible."
             value={result}
             onChange={e => setResult(e.target.value)}
             disabled={isAnalyzing}

@@ -3,6 +3,7 @@
 import React from 'react'
 import * as Icons from 'lucide-react'
 import { Stats } from '../hooks/useProgressData'
+import { SessionsIcon, AccuracyIcon, StreakIcon, ActivityIcon } from './icons/PremiumIcons'
 
 interface StatsCardsProps {
     stats: Stats | null
@@ -17,10 +18,10 @@ export function StatsCards({ stats }: StatsCardsProps) {
     const progressPercent = ((xp - currentLevelXp) / (nextLevelXp - currentLevelXp)) * 100
 
     const config = [
-        { icon: 'Target', value: totalSessions, label: 'Operational Sessions', color: '#6366f1' },
-        { icon: 'TrendingUp', value: stats?.averageScore ? `${Math.round(stats.averageScore)}%` : '—', label: 'Technical Accuracy', color: '#0ea5e9' },
-        { icon: 'Zap', value: stats?.streak ?? 0, label: 'Consistency Streak', color: '#f59e0b' },
-        { icon: 'Calendar', value: stats?.lastSession ? new Date(stats.lastSession).toLocaleDateString('en-US', { day: '2-digit', month: 'short' }) : '—', label: 'Last Activity', color: '#10b981' },
+        { iconComp: SessionsIcon, value: totalSessions, label: 'Operational Sessions', color: '#3B82F6' },
+        { iconComp: AccuracyIcon, value: stats?.averageScore ? `${Math.round(stats.averageScore)}%` : '—', label: 'Technical Accuracy', color: '#22C55E' },
+        { iconComp: StreakIcon, value: stats?.streak ?? 0, label: 'Consistency Streak', color: '#FFC107' },
+        { iconComp: ActivityIcon, value: stats?.lastSession ? new Date(stats.lastSession).toLocaleDateString('en-US', { day: '2-digit', month: 'short' }) : '—', label: 'Last Activity', color: '#F43F5E' },
     ]
 
     return (
@@ -44,12 +45,12 @@ export function StatsCards({ stats }: StatsCardsProps) {
             {/* STATS DOSSIERS */}
             <div className="ledger-stats">
                 {config.map((s) => {
-                    const Icon = (Icons as any)[s.icon]
+                    const Icon = s.iconComp
                     return (
                         <div key={s.label} className="stat-dossier">
                             <div className="stat-top">
-                                <div className="icon-frame" style={{ color: s.color, background: `${s.color}10` }}>
-                                    <Icon size={16} strokeWidth={2.5} />
+                                <div className="icon-frame">
+                                    <Icon size={28} />
                                 </div>
                                 <span className="stat-label">{s.label}</span>
                             </div>

@@ -1,0 +1,7 @@
+# Fluenix robots.txt
+User-agent: *
+Allow: /
+Disallow: /dashboard/
+Disallow: /api/
+
+Sitemap: https://fluenix.app/sitemap.xml

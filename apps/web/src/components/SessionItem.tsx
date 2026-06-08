@@ -8,6 +8,7 @@ interface SessionItemProps {
     session: Session
     index?: number
     onSelect?: (session: Session) => void
+    onDelete?: (id: string) => void
 }
 
 const labelMap: Record<string, string> = {
@@ -29,7 +30,7 @@ const getLabel = (session: { type: string; scenario?: string }) => {
     return labelMap[raw] ?? raw
 }
 
-export function SessionItem({ session, index = 0, onSelect }: SessionItemProps) {
+export function SessionItem({ session, index = 0, onSelect, onDelete }: SessionItemProps) {
     const Icon = session.type === 'scenario' ? Icons.MessagesSquare :
                  session.type === 'pronunciation' ? Icons.Mic : Icons.PenTool
 
@@ -71,7 +72,18 @@ export function SessionItem({ session, index = 0, onSelect }: SessionItemProps) 
                 ) : (
                     <div className="entry-status">COMPLETE</div>
                 )}
-                <Icons.ChevronRight size={14} className="entry-chevron" />
+                
+                {onDelete ? (
+                    <button 
+                        className="delete-entry-btn" 
+                        onClick={(e) => { e.stopPropagation(); onDelete(session.id); }}
+                        title="Delete Session"
+                    >
+                        <Icons.Trash2 size={16} />
+                    </button>
+                ) : (
+                    <Icons.ChevronRight size={14} className="entry-chevron" />
+                )}
             </div>
 
             <style jsx>{`
@@ -165,6 +177,25 @@ export function SessionItem({ session, index = 0, onSelect }: SessionItemProps) 
 
                 .ledger-entry:hover .entry-chevron {
                     color: #4338ca;
+                }
+
+                .delete-entry-btn {
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    width: 36px;
+                    height: 36px;
+                    border-radius: 8px;
+                    background: transparent;
+                    color: #ef4444;
+                    border: none;
+                    cursor: pointer;
+                    transition: all 0.2s ease;
+                    margin-left: 8px;
+                }
+
+                .delete-entry-btn:hover {
+                    background: #fef2f2;
                 }
             `}</style>
         </div>

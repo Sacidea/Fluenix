@@ -1,10 +1,10 @@
 import React from 'react'
 import { Send, Mic, Square, RotateCcw, CheckCircle } from 'lucide-react'
-import { Message } from '@/hooks/useScenarioSession'
+import { Message } from '@fluenix/shared'
 
 interface SimulationWorkspaceProps {
   activeScenario: { id: string; label: string; desc: string; color: string }
-  activeMission: string
+  activeMission: any
   durationStr: string
   messages: Message[]
   input: string
@@ -16,7 +16,7 @@ interface SimulationWorkspaceProps {
   sendMessage: () => void
   endSession: () => void
   endAndAnalyzeSession: () => void
-  bottomRef: React.RefObject<HTMLDivElement>
+  bottomRef: React.RefObject<HTMLDivElement | null>
 }
 
 export function SimulationWorkspace({
@@ -52,7 +52,7 @@ export function SimulationWorkspace({
 
         <div className="briefing-section">
           <h4>Mission Objective</h4>
-          <p>{activeMission || activeScenario.desc}</p>
+          <p>{activeMission?.content || activeScenario.desc}</p>
         </div>
 
         <div className="briefing-section">

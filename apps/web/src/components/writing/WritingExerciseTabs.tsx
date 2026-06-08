@@ -3,10 +3,10 @@
 import React from 'react'
 import { motion } from 'framer-motion'
 import * as Icons from 'lucide-react'
-import { writingExercises, WritingExerciseId } from '@/data/writingExercises'
+import { writingExercises, WritingExerciseId } from '@fluenix/shared'
 
 interface Props {
-  activeId: WritingExerciseId
+  activeId: WritingExerciseId | null
   onSelect: (id: WritingExerciseId) => void
 }
 
@@ -22,6 +22,7 @@ export function WritingExerciseTabs({ activeId, onSelect }: Props) {
             key={ex.id}
             className={`wr-tab ${isActive ? 'active' : ''}`}
             onClick={() => onSelect(ex.id)}
+            style={{ color: isActive ? ex.color : undefined }}
           >
             {isActive && (
               <motion.div
@@ -67,10 +68,6 @@ export function WritingExerciseTabs({ activeId, onSelect }: Props) {
           cursor: pointer;
           transition: color 0.2s ease;
           outline: none;
-        }
-
-        .wr-tab.active {
-          color: #4338ca;
         }
 
         .wr-tab-bg {

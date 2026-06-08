@@ -7,4 +7,12 @@
 @import '../styles/responsive.css';
 @import '../styles/scenario.css';
 @import '../styles/pronunciation.css';
+@import '../styles/vocabulary.css';
+@import '../styles/behavioral.css';
+@import '../styles/error-decoding.css';
+@import '../styles/grammar-lab.css';
+@import '../styles/listening-lab.css';
+@import '../styles/handbook.css';
 @import './writing.css';
+@import '../styles/landing.css';
+@import '../styles/auth.css';

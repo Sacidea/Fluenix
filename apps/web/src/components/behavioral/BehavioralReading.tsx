@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react'
 import { BookText, ChevronRight } from 'lucide-react'
 import ReactMarkdown from 'react-markdown'
 import { useLevel } from '@/context/LevelContext'
-import { starReadingData } from '@/data/starReading'
+import { starReadingData } from '@fluenix/shared'
 import { ReadingQuiz } from '@/components/behavioral/ReadingQuiz'
 
 export function BehavioralReading() {

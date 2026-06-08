@@ -2,13 +2,13 @@
 
 import React from 'react'
 import { ClipboardList } from 'lucide-react'
-import { WritingExercise } from '@/data/writingExercises'
+import { WritingMission } from '@fluenix/shared'
 
 interface Props {
-  exercise: WritingExercise
+  mission: WritingMission
 }
 
-export function WritingTaskPanel({ exercise }: Props) {
+export function WritingTaskPanel({ mission }: Props) {
   return (
     <div className="wr-panel">
       <div className="wr-panel-header">
@@ -16,7 +16,7 @@ export function WritingTaskPanel({ exercise }: Props) {
         <span className="wr-panel-title">Your Task</span>
       </div>
       <div className="wr-prompt">
-        {exercise.prompt}
+        {mission.context}
       </div>
 
       <style jsx>{`

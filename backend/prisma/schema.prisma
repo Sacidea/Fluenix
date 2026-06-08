@@ -1,6 +1,5 @@
 generator client {
   provider   = "prisma-client-js"
-  
   engineType = "library" 
 }
 
@@ -20,6 +19,15 @@ model User {
   createdAt   DateTime   @default(now())
   updatedAt   DateTime   @updatedAt
   progress    Progress[]
+
+  seenListening  UserSeenListening[]
+  seenGrammar    UserSeenGrammar[]
+  seenErrors     UserSeenError[]
+  seenBehavioral UserSeenBehavioral[]
+  seenWriting    UserSeenWriting[]
+  seenVocab      UserSeenVocab[]
+  seenRoleplay   UserSeenRoleplay[]
+  masteredPronun UserMasteredPronunciation[]
 }
 
 model Session {
@@ -31,6 +39,8 @@ model Session {
   score     Float?
   feedback  Json?
   createdAt DateTime @default(now())
+
+  @@index([userId, createdAt(sort: Desc)])
 }
 
 model Progress {
@@ -65,6 +75,20 @@ model PronunciationWord {
   category  String
   phonetic  String
   createdAt DateTime @default(now())
+
+  masteredBy UserMasteredPronunciation[]
+}
+
+model UserMasteredPronunciation {
+  id         String   @id @default(cuid())
+  userId     String
+  wordId     String
+  createdAt  DateTime @default(now())
+
+  user       User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  word       PronunciationWord  @relation(fields: [wordId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, wordId])
 }
 
 model ListeningScenario {
@@ -77,6 +101,21 @@ model ListeningScenario {
   dictation Json?
   shadowing Json?
   createdAt DateTime @default(now())
+
+  seenBy    UserSeenListening[]
+  @@index([level])
+}
+
+model UserSeenListening {
+  id         String   @id @default(cuid())
+  userId     String
+  scenarioId String
+  createdAt  DateTime @default(now())
+
+  user       User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  scenario   ListeningScenario  @relation(fields: [scenarioId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, scenarioId])
 }
 
 model GrammarExercise {
@@ -86,6 +125,9 @@ model GrammarExercise {
   level     String   @default("B1") // CEFR level: B1, B2, C1
   segments  Json
   createdAt DateTime @default(now())
+
+  seenBy    UserSeenGrammar[]
+  @@index([level])
 }
 
 model GrammarRule {
@@ -98,4 +140,138 @@ model GrammarRule {
   lessonContent  String?
   level          String   @default("B1")
   createdAt      DateTime @default(now())
+}
+
+model ErrorScenario {
+  id        String   @id @default(cuid())
+  role      String
+  level     String
+  scenario  Json
+  createdAt DateTime @default(now())
+
+  seenBy    UserSeenError[]
+  @@index([role, level])
+}
+
+model UserSeenError {
+  id         String   @id @default(cuid())
+  userId     String
+  scenarioId String
+  createdAt  DateTime @default(now())
+
+  user       User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  scenario   ErrorScenario @relation(fields: [scenarioId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, scenarioId])
+}
+
+model UserSeenGrammar {
+  id         String   @id @default(cuid())
+  userId     String
+  exerciseId String
+  createdAt  DateTime @default(now())
+
+  user       User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  exercise   GrammarExercise @relation(fields: [exerciseId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, exerciseId])
+}
+
+model BehavioralQuestion {
+  id        String   @id @default(cuid())
+  category  String
+  context   String
+  question  String
+  level     String   @default("B2")
+  createdAt DateTime @default(now())
+
+  seenBy    UserSeenBehavioral[]
+  @@index([level])
+}
+
+model UserSeenBehavioral {
+  id         String   @id @default(cuid())
+  userId     String
+  questionId String
+  createdAt  DateTime @default(now())
+
+  user       User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  question   BehavioralQuestion @relation(fields: [questionId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, questionId])
+}
+
+model WritingMission {
+  id            String   @id @default(cuid())
+  category      String   // 'pr_description', 'commit_message', 'email'
+  level         String   @default("B2")
+  title         String
+  context       String
+  referenceData String
+  createdAt     DateTime @default(now())
+
+  seenBy        UserSeenWriting[]
+  @@index([category, level])
+}
+
+model UserSeenWriting {
+  id         String   @id @default(cuid())
+  userId     String
+  missionId  String
+  createdAt  DateTime @default(now())
+
+  user       User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  mission    WritingMission @relation(fields: [missionId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, missionId])
+}
+
+model VocabWord {
+  id              String   @id @default(cuid())
+  word            String   @unique
+  difficulty      String   @default("medium") // easy, medium, hard, expert
+  type            String   // noun, verb, adj, etc.
+  definition      String
+  phonetic        String
+  turkishMeaning  String
+  contextSentence String
+  createdAt       DateTime @default(now())
+
+  seenBy          UserSeenVocab[]
+  @@index([difficulty])
+}
+
+model UserSeenVocab {
+  id         String   @id @default(cuid())
+  userId     String
+  wordId     String
+  createdAt  DateTime @default(now())
+
+  user       User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  word       VocabWord @relation(fields: [wordId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, wordId])
+}
+
+model RoleplayMission {
+  id        String   @id @default(cuid())
+  category  String   // interview, standup, code_review
+  level     String   @default("B2")
+  content   String
+  createdAt DateTime @default(now())
+
+  seenBy    UserSeenRoleplay[]
+  @@index([category, level])
+}
+
+model UserSeenRoleplay {
+  id         String   @id @default(cuid())
+  userId     String
+  missionId  String
+  createdAt  DateTime @default(now())
+
+  user       User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  mission    RoleplayMission @relation(fields: [missionId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, missionId])
 }

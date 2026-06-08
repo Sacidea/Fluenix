@@ -2,6 +2,7 @@ export interface ISessionService {
   createSession(data: CreateSessionDto): Promise<any>
   getUserSessions(userId: string): Promise<any[]>
   getUserStats(userId: string): Promise<UserStats>
+  deleteSession(sessionId: string, userId: string): Promise<boolean>
 }
 
 export interface CreateSessionDto {

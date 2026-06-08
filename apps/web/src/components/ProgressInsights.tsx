@@ -130,6 +130,11 @@ const getWeeklyDelta = (sessions: Session[]) => {
     return d >= prevWeekStart && d < thisWeekStart
   })
 
+  const currentCount = sessions.filter(s => {
+    const d = new Date(s.createdAt)
+    return d >= thisWeekStart && d <= now
+  }).length
+
   const avg = (arr: Session[]) => (arr.length ? arr.reduce((a, b) => a + Number(b.score || 0), 0) / arr.length : null)
   const currentAvg = avg(currentWeek)
   const previousAvg = avg(previousWeek)
@@ -139,7 +144,7 @@ const getWeeklyDelta = (sessions: Session[]) => {
     currentAvg,
     previousAvg,
     delta,
-    currentCount: currentWeek.length
+    currentCount
   }
 }
 

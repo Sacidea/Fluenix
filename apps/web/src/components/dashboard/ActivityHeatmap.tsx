@@ -13,6 +13,13 @@ interface Props {
 }
 
 export function ActivityHeatmap({ sessions }: Props) {
+  const getLocalYMD = (date: Date) => {
+    const y = date.getFullYear()
+    const m = String(date.getMonth() + 1).padStart(2, '0')
+    const d = String(date.getDate()).padStart(2, '0')
+    return `${y}-${m}-${d}`
+  }
+
   // Generate last 90 days
   const days = 90
   const today = new Date()
@@ -22,14 +29,14 @@ export function ActivityHeatmap({ sessions }: Props) {
     const d = new Date(today)
     d.setDate(d.getDate() - i)
     dates.push({
-      dateStr: d.toISOString().split('T')[0],
+      dateStr: getLocalYMD(d),
       date: d
     })
   }
 
   // Count sessions per day
   const countsByDate = sessions.reduce((acc, session) => {
-    const dateStr = new Date(session.createdAt).toISOString().split('T')[0]
+    const dateStr = getLocalYMD(new Date(session.createdAt))
     acc[dateStr] = (acc[dateStr] || 0) + 1
     return acc
   }, {} as Record<string, number>)

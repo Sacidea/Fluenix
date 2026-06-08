@@ -1,15 +1,14 @@
 .writing-lab-root {
   min-height: 100vh;
-  background-color: #0f172a;
-  /* Deep dark background for IDE feel */
+  background-color: var(--color-bg);
   display: flex;
   flex-direction: column;
 }
 
 .lab-header {
-  background: #1e293b;
-  border-bottom: 1px solid #334155;
-  padding: 16px 32px;
+  background: #ffffff;
+  border-bottom: 1px solid #e2e8f0;
+  padding: 24px 40px;
 }
 
 .header-content {
@@ -24,7 +23,7 @@
   display: flex;
   align-items: center;
   gap: 4px;
-  color: #94a3b8;
+  color: #64748b;
   font-size: 13px;
   font-weight: 700;
   margin-bottom: 8px;
@@ -33,14 +32,14 @@
 }
 
 .back-link:hover {
-  color: #cbd5e1;
+  color: #0f172a;
 }
 
 .eyebrow {
   font-size: 10px;
   text-transform: uppercase;
   letter-spacing: 2.5px;
-  color: #38bdf8;
+  color: #0ea5e9;
   font-weight: 800;
   display: block;
   margin-bottom: 4px;
@@ -48,10 +47,10 @@
 
 .main-title {
   font-size: 28px;
-  font-weight: 800;
+  font-weight: 600;
   letter-spacing: -0.5px;
   margin: 0;
-  color: #f8fafc;
+  color: #0f172a;
 }
 
 .lab-main {
@@ -72,9 +71,10 @@
 /* Left Panel: Context */
 .context-panel {
   flex: 1;
-  background: #1e293b;
+  background: #ffffff;
   border-radius: 12px;
-  border: 1px solid #334155;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
   display: flex;
   flex-direction: column;
   overflow: hidden;
@@ -82,15 +82,15 @@
 
 .panel-header {
   padding: 16px 20px;
-  background: #0f172a;
-  border-bottom: 1px solid #334155;
+  background: #f8fafc;
+  border-bottom: 1px solid #e2e8f0;
   display: flex;
   align-items: center;
   gap: 12px;
 }
 
 .panel-icon {
-  color: #38bdf8;
+  color: #0ea5e9;
 }
 
 .panel-title {
@@ -98,7 +98,7 @@
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 1px;
-  color: #94a3b8;
+  color: #475569;
 }
 
 .context-body {
@@ -108,39 +108,101 @@
 }
 
 .mission-title {
-  font-size: 18px;
-  font-weight: 700;
-  color: #f8fafc;
+  font-family: var(--font-serif);
+  font-size: 20px;
+  font-weight: 900;
+  color: #0f172a;
+  letter-spacing: -0.5px;
   margin-top: 0;
   margin-bottom: 12px;
 }
 
 .mission-desc {
-  font-size: 14px;
-  line-height: 1.6;
-  color: #cbd5e1;
+  font-family: var(--font-dm-sans), sans-serif;
+  font-size: 15px;
+  font-weight: 500;
+  line-height: 1.7;
+  color: #334155;
   margin-bottom: 24px;
 }
 
 .code-diff {
-  background: #0f172a;
+  background: #f1f5f9;
   padding: 16px;
   border-radius: 8px;
-  border: 1px solid #334155;
-  font-family: 'Fira Code', 'Courier New', Courier, monospace;
-  font-size: 13px;
-  line-height: 1.5;
-  color: #e2e8f0;
-  white-space: pre-wrap;
+  border: 1px solid #e2e8f0;
+  font-family: Consolas, Monaco, 'Andale Mono', 'Ubuntu Mono', monospace;
+  font-size: 15px;
+  font-weight: 500;
+  line-height: 1.6;
+  color: #1e293b;
   overflow-x: auto;
+}
+
+.diff-line {
+  padding: 0 4px;
+  border-radius: 3px;
+  min-height: 20px;
+  white-space: pre-wrap;
+}
+
+.diff-add {
+  background: #dcfce7;
+  color: #166534;
+  font-weight: 600;
+  display: block;
+}
+
+.diff-remove {
+  background: #fee2e2;
+  color: #991b1b;
+  font-weight: 600;
+  display: block;
+}
+
+.diff-meta {
+  color: #8b5cf6;
+  font-weight: 600;
+  display: block;
+  margin-top: 8px;
+}
+
+.diff-header {
+  color: #64748b;
+  font-weight: 700;
+  display: block;
+}
+
+.ref-line-kv {
+  margin-bottom: 6px;
+  font-family: var(--font-dm-sans), sans-serif;
+  font-size: 14px;
+}
+
+.ref-key {
+  color: #0f172a;
+  font-weight: 700;
+}
+
+.ref-val {
+  color: #475569;
+  margin-left: 6px;
+}
+
+.ref-line-normal {
+  font-family: var(--font-dm-sans), sans-serif;
+  font-size: 14px;
+  color: #334155;
+  margin-bottom: 4px;
 }
 
 /* Right Panel: Editor */
 .editor-panel {
   flex: 1;
-  background: #1e293b;
+  background: #ffffff;
   border-radius: 12px;
-  border: 1px solid #334155;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
   display: flex;
   flex-direction: column;
   overflow: hidden;
@@ -153,23 +215,23 @@
   background: transparent;
   border: none;
   padding: 24px;
-  font-family: 'Inter', sans-serif;
+  font-family: var(--font-dm-sans), sans-serif;
   font-size: 15px;
   line-height: 1.7;
-  color: #f8fafc;
+  color: #0f172a;
   resize: none;
   outline: none;
 }
 
 .editor-textarea::placeholder {
-  color: #475569;
+  color: #94a3b8;
 }
 
 /* Action Footer inside Editor */
 .editor-footer {
   padding: 16px 24px;
-  background: #0f172a;
-  border-top: 1px solid #334155;
+  background: #f8fafc;
+  border-top: 1px solid #e2e8f0;
   display: flex;
   justify-content: flex-end;
   align-items: center;
@@ -177,10 +239,10 @@
 
 .submit-btn {
   padding: 12px 24px;
-  background: #38bdf8;
+  background: #0ea5e9;
   border: none;
   border-radius: 8px;
-  color: #0f172a;
+  color: #ffffff;
   font-weight: 700;
   font-size: 13px;
   display: flex;
@@ -191,13 +253,13 @@
 }
 
 .submit-btn:hover:not(:disabled) {
-  background: #0ea5e9;
+  background: #0284c7;
   transform: translateY(-1px);
 }
 
 .submit-btn:disabled {
-  background: #334155;
-  color: #64748b;
+  background: #e2e8f0;
+  color: #94a3b8;
   cursor: not-allowed;
 }
 

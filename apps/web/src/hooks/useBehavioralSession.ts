@@ -1,6 +1,14 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import axios from 'axios'
-import { behavioralQuestions, BehavioralQuestion } from '@/data/behavioralQuestions'
+import { useAuth } from '@clerk/nextjs'
+import { useLevel } from '@/context/LevelContext'
+
+export interface BehavioralQuestion {
+  id: string
+  category: string
+  context: string
+  question: string
+}
 
 export type StarFeedback = {
   overall_score: number
@@ -17,7 +25,11 @@ export type StarFeedback = {
 }
 
 export function useBehavioralSession() {
-  const [activeQuestion, setActiveQuestion] = useState<BehavioralQuestion>(behavioralQuestions[0])
+  const { getToken } = useAuth()
+  const { level } = useLevel()
+  const [activeQuestion, setActiveQuestion] = useState<BehavioralQuestion | null>(null)
+  const [isLoadingQuestion, setIsLoadingQuestion] = useState(true)
+  
   const [situation, setSituation] = useState('')
   const [task, setTask] = useState('')
   const [action, setAction] = useState('')
@@ -27,20 +39,47 @@ export function useBehavioralSession() {
   const [feedback, setFeedback] = useState<StarFeedback | null>(null)
   const [error, setError] = useState<string | null>(null)
 
-  const changeQuestion = (qId: string) => {
-    const q = behavioralQuestions.find(x => x.id === qId)
-    if (q) {
-      setActiveQuestion(q)
-      setSituation('')
-      setTask('')
-      setAction('')
-      setResult('')
-      setFeedback(null)
-      setError(null)
+  const loadNextQuestion = async () => {
+    setIsLoadingQuestion(true)
+    setError(null)
+    setSituation('')
+    setTask('')
+    setAction('')
+    setResult('')
+    setFeedback(null)
+    try {
+      const token = await getToken()
+      console.log("Token:", token)
+      console.log("Level:", level)
+      console.log("API URL:", process.env.NEXT_PUBLIC_API_URL)
+      
+      const res = await axios.post(
+        `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'}/api/behavioral/next`,
+        { level },
+        { headers: { Authorization: `Bearer ${token}` } }
+      )
+      if (res.data.success) {
+        setActiveQuestion(res.data.data)
+      } else {
+        throw new Error('Failed to load next question')
+      }
+    } catch (err: any) {
+      console.log("Axios Error Data:", err.response?.data)
+      console.log("Axios Error Status:", err.response?.status)
+      console.log("Axios Error Message:", err.message)
+      setError("Failed to fetch next question. Please try again.")
+    } finally {
+      setIsLoadingQuestion(false)
     }
   }
 
-  const analyzeAnswer = async (level: string) => {
+  // Load question on mount or level change
+  useEffect(() => {
+    loadNextQuestion()
+  }, [level])
+
+  const analyzeAnswer = async (userLevel: string) => {
+    if (!activeQuestion) return
     if (!situation.trim() || !task.trim() || !action.trim() || !result.trim()) {
       setError("Please fill out all 4 sections (S, T, A, R) before submitting.")
       return
@@ -51,21 +90,24 @@ export function useBehavioralSession() {
     setFeedback(null)
 
     try {
-      const res = await axios.post(`${process.env.NEXT_PUBLIC_AI_SERVICE_URL || 'http://localhost:8000'}/behavioral/analyze`, {
+      const token = await getToken()
+      const res = await axios.post(`${process.env.NEXT_PUBLIC_AI_URL || 'http://localhost:8000'}/behavioral/analyze`, {
         question: activeQuestion.question,
         category: activeQuestion.category,
         context: activeQuestion.context,
-        level: level,
+        level: userLevel,
         star: {
           situation,
           task,
           action,
           result
         }
+      }, {
+        headers: { Authorization: `Bearer ${token}` }
       })
       
       const rawFeedback = res.data.analysis
-      const parsed = JSON.parse(rawFeedback) as StarFeedback
+      const parsed = JSON.parse(rawFeedback.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim()) as StarFeedback
       setFeedback(parsed)
       
     } catch (err) {
@@ -77,9 +119,9 @@ export function useBehavioralSession() {
   }
 
   return {
-    questions: behavioralQuestions,
     activeQuestion,
-    changeQuestion,
+    isLoadingQuestion,
+    loadNextQuestion,
     situation, setSituation,
     task, setTask,
     action, setAction,
