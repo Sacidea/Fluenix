@@ -70,23 +70,24 @@ app.use(globalLimiter)
 
 app.get('/health', async (req: Request, res: Response) => {
   try {
-    // Redis opsiyonel olsun, hata verirse sunucuyu çökertmesin
-    let redisStatus = 'not_connected'
-    try {
-      await redis.set('test', 'fluenix redis çalışıyor!')
-      redisStatus = (await redis.get('test')) || 'ok'
-    } catch (e) {
-      console.warn('⚠️ Redis connection failed, skipping...')
-    }
-
-    res.json({
-      status: 'ok',
+    const redisPing = await redis.ping()
+    res.json({ 
+      status: 'ok', 
       service: 'fluenix-api',
-      redis: redisStatus,
-      timestamp: new Date()
+      redis: redisPing === 'PONG' ? 'connected' : 'error',
+      timestamp: new Date().toISOString(),
+      debug_clerk_key: process.env.CLERK_JWT_PUBLIC_KEY ? process.env.CLERK_JWT_PUBLIC_KEY.substring(0, 30) : 'MISSING',
+      debug_db: process.env.DATABASE_URL ? 'PRESENT' : 'MISSING'
     })
-  } catch (err) {
-    res.status(500).json({ status: 'error', message: 'Health check failed' })
+  } catch (error) {
+    res.json({ 
+      status: 'ok', 
+      service: 'fluenix-api',
+      redis: 'not_connected',
+      timestamp: new Date().toISOString(),
+      debug_clerk_key: process.env.CLERK_JWT_PUBLIC_KEY ? process.env.CLERK_JWT_PUBLIC_KEY.substring(0, 30) : 'MISSING',
+      debug_db: process.env.DATABASE_URL ? 'PRESENT' : 'MISSING'
+    })
   }
 })
 
