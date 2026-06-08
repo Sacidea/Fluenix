@@ -1,9 +1,9 @@
 FROM node:20-alpine AS base
 
-# Install pnpm
+# Install pnpm and native build tools
 ENV PNPM_HOME="/pnpm"
 ENV PATH="$PNPM_HOME:$PATH"
-RUN corepack enable
+RUN apk add --no-cache python3 make g++ && corepack enable
 
 FROM base AS builder
 # Set working directory
