@@ -77,7 +77,9 @@ export function useScenarioSession() {
   const speakAIResponse = (text: string) => {
     window.speechSynthesis.cancel()
     setTimeout(() => {
-      const cleanText = text
+      // Kelimenin başına virgül ve boşluk eklemek, Chrome'un TTS motorunun 
+      // uyanırken ilk kelimeyi yutması problemini (ilk okuyuş hatası) çözer.
+      const cleanText = ", " + text
         .replace(/\*\*(.*?)\*\*/g, '$1') // Remove bold asterisks
         .replace(/`/g, '')               // Remove backticks
         .replace(/[-*_]{3,}/g, '')       // Remove horizontal rules (---, ***, ___)
