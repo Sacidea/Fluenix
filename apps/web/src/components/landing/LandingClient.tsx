@@ -126,7 +126,7 @@ export function LandingClient({ userId }: { userId: string | null }) {
             The AI-native communication infrastructure designed exclusively for high-performance software engineers. Master complex system design loops, bulletproof code reviews, and executive-level behavioral storytelling.
           </motion.p>
           <motion.div className="hero-cta-group" variants={fadeInUp} style={{ marginTop: '20px' }}>
-            <Link href={userId ? "/dashboard" : "/sign-up"} className="btn-marker-link">
+            <Link href={userId ? "/dashboard" : "/sign-up"} className="btn-hero-cta">
               Launch Application <ChevronRight size={24} />
             </Link>
           </motion.div>
