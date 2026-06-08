@@ -35,7 +35,9 @@ export default function DashboardClient({ user, stats, sessions }: Props) {
   const now = new Date()
   const thisWeekStart = new Date(now)
   thisWeekStart.setDate(now.getDate() - 7)
-  const currentWeeklyCount = sessions.filter(s => {
+  const safeSessions = Array.isArray(sessions) ? sessions : []
+  const currentWeeklyCount = safeSessions.filter(s => {
+    if (!s || !s.createdAt) return false
     const d = new Date(s.createdAt)
     return d >= thisWeekStart && d <= now
   }).length

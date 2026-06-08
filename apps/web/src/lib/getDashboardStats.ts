@@ -4,6 +4,7 @@ export async function getDashboardStats(userId: string, token?: string | null) {
             cache: 'no-store',
             headers: token ? { Authorization: `Bearer ${token}` } : undefined
         })
+        if (!res.ok) throw new Error("Failed to fetch stats");
         return await res.json()
     } catch {
         return { totalSessions: 0, averageScore: 0, streak: 0 }
@@ -16,6 +17,7 @@ export async function getDashboardSessions(userId: string, token?: string | null
             cache: 'no-store',
             headers: token ? { Authorization: `Bearer ${token}` } : undefined
         })
+        if (!res.ok) throw new Error("Failed to fetch sessions");
         return await res.json()
     } catch {
         return []
