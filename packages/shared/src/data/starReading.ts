@@ -636,7 +636,146 @@ An exceptional STAR response involves a **Situation** where you had strong incom
           "By stating that you only listen to the CEO's instructions."
         ],
         answerIndex: 1,
-        explanation: "Sifting through noise means analyzing ambiguous, conflicting data to find the true 'signal' or root cause."
+      }
+    },
+    {
+      id: "customer_b2",
+      title: "4. Principle: Customer Obsession",
+      content: `
+# Customer Obsession for Senior Engineers
+
+At the B2 level, Customer Obsession means understanding the profound impact of technical choices on the end-user experience. It is not just about building features; it's about advocating for the customer when balancing technical trade-offs.
+
+## Internal vs. External Customers
+Senior engineers often build platforms for internal teams. You must show how you obsess over the developer experience (DX). 
+
+## Your STAR Answer
+When asked about a time you advocated for the customer, explain the **Action** you took to push back against a product requirement that degraded the user experience, or how you prioritized a latency fix over a shiny new feature. Your **Result** must highlight the measurable impact on customer satisfaction or retention.
+      `,
+      vocabulary: [
+        { word: "Advocate", meaning: "To publicly recommend or support." },
+        { word: "Latency", meaning: "The delay before a transfer of data begins following an instruction." }
+      ],
+      fillInBlank: {
+        sentenceParts: ["You must ", " for the customer when balancing technical trade-offs. Prioritize a ", " fix over a new feature."],
+        missingWords: ["advocate", "latency"],
+        wordBank: ["advocate", "latency", "ignore", "money"]
+      },
+      scenario: {
+        scenario: "Product Management wants to launch a feature that increases page load time by 3 seconds. What do you do?",
+        options: [
+          "Launch it because Product requested it.",
+          "Push back with data showing how latency reduces customer retention and propose an optimized architecture.",
+          "Tell them to ask the frontend team to fix it.",
+          "Quit your job."
+        ],
+        answerIndex: 1,
+        explanation: "Advocating for the customer means pushing back on requirements that harm the user experience."
+      }
+    },
+    {
+      id: "hire_develop_b2",
+      title: "5. Principle: Hire and Develop the Best",
+      content: `
+# Raising the Engineering Bar
+
+As you progress in your career, your impact is measured not just by the code you write, but by the engineers you elevate. FAANG companies expect senior candidates to be active mentors and rigorous interviewers.
+
+## Mentorship in Your STAR Story
+In your interviews, you must demonstrate how you develop others. Did you create a new onboarding curriculum? Did you mentor a struggling junior engineer until they were promoted?
+
+## Setting the Standard
+Your **Action** should describe the specific coaching mechanisms you used—like conducting deep-dive code reviews or hosting weekly architecture seminars. The **Result** must be the quantifiable growth of your colleagues.
+      `,
+      vocabulary: [
+        { word: "Elevate", meaning: "To raise to a more important or impressive level." },
+        { word: "Curriculum", meaning: "The subjects comprising a course of study." }
+      ],
+      fillInBlank: {
+        sentenceParts: ["Your impact is measured by the engineers you ", ". Your Action should describe specific coaching ", "."],
+        missingWords: ["elevate", "mechanisms"],
+        wordBank: ["elevate", "mechanisms", "fire", "tools"]
+      },
+      scenario: {
+        scenario: "A junior engineer submits a pull request with messy, unoptimized code. How do you handle it?",
+        options: [
+          "Approve it to save time.",
+          "Reject it with a rude comment.",
+          "Rewrite the code for them.",
+          "Schedule a pairing session to walk through the logic and teach them best practices."
+        ],
+        answerIndex: 3,
+        explanation: "Developing the best requires taking the time to mentor and teach, not just fixing things for them."
+      }
+    },
+    {
+      id: "deliver_results_b2",
+      title: "6. Principle: Deliver Results",
+      content: `
+# Delivering Despite Setbacks
+
+"Deliver Results" is about overcoming unforeseen roadblocks and delivering the right quality in a timely fashion. 
+
+## The Reality of Software Engineering
+Things go wrong. Servers crash, APIs change, and requirements pivot. Interviewers want to know how you react when the project goes off the rails. 
+
+## The 'Roadblock' STAR Story
+For your **Situation**, describe a project that was failing. In your **Action**, explain the pragmatic choices you made to rescue it. Did you negotiate a reduced scope? Did you work cross-functionally to unblock your team? The **Result** must show that you delivered the core value to the business despite the chaos.
+      `,
+      vocabulary: [
+        { word: "Pragmatic", meaning: "Dealing with things sensibly and realistically." },
+        { word: "Unforeseen", meaning: "Not anticipated or predicted." }
+      ],
+      fillInBlank: {
+        sentenceParts: ["Explain the ", " choices you made to rescue the project. Deliver the core value despite ", " roadblocks."],
+        missingWords: ["pragmatic", "unforeseen"],
+        wordBank: ["pragmatic", "unforeseen", "emotional", "easy"]
+      },
+      scenario: {
+        scenario: "Two weeks before launch, a critical third-party API shuts down. How do you deliver results?",
+        options: [
+          "Cancel the project.",
+          "Blame the third party and tell the CEO it's impossible.",
+          "Quickly evaluate alternative APIs, negotiate a scoped-down MVP, and rally the team to integrate it on time.",
+          "Hide the failure and hope nobody notices."
+        ],
+        answerIndex: 2,
+        explanation: "Delivering results means finding pragmatic workarounds to unforeseen problems to ensure value is delivered."
+      }
+    },
+    {
+      id: "learn_curious_b2",
+      title: "7. Principle: Learn and Be Curious",
+      content: `
+# Continuous Learning in Tech
+
+The technology landscape changes rapidly. "Learn and Be Curious" means you never settle into complacency. You explore new possibilities and act to explore them.
+
+## Proving Curiosity
+Don't just say "I read tech blogs." Tell a STAR story where your curiosity solved a business problem. 
+
+## The Curiosity Narrative
+Perhaps you noticed a recurring bug (Situation). Because you are curious, you dug into the open-source library's source code, found a memory leak, and contributed a patch (Action). The Result was improved performance for your company and the wider community. This proves your curiosity generates tangible value.
+      `,
+      vocabulary: [
+        { word: "Complacency", meaning: "A feeling of smug or uncritical satisfaction with oneself." },
+        { word: "Tangible", meaning: "Perceptible by touch; clear and definite; real." }
+      ],
+      fillInBlank: {
+        sentenceParts: ["You never settle into ", ". Your curiosity must generate ", " value for the business."],
+        missingWords: ["complacency", "tangible"],
+        wordBank: ["complacency", "tangible", "excitement", "fake"]
+      },
+      scenario: {
+        scenario: "Which 'Action' best demonstrates Learn and Be Curious?",
+        options: [
+          "I learned a new framework just for fun but never used it.",
+          "I watched a tutorial on YouTube during my lunch break.",
+          "I noticed our search was slow, so I researched Elasticsearch, built a prototype on my weekend, and presented it to the team.",
+          "I asked my manager to pay for a course."
+        ],
+        answerIndex: 2,
+        explanation: "Curiosity must be coupled with action that drives tangible business or technical value."
       }
     }
   ],
@@ -723,6 +862,146 @@ In your **Action** phase, you must detail your heuristic for sifting through thi
         answerIndex: 1,
         explanation: "Actively working to disconfirm biases and prioritizing the data-backed customer outcome is the core of 'Are Right, A Lot'."
       }
+    },
+    {
+      id: "customer_c1",
+      title: "4. Executive Principle: Customer Obsession",
+      content: `
+# Customer Obsession at Scale
+
+At the Staff and Principal levels, Customer Obsession transcends resolving individual bugs. It requires aligning entire engineering organizations toward a cohesive, customer-centric architecture.
+
+## Working Backwards from the Customer
+You must demonstrate how you use empirical data to proxy the voice of the customer in executive meetings. Do you advocate for architectural investments (like reducing P99 latency) over feature factories? 
+
+## The Executive STAR Narrative
+Your **Action** should detail how you identified a systemic disconnect between engineering output and customer needs. Explain the mechanisms you implemented to bridge this gap. The **Result** must validate how your architectural or organizational changes directly correlated with massive increases in customer satisfaction, retention, or revenue.
+      `,
+      vocabulary: [
+        { word: "Cohesive", meaning: "Characterized by or causing cohesion; forming a united whole." },
+        { word: "Empirical", meaning: "Based on, concerned with, or verifiable by observation or experience rather than theory or pure logic." }
+      ],
+      fillInBlank: {
+        sentenceParts: ["Aligning entire engineering organizations toward a ", " architecture requires using ", " data to proxy the voice of the customer."],
+        missingWords: ["cohesive", "empirical"],
+        wordBank: ["cohesive", "empirical", "fragmented", "emotional"]
+      },
+      scenario: {
+        scenario: "The engineering team wants to adopt a trendy new database, but the migration will halt feature development for 6 months with no visible benefit to the user. What do you do?",
+        options: [
+          "Approve the migration to keep the engineers happy.",
+          "Veto the migration by empirically proving that the architectural investment provides zero ROI for the customer experience.",
+          "Let the team vote on it.",
+          "Resign."
+        ],
+        answerIndex: 1,
+        explanation: "Executives must ruthlessly protect the customer experience and veto technical investments that lack customer ROI."
+      }
+    },
+    {
+      id: "hire_develop_c1",
+      title: "5. Executive Principle: Hire and Develop the Best",
+      content: `
+# Architecting Talent Density
+
+At the executive echelon, "Hire and Develop the Best" means designing the organizational mechanisms that systematically elevate talent density across the company. You are no longer just a mentor; you are an architect of culture.
+
+## Mechanisms Over Intentions
+Good intentions don't scale; mechanisms do. Interviewers want to know how you codified the hiring bar. 
+
+## The Mechanism Narrative
+In your **Action**, narrate how you established technical interview rubrics, overhauled the promotion criteria, or built a company-wide engineering academy. The **Result** should be quantified not by your own code, but by the aggregate impact of the leaders you successfully cultivated and empowered.
+      `,
+      vocabulary: [
+        { word: "Echelon", meaning: "A level or rank in an organization, a profession, or society." },
+        { word: "Aggregate", meaning: "A whole formed by combining several separate elements." }
+      ],
+      fillInBlank: {
+        sentenceParts: ["Good intentions don't scale; ", " do. Your impact is measured by the ", " success of the leaders you cultivated."],
+        missingWords: ["mechanisms", "aggregate"],
+        wordBank: ["mechanisms", "aggregate", "wishes", "isolated"]
+      },
+      scenario: {
+        scenario: "Engineering velocity is dropping because the hiring bar is inconsistent across 10 different teams. What is your executive action?",
+        options: [
+          "Personally interview every single candidate from now on.",
+          "Fire the recruiters.",
+          "Design and implement a standardized technical interviewing rubric and train a core group of 'Bar Raisers' to enforce it across all teams.",
+          "Tell the teams to work harder."
+        ],
+        answerIndex: 2,
+        explanation: "Creating a scalable mechanism (rubrics and Bar Raisers) elevates talent density systematically."
+      }
+    },
+    {
+      id: "deliver_results_c1",
+      title: "6. Executive Principle: Deliver Results",
+      content: `
+# Delivering in the Face of Enterprise Headwinds
+
+At the Staff/Principal level, "Deliver Results" evaluates your ability to navigate intense organizational friction, secure massive cross-functional alignment, and execute high-stakes initiatives against impossible odds.
+
+## Navigating Headwinds
+You will face headwinds: budget cuts, shifting corporate strategies, and warring department heads. Your STAR story must show political acumen and strategic ruthlessness.
+
+## The 'Turnaround' Story
+Describe a **Situation** where a multi-million dollar initiative was destined for failure. Your **Action** should detail how you decisively audited the architecture, realigned the warring stakeholders, deprecated failing scopes, and established rigorous delivery mechanisms. The **Result** is the successful launch of a strategically vital product that salvaged the company's quarter.
+      `,
+      vocabulary: [
+        { word: "Acumen", meaning: "The ability to make good judgments and quick decisions, typically in a particular domain." },
+        { word: "Ruthlessness", meaning: "The quality of lacking pity or compassion for others (in a strategic sense, lacking sentimentality for bad ideas)." }
+      ],
+      fillInBlank: {
+        sentenceParts: ["Your STAR story must show political ", " and strategic ", " when navigating enterprise headwinds."],
+        missingWords: ["acumen", "ruthlessness"],
+        wordBank: ["acumen", "ruthlessness", "weakness", "hesitation"]
+      },
+      scenario: {
+        scenario: "A critical enterprise launch is 3 months behind schedule due to two teams fighting over API ownership. What is your action?",
+        options: [
+          "Let them resolve it naturally.",
+          "Step in, mandate an architectural contract, decouple the dependencies, and enforce a unified delivery mechanism.",
+          "Cancel the launch.",
+          "Tell the CEO to fire both team leads."
+        ],
+        answerIndex: 1,
+        explanation: "Executives deliver results by breaking deadlocks, mandating architectural clarity, and forcing alignment."
+      }
+    },
+    {
+      id: "learn_curious_c1",
+      title: "7. Executive Principle: Learn and Be Curious",
+      content: `
+# Strategic Curiosity at Scale
+
+For technology executives, "Learn and Be Curious" is not about reading HackerNews. It is about identifying macro-trends in technology and strategically maneuvering the organization to capitalize on them before the competition does.
+
+## Capitalizing on Macro-Trends
+Did you foresee the shift to cloud-native architectures? Did you recognize the disruptive potential of LLMs early on? 
+
+## The Foresight Narrative
+Your **Situation** should describe a looming existential threat or opportunity for the business. In your **Action**, articulate how your curiosity led you to deeply investigate an emerging paradigm, prototype a proof-of-concept, and systematically convince the executive board to pivot the engineering strategy. The **Result** is the organization establishing a first-mover advantage in a critical new domain.
+      `,
+      vocabulary: [
+        { word: "Existential", meaning: "Relating to existence (in business, a threat that could destroy the company)." },
+        { word: "Paradigm", meaning: "A typical example or pattern of something; a model." }
+      ],
+      fillInBlank: {
+        sentenceParts: ["Investigate an emerging ", " and convince the board to pivot strategy to avoid a looming ", " threat."],
+        missingWords: ["paradigm", "existential"],
+        wordBank: ["paradigm", "existential", "minor", "book"]
+      },
+      scenario: {
+        scenario: "You notice a new technology paradigm that could render your company's core product obsolete in 3 years. What do you do?",
+        options: [
+          "Ignore it; 3 years is a long time.",
+          "Deeply investigate the paradigm, prototype an integration, and present a strategic pivot plan to the board of directors.",
+          "Complain about it to your coworkers.",
+          "Start looking for a new job."
+        ],
+        answerIndex: 1,
+        explanation: "Strategic curiosity involves deep investigation and leading the organizational pivot to capture the opportunity."
+      }
     }
   ],
 
@@ -808,6 +1087,146 @@ In your **Action** phase, articulate the exact mechanisms you utilized to sift s
         ],
         answerIndex: 1,
         explanation: "Fostering debate to disconfirm your own bias is the exact definition of strong executive judgment."
+      }
+    },
+    {
+      id: "customer_c2",
+      title: "4. The Ultimate Metric: Customer Obsession",
+      content: `
+# Customer Obsession as Organizational Religion
+
+At the highest echelons (VP/C-Suite), Customer Obsession is not a tactic; it is the fundamental operating system of the enterprise. You must demonstrate how you embed this obsession into the very DNA of the company's culture and metrics.
+
+## Engineering the Culture
+How do you ensure that an engineer 10 levels below you is making decisions aligned with the customer's best interest? 
+
+## The Cultural Architecture Narrative
+Your **Action** must detail the creation of pervasive feedback loops. Did you mandate that every executive must spend 2 days a year working in customer support? Did you re-architect the corporate OKRs so that engineering bonuses were tied strictly to customer-facing latency percentiles? Your **Result** demonstrates a fundamental shift in the company's culture, leading to unprecedented market dominance.
+      `,
+      vocabulary: [
+        { word: "Pervasive", meaning: "Spreading widely throughout an area or a group of people." },
+        { word: "Unprecedented", meaning: "Never done or known before." }
+      ],
+      fillInBlank: {
+        sentenceParts: ["You must detail the creation of ", " feedback loops that lead to ", " market dominance."],
+        missingWords: ["pervasive", "unprecedented"],
+        wordBank: ["pervasive", "unprecedented", "hidden", "average"]
+      },
+      scenario: {
+        scenario: "Engineering is hitting all their internal sprint goals, but customer churn is at an all-time high. As VP of Engineering, what is your action?",
+        options: [
+          "Celebrate the sprint goals; churn is a Sales problem.",
+          "Radically re-architect the engineering OKRs to tie directly to customer churn and mandate direct engineer-to-customer feedback loops.",
+          "Fire the bottom 10% of engineers.",
+          "Hire more marketing people."
+        ],
+        answerIndex: 1,
+        explanation: "C-Level leaders align the entire organizational incentive structure directly with the customer outcome."
+      }
+    },
+    {
+      id: "hire_develop_c2",
+      title: "5. Organizational Gravity: Hire and Develop the Best",
+      content: `
+# Creating Organizational Gravity
+
+Top-tier technology executives act as talent magnets. "Hire and Develop the Best" at this level means creating an organizational gravity that inevitably attracts world-class engineers who would otherwise start their own companies.
+
+## The Magnetism Narrative
+In a C-Level interview, you must articulate how you built a culture of engineering excellence that became renowned in the industry. 
+
+## Establishing the Legacy
+Your **Action** should describe your bold, unconventional strategies. Did you champion open-source initiatives that put your company on the map? Did you implement a "Principal Engineer track" that prevented top technical talent from being forced into management? The **Result** is a quantified influx of elite talent and a retention rate that defies industry averages.
+      `,
+      vocabulary: [
+        { word: "Gravity", meaning: "Extreme or alarming importance; seriousness (or a force of attraction)." },
+        { word: "Influx", meaning: "An arrival or entry of large numbers of people or things." }
+      ],
+      fillInBlank: {
+        sentenceParts: ["You must create organizational ", " that results in an ", " of elite talent."],
+        missingWords: ["gravity", "influx"],
+        wordBank: ["gravity", "influx", "boredom", "exodus"]
+      },
+      scenario: {
+        scenario: "Your best Principal Engineers are leaving to join startups because they hate managing people. How do you retain them?",
+        options: [
+          "Offer them a tiny raise.",
+          "Force them to be managers anyway.",
+          "Architect and implement a parallel 'Individual Contributor' career track with compensation and prestige equal to the VP level.",
+          "Let them leave."
+        ],
+        answerIndex: 2,
+        explanation: "Developing the best means creating institutional structures that reward elite technical talent without forcing them into management."
+      }
+    },
+    {
+      id: "deliver_results_c2",
+      title: "6. Market Dominance: Deliver Results",
+      content: `
+# Delivering Ecosystem-Defining Results
+
+At the C-Suite, delivering a product on time is table stakes. "Deliver Results" means successfully executing massive, multi-year initiatives that fundamentally alter the company's valuation and market position.
+
+## The Bet-the-Company Narrative
+You must narrate a time when you led a "bet-the-company" initiative. 
+
+## The Execution Mechanism
+Your **Action** should not focus on code, but on capital allocation, aggressive risk mitigation, and ruthless prioritization across a thousand-person organization. Detail how you maintained high standards and velocity over a multi-year horizon. The **Result** must be framed in terms of billions in revenue, total market disruption, or successfully pivoting the entire enterprise business model.
+      `,
+      vocabulary: [
+        { word: "Mitigation", meaning: "The action of reducing the severity, seriousness, or painfulness of something." },
+        { word: "Disruption", meaning: "Radical change to an existing industry or market due to technological innovation." }
+      ],
+      fillInBlank: {
+        sentenceParts: ["Focus on aggressive risk ", " to achieve total market ", "."],
+        missingWords: ["mitigation", "disruption"],
+        wordBank: ["mitigation", "disruption", "creation", "stagnation"]
+      },
+      scenario: {
+        scenario: "You are leading a 3-year, $500M cloud migration initiative. The board is getting anxious. How do you deliver results?",
+        options: [
+          "Tell them to wait 3 years for the final result.",
+          "Architect the migration into quarterly deliverables that unlock tangible business value incrementally, ensuring continuous board confidence and risk mitigation.",
+          "Cancel the migration to save money.",
+          "Micromanage every single developer to make them code faster."
+        ],
+        answerIndex: 1,
+        explanation: "Delivering massive results requires structuring the initiative to unlock incremental value and mitigate risk continuously."
+      }
+    },
+    {
+      id: "learn_curious_c2",
+      title: "7. Existential Foresight: Learn and Be Curious",
+      content: `
+# Curiosity as a Corporate Survival Strategy
+
+At the highest echelon, curiosity is what prevents the company from becoming obsolete. The C-Level "Learn and Be Curious" principle is about having the intellectual agility to abandon the cash cow when the paradigm shifts.
+
+## Cannibalizing Your Own Business
+Are you curious enough to invent the technology that will destroy your current business model before your competitors do? 
+
+## The Disruption Narrative
+Your **Situation** involves an incredibly successful legacy product. Your **Action** involves your relentless curiosity exposing an upcoming technological disruption. You then took the incredibly difficult step of convincing the board to invest heavily in this new, unproven technology, effectively cannibalizing your own legacy revenue. The **Result** is the company surviving the paradigm shift and dominating the next decade of the industry.
+      `,
+      vocabulary: [
+        { word: "Agility", meaning: "Ability to move quickly and easily; ability to think and understand quickly." },
+        { word: "Cannibalize", meaning: "Use (a machine) as a source of spare parts for another, similar machine (or in business, when a new product eats the sales of an old product)." }
+      ],
+      fillInBlank: {
+        sentenceParts: ["Have the intellectual ", " to abandon the cash cow, even if it means you ", " your own legacy revenue."],
+        missingWords: ["agility", "cannibalize"],
+        wordBank: ["agility", "cannibalize", "sluggishness", "protect"]
+      },
+      scenario: {
+        scenario: "Your company sells highly profitable DVD rentals. You notice a massive shift towards streaming internet video. What is the C-Level action?",
+        options: [
+          "Double down on DVD marketing because it is currently profitable.",
+          "Ignore streaming because the quality is currently too low.",
+          "Invest massively in building a streaming platform, willingly cannibalizing your highly profitable DVD business to ensure the company survives the paradigm shift.",
+          "Sell the company immediately."
+        ],
+        answerIndex: 2,
+        explanation: "True executive curiosity and foresight requires the courage to cannibalize current profits to secure the company's future."
       }
     }
   ]
