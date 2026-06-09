@@ -2,8 +2,8 @@ import { defineConfig } from 'vitest/config';
 
 export default defineConfig({
   test: {
-    environment: 'node', // Change to jsdom or happy-dom if UI components are tested
+    environment: 'node',
     globals: true,
-    exclude: ['node_modules', 'dist', '.idea', '.git', '.cache', 'tests/**'],
+    exclude: ['**/node_modules/**', '**/dist/**', '**/tests/**', '**/*.spec.ts', '**/*.e2e.ts'],
   },
 });

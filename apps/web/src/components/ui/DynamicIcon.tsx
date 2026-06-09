@@ -1,10 +1,16 @@
 import React from 'react'
-import * as Icons from 'lucide-react'
+import { 
+  LayoutDashboard, TerminalSquare, PenTool, Mic, BookOpen, 
+  Terminal, Headphones, Cpu, Target, Activity, BookText, 
+  CheckSquare, GitPullRequest, GitCommit, Mail, LucideIcon 
+} from 'lucide-react'
 
-// Explicitly define the available icons we support so we don't import the whole library un-safely
-// though in a perfect world we would map them statically. Here we dynamically extract from the Icons object.
-
-type IconName = keyof typeof Icons
+// Explicitly map the icons used in the app to prevent aggressive tree-shaking on Vercel
+const iconMap: Record<string, LucideIcon> = {
+  LayoutDashboard, TerminalSquare, PenTool, Mic, BookOpen,
+  Terminal, Headphones, Cpu, Target, Activity, BookText,
+  CheckSquare, GitPullRequest, GitCommit, Mail
+}
 
 interface DynamicIconProps extends React.ComponentProps<'svg'> {
   name: string
@@ -13,9 +19,10 @@ interface DynamicIconProps extends React.ComponentProps<'svg'> {
 }
 
 export function DynamicIcon({ name, ...props }: DynamicIconProps) {
-  const IconComponent = Icons[name as IconName] as React.ElementType
+  const IconComponent = iconMap[name]
   
   if (!IconComponent) {
+    console.warn(`Icon ${name} not found in DynamicIcon map`)
     return null
   }
   
