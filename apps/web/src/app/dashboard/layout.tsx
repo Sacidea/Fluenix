@@ -41,6 +41,7 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
                     .dashboard-main.sidebar-open,
                     .dashboard-main.sidebar-closed {
                         margin-left: 0;
+                        padding-top: 64px;
                     }
                 }
             `}</style>

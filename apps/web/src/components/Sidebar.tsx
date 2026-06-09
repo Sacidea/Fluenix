@@ -29,14 +29,17 @@ export default function Sidebar() {
 
   return (
     <>
-      {/* Mobile-only toggle button */}
-      <button
-        className={`sb-toggle-btn ${isOpen ? 'active' : ''}`}
-        onClick={toggle}
-        aria-label="Menu"
-      >
-        {isOpen ? <Icons.X size={20} /> : <Icons.Menu size={20} />}
-      </button>
+      {/* Mobile-only top bar */}
+      <div className="sb-top-bar">
+        <button
+          className={`sb-toggle-btn ${isOpen ? 'active' : ''}`}
+          onClick={toggle}
+          aria-label="Menu"
+        >
+          {isOpen ? <Icons.X size={20} /> : <Icons.Menu size={20} />}
+        </button>
+        <span className="sb-mobile-logo">Fluenix <span className="lab-tag">LAB</span></span>
+      </div>
 
       {isOpen && (
         <motion.div
@@ -106,34 +109,52 @@ export default function Sidebar() {
         </div>
 
         <style jsx global>{`
-          .sb-toggle-btn {
-            position: fixed;
-            top: 24px;
-            left: 24px;
-            z-index: 1010;
-            width: 44px;
-            height: 44px;
+          .sb-top-bar {
             display: none;
-            align-items: center;
-            justify-content: center;
+            position: fixed;
+            top: 0; left: 0; right: 0;
+            height: 64px;
             background: #ffffff;
-            border: 1px solid #e2e8f0;
-            border-radius: 12px;
-            cursor: pointer;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
-            color: #0f172a;
-            transition: all 0.2s;
+            border-bottom: 1px solid #e2e8f0;
+            z-index: 900;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 20px;
           }
 
           @media (max-width: 1024px) {
-            .sb-toggle-btn {
+            .sb-top-bar {
               display: flex;
             }
           }
 
+          .sb-mobile-logo {
+            font-family: var(--font-dm-sans);
+            font-size: 16px;
+            font-weight: 800;
+            color: #09090b;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+          }
+
+          .sb-toggle-btn {
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: transparent;
+            border: 1px solid #e2e8f0;
+            border-radius: 10px;
+            cursor: pointer;
+            color: #0f172a;
+            transition: all 0.2s;
+          }
+
           .sb-toggle-btn:hover {
             border-color: #cbd5e1;
-            transform: scale(1.05);
+            background: #f8fafc;
           }
 
           .sb-overlay {
