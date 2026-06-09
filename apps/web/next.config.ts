@@ -8,6 +8,18 @@ const nextConfig: NextConfig = {
   turbopack: {
     root: workspaceRoot,
   },
+  images: {
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: 'd2xsxph8kpxj0f.cloudfront.net',
+      },
+      {
+        protocol: 'https',
+        hostname: 'images.unsplash.com',
+      },
+    ],
+  },
 };
 
 import { withSentryConfig } from "@sentry/nextjs";

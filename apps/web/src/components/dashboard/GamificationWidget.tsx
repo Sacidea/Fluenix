@@ -31,13 +31,13 @@ export function GamificationWidget({ totalSessions, currentWeeklyCount, weeklyTa
 
       <style jsx>{`
         .gamification-card {
-          background: #0f172a;
+          background: white;
           border-radius: 20px;
           padding: 24px;
           position: relative;
           overflow: hidden;
-          box-shadow: 0 10px 30px rgba(0,0,0,0.2);
-          border: 1px solid #1e293b;
+          box-shadow: 0 4px 24px rgba(0,0,0,0.06);
+          border: 1.5px solid #e8edf5;
         }
 
         .gamification-header {
@@ -63,12 +63,12 @@ export function GamificationWidget({ totalSessions, currentWeeklyCount, weeklyTa
 
         .goal-container { margin-top: auto; }
         .goal-text { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 12px; }
-        .goal-title { font-size: 11px; font-weight: 700; color: #94a3b8; text-transform: uppercase; letter-spacing: 1px; }
-        .goal-progress { font-family: var(--font-mono); font-size: 13px; font-weight: 600; color: white; }
+        .goal-title { font-size: 11px; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 1px; }
+        .goal-progress { font-family: var(--font-mono); font-size: 13px; font-weight: 700; color: #1e293b; }
 
         .progress-track {
           height: 6px;
-          background: #1e293b;
+          background: #e2e8f0;
           border-radius: 4px;
           overflow: hidden;
         }
