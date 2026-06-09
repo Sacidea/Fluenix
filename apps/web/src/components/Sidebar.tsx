@@ -180,6 +180,7 @@ export default function Sidebar() {
             position: fixed;
             top: 0; 
             left: 0; 
+            bottom: 0;
             height: 100dvh;
             z-index: 1000;
             border-right: 1px solid #e2e8f0;
@@ -250,7 +251,7 @@ export default function Sidebar() {
             border-radius: 4px; 
           }
 
-          .sb-nav { flex: 1; padding: 12px 16px; display: flex; flex-direction: column; gap: 2px; overflow-y: auto; overflow-x: hidden; scrollbar-width: none; }
+          .sb-nav { flex: 1; min-height: 0; padding: 12px 16px; display: flex; flex-direction: column; gap: 2px; overflow-y: auto; overflow-x: hidden; scrollbar-width: none; }
           .sb-nav::-webkit-scrollbar { display: none; }
           
           .sb-link { 

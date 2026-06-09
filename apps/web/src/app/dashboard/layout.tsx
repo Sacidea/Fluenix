@@ -40,8 +40,9 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
                 @media (max-width: 1024px) {
                     .dashboard-main.sidebar-open,
                     .dashboard-main.sidebar-closed {
-                        margin-left: 0;
-                        padding-top: 64px;
+                        margin-left: 0 !important;
+                        padding-top: 64px !important;
+                        width: 100% !important;
                     }
                 }
             `}</style>
