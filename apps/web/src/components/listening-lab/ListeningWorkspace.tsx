@@ -141,29 +141,15 @@ export function ListeningWorkspace() {
       const line = scenario.dialogue[utteranceIndex]
       const utterance = new SpeechSynthesisUtterance(line.text)
       
-      const uniqueSpeakers = Array.from(new Set(scenario.dialogue.map((l: any) => l.speaker)))
-      const speakerIndex = uniqueSpeakers.indexOf(line.speaker)
-      
       const voices = synthRef.current?.getVoices() || []
-      let englishVoices = voices.filter(v => v.lang.startsWith('en'))
+      const englishVoices = voices.filter(v => v.lang.startsWith('en') && !v.name.toLowerCase().includes('us english'))
       
-      if (englishVoices.length === 0) englishVoices = voices // Fallback
-
       if (englishVoices.length > 0) {
-        // If we have multiple voices, try to remove the generic/robotic ones if possible, but keep them if they are all we have
-        const premiumVoices = englishVoices.filter(v => !v.name.toLowerCase().includes('us english'))
-        const voicesToUse = premiumVoices.length > 1 ? premiumVoices : englishVoices
-        
-        const voiceIdx = speakerIndex % voicesToUse.length
-        utterance.voice = voicesToUse[voiceIdx]
-        
-        // Mobile fallback: If the device only provides 1 voice, alter the pitch to simulate two people
-        if (voicesToUse.length === 1 && uniqueSpeakers.length > 1) {
-          utterance.pitch = speakerIndex % 2 === 0 ? 1.0 : 0.75
-        }
+        const voiceIdx = (line.speaker.length || 0) % englishVoices.length
+        utterance.voice = englishVoices[voiceIdx]
       }
 
-      utterance.rate = 1.0
+      utterance.rate = 1.1
       utterance.onend = () => {
         utteranceIndex++
         playNext()
