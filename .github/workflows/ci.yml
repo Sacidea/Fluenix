@@ -35,6 +35,9 @@ jobs:
       - name: Mobile Type Check
         run: pnpm --filter mobile exec tsc --noEmit
 
+      - name: Build Web App
+        run: pnpm --filter web run build
+
       - name: Install Playwright Browsers
         run: pnpm --filter web exec playwright install --with-deps chromium
 
