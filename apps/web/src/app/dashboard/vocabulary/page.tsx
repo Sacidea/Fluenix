@@ -10,7 +10,7 @@ export default function VocabularyPage() {
   return (
     <div className="vocab-lab-root">
       <header className="lab-header">
-        <div className="header-content">
+        <div className="vocab-header-content">
           <Link href="/dashboard" className="back-link">
             <ChevronLeft size={14} />
             <span>Return to Dashboard</span>
