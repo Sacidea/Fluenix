@@ -145,12 +145,10 @@ export function ListeningWorkspace() {
       const speakerIndex = uniqueSpeakers.indexOf(line.speaker)
       
       const voices = synthRef.current?.getVoices() || []
-      let englishVoices = voices.filter(v => v.lang.startsWith('en'))
-      
-      if (englishVoices.length === 0) englishVoices = voices // Fallback
+      const englishVoices = voices.filter(v => v.lang.startsWith('en'))
 
       if (englishVoices.length > 0) {
-        // If we have multiple voices, try to remove the generic/robotic ones if possible, but keep them if they are all we have
+        // Try to use premium/distinct voices if possible
         const premiumVoices = englishVoices.filter(v => !v.name.toLowerCase().includes('us english'))
         const voicesToUse = premiumVoices.length > 1 ? premiumVoices : englishVoices
         
