@@ -110,7 +110,7 @@
 /* ─── FEEDBACK SCORES ─────────────────────────────────── */
 @media (max-width: 480px) {
   .wr-scores { grid-template-columns: 1fr; }
-}/* ��� DASHBOARD LAYOUT (Migrated from styled-jsx) ��� */
+}/* ��� DASHBOARD LAYOUT (Migrated from styled-jsx) ��� */
 .dashboard-layout {
   display: flex;
   min-height: 100vh;
