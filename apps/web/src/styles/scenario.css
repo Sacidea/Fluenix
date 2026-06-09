@@ -68,7 +68,12 @@
 }
 
 .selector-intro {
-  text-align: center;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  width: 100%;
+  max-width: 900px;
+  text-align: left;
 }
 
 .selector-intro h2 {
@@ -474,5 +479,48 @@
 
   40% {
     opacity: 1;
+  }
+}
+
+/* ====================================
+   RESPONSIVE (MOBILE FIXES)
+==================================== */
+@media (max-width: 1024px) {
+  .scenarios-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 768px) {
+  .scenarios-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .simulation-workspace {
+    grid-template-columns: 1fr;
+    height: auto;
+    min-height: calc(100vh - 200px);
+  }
+
+  .selector-intro {
+    flex-direction: column;
+    align-items: center !important;
+    gap: 20px;
+  }
+
+  .selector-intro h2 {
+    font-size: 24px;
+  }
+
+  .scenario-header {
+    padding: 16px 20px;
+  }
+
+  .scenario-main {
+    padding: 20px;
+  }
+
+  .comms-channel {
+    height: 60vh;
   }
 }

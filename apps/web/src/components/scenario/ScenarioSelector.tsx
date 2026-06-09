@@ -32,7 +32,7 @@ export function ScenarioSelector({
 
   return (
     <section className="selector-view">
-      <div className="selector-intro" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+      <div className="selector-intro">
         <div>
           <h2>Select Operational Context</h2>
           <p>Click on a scenario below to immediately initialize the AI simulation.</p>
@@ -69,7 +69,7 @@ export function ScenarioSelector({
       </div>
 
       <div style={{ maxWidth: '900px', margin: '0 auto', width: '100%' }}>
-        <div className="scenarios-grid" style={{ display: 'flex', flexDirection: 'column', gap: '16px', marginTop: '20px' }}>
+        <div className="scenarios-grid" style={{ marginTop: '20px' }}>
           {scenarios.map((s) => {
             const Icon = IconMap[s.icon]
             const isSelected = scenario === s.id
