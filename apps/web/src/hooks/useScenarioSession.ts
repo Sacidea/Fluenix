@@ -27,9 +27,12 @@ export function useScenarioSession() {
   
   const bottomRef = useRef<HTMLDivElement>(null)
   const recognitionRef = useRef<any>(null)
+  const isMounted = useRef<boolean>(true)
+  const speakTimeoutRef = useRef<NodeJS.Timeout | null>(null)
 
   // Unmount Cleanup & Load Voices
   useEffect(() => {
+    isMounted.current = true
     const loadVoices = () => {
       const voices = window.speechSynthesis.getVoices().filter(v => {
         // Sadece İngilizce sesleri al, fakat "US English" isimli jenerik/kalitesiz sesi filtrele
@@ -49,6 +52,8 @@ export function useScenarioSession() {
     }
 
     return () => {
+      isMounted.current = false
+      if (speakTimeoutRef.current) clearTimeout(speakTimeoutRef.current)
       if (typeof window !== 'undefined' && window.speechSynthesis) {
         window.speechSynthesis.cancel()
       }
@@ -75,8 +80,12 @@ export function useScenarioSession() {
 
   // Web Speech AI Helper
   const speakAIResponse = (text: string) => {
+    if (!isMounted.current) return
     window.speechSynthesis.cancel()
-    setTimeout(() => {
+    if (speakTimeoutRef.current) clearTimeout(speakTimeoutRef.current)
+    
+    speakTimeoutRef.current = setTimeout(() => {
+      if (!isMounted.current) return
       // Kelimenin başına virgül ve boşluk eklemek, Chrome'un TTS motorunun 
       // uyanırken ilk kelimeyi yutması problemini (ilk okuyuş hatası) çözer.
       const cleanText = ", " + text
