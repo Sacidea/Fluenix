@@ -124,7 +124,7 @@ export function WritingPaperCanvas({
         <footer className="editor-footer">
           {error && <span style={{ color: '#ef4444', marginRight: 'auto', fontSize: '14px' }}>{error}</span>}
           
-          <div style={{ display: 'flex', gap: '12px', marginLeft: 'auto' }}>
+          <div className="editor-footer-actions">
             <button
               className="submit-btn"
               onClick={onSubmit}
