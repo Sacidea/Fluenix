@@ -4,9 +4,12 @@ module.exports = function (api) {
     presets: [
       ["babel-preset-expo", { jsxImportSource: "nativewind" }],
     ],
+    plugins: [
+      "react-native-reanimated/plugin",
+    ],
     env: {
       production: {
-        plugins: ["transform-remove-console"],
+        plugins: ["transform-remove-console", "react-native-reanimated/plugin"],
       },
     },
   };
