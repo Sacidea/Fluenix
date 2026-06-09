@@ -40,7 +40,7 @@ export default function ScenarioPage() {
         <View className="flex-1">
           {analysisResult ? (
             <AnalysisResultView 
-              analysisResult={analysisResult} 
+              analysisResult={analysisResult as any} 
               setAnalysisResult={setAnalysisResult} 
             />
           ) : !started ? (

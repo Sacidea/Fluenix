@@ -1,6 +1,7 @@
 import React, { useState } from 'react'
 import { CheckCircle2, Terminal, FileCode, Users, PenLine, Mic, GitPullRequest, X, Trash2 } from 'lucide-react'
 import * as Icons from 'lucide-react'
+import { RecentActivityModal } from './RecentActivityModal'
 
 interface Session {
   id: string
@@ -8,7 +9,7 @@ interface Session {
   scenario: string
   createdAt: string
   score: number | null
-  feedback?: any
+  feedback?: unknown
 }
 
 interface Props {
@@ -61,14 +62,8 @@ export function RecentActivity({ sessions, onDelete }: Props) {
     )
   }
 
-  // Parse feedback if it's a string
-  const getParsedFeedback = (session: Session) => {
-    if (!session.feedback) return null
-    if (typeof session.feedback === 'string') {
-      try { return JSON.parse(session.feedback) } catch(e) { return null }
-    }
-    return session.feedback
-  }
+  // Helper for score color passed to modal
+  const getScoreColorFunc = getScoreColor
 
   return (
     <div className="recent-container">
@@ -125,48 +120,11 @@ export function RecentActivity({ sessions, onDelete }: Props) {
 
       {/* MODAL OVERLAY */}
       {selectedSession && (
-        <div className="modal-overlay" onClick={() => setSelectedSession(null)}>
-          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
-            <button className="close-btn" onClick={() => setSelectedSession(null)}>
-              <X size={20} />
-            </button>
-            <h2 className="modal-title">
-              {selectedSession.type.toUpperCase()} - {selectedSession.scenario.replace(/_/g, ' ')}
-            </h2>
-            <div className="modal-meta">
-              <span>{new Date(selectedSession.createdAt).toLocaleString()}</span>
-              <span className="modal-score" style={{ color: getScoreColor(selectedSession.score) }}>
-                Score: {selectedSession.score ? Math.round(selectedSession.score) : 'N/A'}
-              </span>
-            </div>
-
-            <div className="modal-body">
-              {getParsedFeedback(selectedSession) ? (
-                <div className="feedback-json">
-                  {Object.entries(getParsedFeedback(selectedSession)).map(([key, value]: [string, any]) => {
-                    if (key === 'overall_score') return null
-                    return (
-                      <div key={key} className="fb-block">
-                        <strong className="fb-key">{key.replace(/_/g, ' ').toUpperCase()}:</strong>
-                        <div className="fb-val">
-                          {Array.isArray(value) ? (
-                            <ul className="fb-list">
-                              {value.map((v, idx) => <li key={idx}>{v}</li>)}
-                            </ul>
-                          ) : (
-                            <p>{value}</p>
-                          )}
-                        </div>
-                      </div>
-                    )
-                  })}
-                </div>
-              ) : (
-                <p className="no-feedback">No detailed feedback available for this session.</p>
-              )}
-            </div>
-          </div>
-        </div>
+        <RecentActivityModal 
+          session={selectedSession} 
+          onClose={() => setSelectedSession(null)} 
+          getScoreColor={getScoreColorFunc} 
+        />
       )}
 
       <style jsx>{`

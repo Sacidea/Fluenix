@@ -5,7 +5,7 @@ import { Flashcard } from './Flashcard'
 import { X, Check, Trophy, Loader2 } from 'lucide-react'
 import { useVocabularySession } from '@/hooks/useVocabularySession'
 
-function shuffle(array: any[]) {
+function shuffle<T>(array: T[]): T[] {
   const arr = [...array]
   for (let i = arr.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1));

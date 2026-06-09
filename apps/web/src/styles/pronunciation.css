@@ -533,7 +533,9 @@
   }
 
   .word-index {
-    display: none;
+    max-height: 280px;
+    margin-bottom: 24px;
+    border-radius: var(--radius-xl);
   }
 
   .welcome-text {

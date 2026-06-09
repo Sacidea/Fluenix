@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import axios from 'axios'
 import { useAuth, useUser } from '@clerk/nextjs'
+import { apiClient, aiClient } from '@/lib/apiClient'
 import { useLevel } from '@/context/LevelContext'
 import { WritingExerciseId, writingExercises } from '@fluenix/shared'
 
@@ -15,6 +16,15 @@ export interface WritingMission {
   referenceData: string
 }
 
+export interface WritingFeedback {
+  overall_score: number
+  tone_alignment: number
+  technical_accuracy: number
+  strengths: string[]
+  improvements: string[]
+  revised_text: string
+}
+
 export function useWritingSession() {
   const { user } = useUser()
   const { getToken } = useAuth()
@@ -25,7 +35,7 @@ export function useWritingSession() {
   const [isLoadingMission, setIsLoadingMission] = useState(false)
 
   const [userText, setUserText] = useState('')
-  const [feedback, setFeedback] = useState<any>(null)
+  const [feedback, setFeedback] = useState<WritingFeedback | null>(null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
@@ -41,9 +51,8 @@ export function useWritingSession() {
       const token = await getToken()
       console.log("Token:", token)
       console.log("Level:", level)
-      console.log("API URL:", process.env.NEXT_PUBLIC_API_URL)
-      const res = await axios.post(
-        `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'}/api/writing/next`,
+      const res = await apiClient.post(
+        '/api/writing/next',
         { level, category },
         { headers: { Authorization: `Bearer ${token}` } }
       )
@@ -52,10 +61,12 @@ export function useWritingSession() {
       } else {
         throw new Error('Failed to load next mission')
       }
-    } catch (err: any) {
-      console.log("Axios Error Data:", err.response?.data)
-      console.log("Axios Error Status:", err.response?.status)
-      console.log("Axios Error Message:", err.message)
+    } catch (err: unknown) {
+      if (axios.isAxiosError(err)) {
+        console.log("Axios Error:", err.response?.data)
+      } else {
+        console.error(err)
+      }
       setError("Failed to fetch next writing task. Please try again.")
     } finally {
       setIsLoadingMission(false)
@@ -69,7 +80,7 @@ export function useWritingSession() {
     }
   }, [exerciseId, level])
 
-  const changeExercise = (id: WritingExerciseId) => {
+  const changeExercise = (id: WritingExerciseId | null) => {
     setExerciseId(id)
   }
 
@@ -82,7 +93,7 @@ export function useWritingSession() {
     try {
       const token = await getToken()
       // 1. Analyze with AI
-      const res = await axios.post(`${process.env.NEXT_PUBLIC_AI_URL || 'http://localhost:8000'}/writing/analyze`, {
+      const res = await aiClient.post('/writing/analyze', {
         exercise: exerciseId,
         text: userText,
         context: activeMission.context,
@@ -94,12 +105,12 @@ export function useWritingSession() {
 
       const raw = res.data.feedback
       const clean = raw.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim()
-      const parsed = typeof clean === 'string' ? JSON.parse(clean) : clean
+      const parsed = (typeof clean === 'string' ? JSON.parse(clean) : clean) as WritingFeedback
       setFeedback(parsed)
 
       // 2. Save Session to Backend
       if (user) {
-        await axios.post(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'}/api/sessions`, {
+        await apiClient.post('/api/sessions', {
           userId: user.id,
           type: 'writing',
           scenario: activeMission.title, // Store the specific mission title
@@ -110,9 +121,13 @@ export function useWritingSession() {
           headers: token ? { Authorization: `Bearer ${token}` } : undefined
         })
       }
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Writing analysis failed:', err)
-      setError(err.response?.data?.detail || 'Analysis failed. Please try again.')
+      if (axios.isAxiosError(err)) {
+        setError(err.response?.data?.detail || 'Analysis failed. Please try again.')
+      } else {
+        setError('Analysis failed. Please try again.')
+      }
     } finally {
       setLoading(false)
     }

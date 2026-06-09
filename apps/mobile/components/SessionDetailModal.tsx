@@ -11,7 +11,9 @@ const labelMap: Record<string, string> = {
   'grammar-lab': 'Grammar Linter'
 };
 
-export function SessionDetailModal({ visible, session, onClose }: { visible: boolean; session: any; onClose: () => void }) {
+import { Session } from './SessionItem';
+
+export function SessionDetailModal({ visible, session, onClose }: { visible: boolean; session: Session | null; onClose: () => void }) {
   if (!session) return null;
 
   const hasFeedback = session.feedback && typeof session.feedback === 'object';

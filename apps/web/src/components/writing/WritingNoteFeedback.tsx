@@ -4,17 +4,10 @@ import React from 'react'
 import { motion } from 'framer-motion'
 import { Sparkles, Pin } from 'lucide-react'
 
-interface Feedback {
-  clarity_score: number
-  technical_score: number
-  overall_score: number
-  strengths: string[]
-  improvements: string[]
-  overall_feedback: string
-}
+import { WritingFeedback } from '@/hooks/useWritingSession'
 
 interface Props {
-  feedback: Feedback
+  feedback: WritingFeedback
   theme?: 'lilac' | 'yellow' | 'blue'
 }
 
@@ -66,7 +59,7 @@ export function WritingNoteFeedback({ feedback, theme = 'blue' }: Props) {
           </div>
           
           <p className="note-summary" style={{ borderTopColor: t.border }}>
-            {feedback.overall_feedback.substring(0, 100)}...
+            {feedback.revised_text ? feedback.revised_text.substring(0, 100) : ''}...
           </p>
         </div>
       </div>

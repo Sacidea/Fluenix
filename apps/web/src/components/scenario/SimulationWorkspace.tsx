@@ -1,10 +1,11 @@
 import React from 'react'
 import { Send, Mic, Square, RotateCcw, CheckCircle } from 'lucide-react'
-import { Message } from '@fluenix/shared'
+import { Message, ScenarioMission } from '@fluenix/shared'
+import DOMPurify from 'isomorphic-dompurify'
 
 interface SimulationWorkspaceProps {
   activeScenario: { id: string; label: string; desc: string; color: string }
-  activeMission: any
+  activeMission: ScenarioMission | null
   durationStr: string
   messages: Message[]
   input: string
@@ -99,9 +100,9 @@ export function SimulationWorkspace({
               <div 
                 className="msg-content"
                 dangerouslySetInnerHTML={{
-                  __html: msg.content
+                  __html: DOMPurify.sanitize(msg.content
                     .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
-                    .replace(/\n/g, '<br/>')
+                    .replace(/\n/g, '<br/>'))
                 }}
               />
             </div>

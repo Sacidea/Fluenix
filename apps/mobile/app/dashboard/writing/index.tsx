@@ -54,7 +54,7 @@ export default function WritingPage() {
               onSubmit={analyzeWriting}
               disabled={loading}
               loading={loading}
-              feedback={feedback}
+              feedback={feedback as any}
               error={error}
               onNext={() => loadNextMission(exerciseId)}
             />

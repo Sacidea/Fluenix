@@ -31,7 +31,8 @@ export default function SignUpScreen() {
       } else {
         Alert.alert("Error", "Google Login didn't complete (no session ID).");
       }
-    } catch (err: any) {
+    } catch (error: unknown) {
+      const err = error as any;
       console.error('Google Sign-Up error:', err);
       Alert.alert("Sign Up Failed", err.errors?.[0]?.longMessage || err.errors?.[0]?.message || err.message || 'Google sign-up failed');
     }
@@ -44,7 +45,8 @@ export default function SignUpScreen() {
       await signUp.create({ emailAddress, password });
       await signUp.prepareEmailAddressVerification({ strategy: 'email_code' });
       setPendingVerification(true);
-    } catch (err: any) {
+    } catch (error: unknown) {
+      const err = error as any;
       console.error(err);
       alert(err.errors[0]?.message || 'Failed to sign up');
     } finally {
@@ -61,7 +63,8 @@ export default function SignUpScreen() {
         await setActive({ session: completeSignUp.createdSessionId });
         router.replace('/');
       }
-    } catch (err: any) {
+    } catch (error: unknown) {
+      const err = error as any;
       console.error(err);
       alert(err.errors[0]?.message || 'Verification failed');
     } finally {

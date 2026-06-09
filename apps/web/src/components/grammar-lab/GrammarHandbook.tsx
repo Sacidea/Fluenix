@@ -1,7 +1,7 @@
 'use client'
 
 import React, { useState, useEffect } from 'react'
-import axios from 'axios'
+import { apiClient } from '@/lib/apiClient'
 import { useAuth } from '@clerk/nextjs'
 import { BookOpen, CheckCircle2, XCircle, AlertCircle, Loader2, ChevronRight } from 'lucide-react'
 import ReactMarkdown from 'react-markdown'
@@ -35,7 +35,7 @@ export function GrammarHandbook() {
       const token = await getToken()
       if (!token) return
       setIsLoading(true)
-      axios.get(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'}/api/handbook/rules`, {
+      apiClient.get('/api/handbook/rules', {
         headers: { Authorization: `Bearer ${token}` }
       })
       .then(res => {

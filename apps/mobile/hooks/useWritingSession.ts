@@ -1,16 +1,7 @@
 import { useState, useEffect } from 'react';
-import axios from 'axios';
 import { useAuth, useUser } from '@clerk/clerk-expo';
 import { WritingExerciseId, writingExercises, WritingMission } from '@fluenix/shared';
-import { Platform } from 'react-native';
-
-const getBaseUrl = (port: number) => {
-  if (Platform.OS === 'web') return `http://localhost:${port}`;
-  return `http://10.0.2.2:${port}`;
-};
-
-const API_URL = process.env.EXPO_PUBLIC_API_URL || getBaseUrl(3001);
-const AI_URL = process.env.EXPO_PUBLIC_AI_URL || getBaseUrl(8000);
+import { apiClient, aiClient } from '../utils/apiClient';
 
 export function useWritingSession() {
   const { getToken } = useAuth();
@@ -22,7 +13,7 @@ export function useWritingSession() {
   const [isLoadingMission, setIsLoadingMission] = useState(false);
 
   const [userText, setUserText] = useState('');
-  const [feedback, setFeedback] = useState<any>(null);
+  const [feedback, setFeedback] = useState<unknown>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -37,8 +28,8 @@ export function useWritingSession() {
     
     try {
       const token = await getToken();
-      const res = await axios.post(
-        `${API_URL}/api/writing/next`,
+      const res = await apiClient.post(
+        `/api/writing/next`,
         { level, category },
         { headers: { Authorization: `Bearer ${token}` } }
       );
@@ -48,7 +39,7 @@ export function useWritingSession() {
       } else {
         throw new Error('Failed to load next mission');
       }
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error("Failed to fetch next writing task", err);
       setError("Failed to fetch next writing task. Please try again.");
     } finally {
@@ -75,7 +66,7 @@ export function useWritingSession() {
     try {
       const token = await getToken();
       
-      const res = await axios.post(`${AI_URL}/writing/analyze`, {
+      const res = await aiClient.post(`/writing/analyze`, {
         exercise: exerciseId,
         text: userText,
         context: activeMission.context,
@@ -91,7 +82,7 @@ export function useWritingSession() {
       setFeedback(parsed);
 
       if (user) {
-        await axios.post(`${API_URL}/api/sessions`, {
+        await apiClient.post(`/api/sessions`, {
           userId: user.id,
           type: 'writing',
           scenario: activeMission.title,
@@ -102,9 +93,10 @@ export function useWritingSession() {
           headers: token ? { Authorization: `Bearer ${token}` } : undefined
         });
       }
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Writing analysis failed:', err);
-      setError(err.response?.data?.detail || 'Analysis failed. Please try again.');
+      const errorMessage = err instanceof Error ? err.message : 'Analysis failed. Please try again.';
+      setError(errorMessage);
     } finally {
       setLoading(false);
     }

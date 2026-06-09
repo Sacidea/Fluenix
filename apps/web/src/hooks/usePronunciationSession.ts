@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react'
+import { apiClient, aiClient } from '@/lib/apiClient'
 import axios from 'axios'
 import { useLevel } from '@/context/LevelContext'
 import { useAuth, useUser } from '@clerk/nextjs'
@@ -30,7 +31,7 @@ export function usePronunciationSession() {
   const [loading, setLoading] = useState(false)
   const [supported, setSupported] = useState(true)
   
-  const recognitionRef = useRef<any>(null)
+  const recognitionRef = useRef<any>(null) // keeping any for now due to lack of TS SpeechRecognition type
 
   const [selectedCategory, setSelectedCategory] = useState<string>('All')
   const [currentPage, setCurrentPage] = useState<number>(1)
@@ -41,7 +42,7 @@ export function usePronunciationSession() {
     const fetchWords = async () => {
       try {
         const token = await getToken()
-        const res = await axios.get(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'}/api/pronunciation/words`, {
+        const res = await apiClient.get('/api/pronunciation/words', {
           headers: { Authorization: `Bearer ${token}` }
         })
         setWords(res.data)
@@ -54,7 +55,7 @@ export function usePronunciationSession() {
     fetchWords()
 
     if (typeof window !== 'undefined') {
-      const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition
+      const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition
       if (!SpeechRecognition) setSupported(false)
     }
   }, [])
@@ -79,7 +80,7 @@ export function usePronunciationSession() {
   }, [selectedCategory, filteredWords, words, currentIndex])
 
   const startListening = () => {
-    const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition
     if (!SpeechRecognition) return
 
     const recognition = new SpeechRecognition()
@@ -113,7 +114,7 @@ export function usePronunciationSession() {
     try {
       const token = await getToken()
       // 1. Get AI Analysis
-      const res = await axios.post(`${process.env.NEXT_PUBLIC_AI_URL || 'http://localhost:8000'}/pronunciation/analyze`, {
+      const res = await aiClient.post('/pronunciation/analyze', {
         transcript: heard,
         target_word: words[currentIndex].word,
         level: userLevel
@@ -127,8 +128,8 @@ export function usePronunciationSession() {
 
       // 2. Save Session to Backend (if user is logged in)
       if (user) {
-        await axios.post(
-          `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'}/api/sessions`,
+        await apiClient.post(
+          '/api/sessions',
           {
             userId: user.id,
             type: 'pronunciation',
@@ -147,7 +148,7 @@ export function usePronunciationSession() {
         )
       }
 
-    } catch (err) {
+    } catch (err: unknown) {
       console.error('Failed to analyze or save pronunciation session:', err)
     } finally {
       setLoading(false)
@@ -175,7 +176,7 @@ export function usePronunciationSession() {
 
       // Assign to window so it doesn't get garbage collected mid-speech
       // (Another notorious Chrome bug where speech abruptly fails)
-      ;(window as any)._fluenixActiveUtterance = utterance
+      window._fluenixActiveUtterance = utterance
 
       window.speechSynthesis.speak(utterance)
     }, 50)

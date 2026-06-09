@@ -20,7 +20,9 @@ const DEFAULT_COMP = [
   { subject: 'Grammar', A: 20 }
 ];
 
-export function CompetencyRadar({ sessions }: { sessions: any[] }) {
+import { Session } from './SessionItem';
+
+export function CompetencyRadar({ sessions }: { sessions: Session[] }) {
   const data = [...DEFAULT_COMP];
   const scores = {
     scenario: [] as number[],

@@ -7,16 +7,10 @@ import { Play, Square, Eye, EyeOff, CheckCircle2, XCircle, Mic, Keyboard, ListCh
 // --- Types & Globals ---
 type PracticeMode = 'quiz' | 'dictation' | 'shadowing'
 
-// Type declaration for Web Speech API
-declare global {
-  interface Window {
-    SpeechRecognition: any
-    webkitSpeechRecognition: any
-  }
-}
+// We rely on the global.d.ts definitions instead of redefining window here
 
 // --- Helpers ---
-function renderLineWithIdioms(line: any) {
+function renderLineWithIdioms(line: { text: string, idiomHighlight?: { word: string, meaning: string } }) {
   if (!line.idiomHighlight || !line.idiomHighlight.word) return line.text
 
   const { word, meaning } = line.idiomHighlight
@@ -273,7 +267,7 @@ export function ListeningWorkspace() {
 
         {showTranscript && (
           <div className="transcript-panel">
-            {scenario.dialogue.map((line: any, idx: number) => (
+            {scenario.dialogue.map((line: { text: string, speaker: string, idiomHighlight?: { word: string, meaning: string } }, idx: number) => (
               <div key={idx} className="dialogue-line">
                 <span className="speaker-name">{line.speaker}</span>
                 <span className="speaker-text">{renderLineWithIdioms(line)}</span>
@@ -310,7 +304,7 @@ export function ListeningWorkspace() {
             </div>
             
             <div className="options-list">
-              {currentQuestion.options.map((opt: any) => {
+              {currentQuestion.options.map((opt: { id: string, text: string, isCorrect: boolean, explanation: string }) => {
                 const isSelected = selectedOptionId === opt.id
                 let btnClass = 'l-option-btn'
                 
@@ -335,7 +329,7 @@ export function ListeningWorkspace() {
             </div>
 
             {(() => {
-              const selectedOption = currentQuestion.options.find((o: any) => o.id === selectedOptionId)
+              const selectedOption = currentQuestion.options.find((o: { id: string }) => o.id === selectedOptionId)
               return isAnswered && selectedOption && (
                 <div className={"l-feedback " + (selectedOption.isCorrect ? 'correct' : 'incorrect')}>
                   <div className="feedback-header" style={{ fontWeight: 800, marginBottom: '8px', display: 'flex', alignItems: 'center', gap: '8px', color: selectedOption.isCorrect ? '#059669' : '#dc2626' }}>

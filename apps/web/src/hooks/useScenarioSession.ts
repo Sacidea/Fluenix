@@ -1,9 +1,21 @@
 import { useState, useRef, useEffect } from 'react'
+import { apiClient, aiClient } from '@/lib/apiClient'
 import axios from 'axios'
 import { useUser, useAuth } from '@clerk/nextjs'
 import { useLevel } from '@/context/LevelContext'
+import { useScenarioAudio } from './useScenarioAudio'
 
 import { Message, ScenarioType, scenarios, ScenarioMission } from '@fluenix/shared'
+
+export interface ScenarioAnalysisResult {
+  overall_score: number
+  fluency_score: number
+  vocabulary_score: number
+  technical_accuracy: number
+  strengths: string[]
+  improvements: string[]
+  overall_feedback: string
+}
 
 export function useScenarioSession() {
   const { user } = useUser()
@@ -17,48 +29,24 @@ export function useScenarioSession() {
   const [started, setStarted] = useState(false)
   const [startTime, setStartTime] = useState<Date | null>(null)
   const [durationStr, setDurationStr] = useState('00:00')
-  const [listening, setListening] = useState(false)
-  const [analysisResult, setAnalysisResult] = useState<any>(null)
+  const [analysisResult, setAnalysisResult] = useState<ScenarioAnalysisResult | null>(null)
   const [isLoadingMission, setIsLoadingMission] = useState(false)
   
-  // Voice Selection State
-  const [availableVoices, setAvailableVoices] = useState<SpeechSynthesisVoice[]>([])
-  const [selectedVoiceURI, setSelectedVoiceURI] = useState<string>('')
-  
   const bottomRef = useRef<HTMLDivElement>(null)
-  const recognitionRef = useRef<any>(null)
-  const isMounted = useRef<boolean>(true)
-  const speakTimeoutRef = useRef<NodeJS.Timeout | null>(null)
 
-  // Unmount Cleanup & Load Voices
-  useEffect(() => {
-    isMounted.current = true
-    const loadVoices = () => {
-      const voices = window.speechSynthesis.getVoices().filter(v => {
-        // Sadece İngilizce sesleri al, fakat "US English" isimli jenerik/kalitesiz sesi filtrele
-        return v.lang.startsWith('en') && !v.name.toLowerCase().includes('us english')
-      })
-      setAvailableVoices(voices)
-      if (voices.length > 0 && !selectedVoiceURI) {
-        // Default to a Google US voice if available, else first english voice
-        const defaultVoice = voices.find(v => v.name.includes('Google') && v.lang === 'en-US') || voices[0]
-        setSelectedVoiceURI(defaultVoice.voiceURI)
-      }
-    }
+  const {
+    availableVoices,
+    selectedVoiceURI,
+    setSelectedVoiceURI,
+    listening,
+    startListening: startAudioListening,
+    stopListening,
+    speakAIResponse
+  } = useScenarioAudio()
 
-    loadVoices()
-    if (typeof window !== 'undefined' && window.speechSynthesis) {
-      window.speechSynthesis.onvoiceschanged = loadVoices
-    }
-
-    return () => {
-      isMounted.current = false
-      if (speakTimeoutRef.current) clearTimeout(speakTimeoutRef.current)
-      if (typeof window !== 'undefined' && window.speechSynthesis) {
-        window.speechSynthesis.cancel()
-      }
-    }
-  }, []) // Remove dependencies to only run on mount/unmount
+  const startListening = () => {
+    startAudioListening((text) => setInput(prev => (prev + ' ' + text).trim()))
+  }
 
   useEffect(() => {
     if (started) {
@@ -78,42 +66,6 @@ export function useScenarioSession() {
     return () => clearInterval(interval)
   }, [started, startTime])
 
-  // Web Speech AI Helper
-  const speakAIResponse = (text: string) => {
-    if (!isMounted.current) return
-    window.speechSynthesis.cancel()
-    if (speakTimeoutRef.current) clearTimeout(speakTimeoutRef.current)
-    
-    speakTimeoutRef.current = setTimeout(() => {
-      if (!isMounted.current) return
-      // Kelimenin başına virgül ve boşluk eklemek, Chrome'un TTS motorunun 
-      // uyanırken ilk kelimeyi yutması problemini (ilk okuyuş hatası) çözer.
-      const cleanText = ", " + text
-        .replace(/\*\*(.*?)\*\*/g, '$1') // Remove bold asterisks
-        .replace(/`/g, '')               // Remove backticks
-        .replace(/[-*_]{3,}/g, '')       // Remove horizontal rules (---, ***, ___)
-        .replace(/^#+\s+/gm, '')         // Remove heading hashes (###)
-        .replace(/^[-*]\s+/gm, '')       // Remove bullet points (- or *)
-        .replace(/\[([^\]]+)\]/g, '$1')  // Remove brackets but keep text inside
-        .trim()
-        
-      const utterance = new SpeechSynthesisUtterance(cleanText)
-      utterance.lang = 'en-US'
-      utterance.rate = 0.95
-      
-      const voices = window.speechSynthesis.getVoices()
-      const selectedVoice = voices.find(v => v.voiceURI === selectedVoiceURI)
-      if (selectedVoice) {
-        utterance.voice = selectedVoice
-      } else {
-        const fallback = voices.find(v => v.lang === 'en-US' || v.lang === 'en_US')
-        if (fallback) utterance.voice = fallback
-      }
-      
-      ;(window as any)._fluenixActiveUtterance = utterance
-      window.speechSynthesis.speak(utterance)
-    }, 50)
-  }
 
   const startScenario = async () => {
     setStarted(true)
@@ -125,8 +77,8 @@ export function useScenarioSession() {
     
     try {
       const token = await getToken()
-      const missionRes = await axios.post(
-        `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'}/api/scenario/next`,
+      const missionRes = await apiClient.post(
+        '/api/scenario/next',
         { category: scenario, level },
         { headers: { Authorization: `Bearer ${token}` } }
       )
@@ -139,7 +91,7 @@ export function useScenarioSession() {
         throw new Error('Failed to load mission')
       }
 
-      const res = await axios.post(`${process.env.NEXT_PUBLIC_AI_URL || 'http://localhost:8000'}/scenario/chat`, {
+      const res = await aiClient.post('/scenario/chat', {
         scenario,
         level,
         context: missionContent,
@@ -178,7 +130,7 @@ export function useScenarioSession() {
     setLoading(true)
     try {
       const token = await getToken()
-      const res = await axios.post(`${process.env.NEXT_PUBLIC_AI_URL || 'http://localhost:8000'}/scenario/chat`, {
+      const res = await aiClient.post('/scenario/chat', {
         scenario,
         level,
         context: activeMission?.content || '',
@@ -189,7 +141,7 @@ export function useScenarioSession() {
       const reply = res.data.reply
       setMessages([...newMessages, { role: 'assistant', content: reply }])
       speakAIResponse(reply)
-    } catch (err) {
+    } catch (err: unknown) {
       if (axios.isAxiosError(err)) {
         console.error('Status:', err.response?.status);
         console.error('Data:', err.response?.data);
@@ -204,48 +156,6 @@ export function useScenarioSession() {
     }
   }
 
-  const startListening = () => {
-    const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition
-    if (!SpeechRecognition) return
-
-    const recognition = new SpeechRecognition()
-    recognition.lang = 'en-US'
-    recognition.interimResults = true
-    recognition.maxAlternatives = 1
-
-    recognition.onstart = () => {
-      window.speechSynthesis.cancel()
-      setListening(true)
-    }
-    
-    recognition.onresult = (event: any) => {
-      let interimTranscript = ''
-      let finalTranscript = ''
-
-      for (let i = event.resultIndex; i < event.results.length; ++i) {
-        if (event.results[i].isFinal) {
-          finalTranscript += event.results[i][0].transcript
-        } else {
-          interimTranscript += event.results[i][0].transcript
-        }
-      }
-
-      if (finalTranscript) {
-        setInput(prev => (prev + ' ' + finalTranscript).trim())
-      }
-    }
-
-    recognition.onerror = () => setListening(false)
-    recognition.onend = () => setListening(false)
-
-    recognitionRef.current = recognition
-    recognition.start()
-  }
-
-  const stopListening = () => {
-    recognitionRef.current?.stop()
-    setListening(false)
-  }
 
   const endSession = () => {
     setStarted(false)
@@ -269,7 +179,7 @@ export function useScenarioSession() {
     window.speechSynthesis.cancel()
     try {
       const token = await getToken()
-      const res = await axios.post(`${process.env.NEXT_PUBLIC_AI_URL || 'http://localhost:8000'}/scenario/analyze`, {
+      const res = await aiClient.post('/scenario/analyze', {
         scenario,
         level,
         messages
@@ -301,8 +211,8 @@ export function useScenarioSession() {
         const token = await getToken()
         const diffSeconds = startTime ? Math.floor((new Date().getTime() - startTime.getTime()) / 1000) : 0
 
-        await axios.post(
-          `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'}/api/sessions`,
+        await apiClient.post(
+          '/api/sessions',
           {
             userId: user.id,
             type: 'scenario',
@@ -325,8 +235,8 @@ export function useScenarioSession() {
         )
 
         if (activeMission?.id) {
-          await axios.post(
-            `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'}/api/scenario/complete`,
+          await apiClient.post(
+            '/api/scenario/complete',
             {
               userId: user.id,
               missionId: activeMission.id
@@ -343,7 +253,7 @@ export function useScenarioSession() {
       // Stop the simulation from continuing, but don't clear the messages yet so we can show feedback
       setStarted(false)
 
-    } catch (err) {
+    } catch (err: unknown) {
       console.error('Failed to analyze/save session:', err)
       alert("Failed to analyze session. Please check console.")
       endSession()

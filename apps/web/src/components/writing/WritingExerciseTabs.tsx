@@ -2,7 +2,7 @@
 
 import React from 'react'
 import { motion } from 'framer-motion'
-import * as Icons from 'lucide-react'
+import { DynamicIcon } from '@/components/ui/DynamicIcon'
 import { writingExercises, WritingExerciseId } from '@fluenix/shared'
 
 interface Props {
@@ -14,7 +14,6 @@ export function WritingExerciseTabs({ activeId, onSelect }: Props) {
   return (
     <nav className="wr-tabs">
       {writingExercises.map((ex) => {
-        const IconComponent = (Icons as any)[ex.icon] || Icons.HelpCircle
         const isActive = activeId === ex.id
 
         return (
@@ -33,7 +32,8 @@ export function WritingExerciseTabs({ activeId, onSelect }: Props) {
             )}
             
             <span className="wr-tab-content">
-              <IconComponent 
+              <DynamicIcon 
+                name={ex.icon}
                 size={14} 
                 className="wr-tab-icon" 
               />

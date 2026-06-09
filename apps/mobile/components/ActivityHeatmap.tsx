@@ -3,7 +3,9 @@ import { View, Text, ScrollView } from 'react-native';
 
 const dayKey = (d: Date) => d.toISOString().slice(0, 10);
 
-function generateHeatmapData(sessions: any[]) {
+import { Session } from './SessionItem';
+
+function generateHeatmapData(sessions: Session[]) {
   const now = new Date();
   const start = new Date(now);
   start.setDate(now.getDate() - 30);
@@ -31,7 +33,7 @@ function generateHeatmapData(sessions: any[]) {
   return cols;
 }
 
-export function ActivityHeatmap({ sessions }: { sessions: any[] }) {
+export function ActivityHeatmap({ sessions }: { sessions: Session[] }) {
   const cols = generateHeatmapData(sessions);
 
   const getColor = (count: number) => {

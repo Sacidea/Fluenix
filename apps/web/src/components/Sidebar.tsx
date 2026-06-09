@@ -6,7 +6,8 @@ import { motion } from 'framer-motion'
 import { usePathname } from 'next/navigation'
 import { UserButton } from '@clerk/nextjs'
 import { LevelSelector } from './LevelSelector'
-import * as Icons from 'lucide-react'
+import { HelpCircle, Menu, PanelLeft, PanelLeftClose, X } from 'lucide-react'
+import { DynamicIcon } from './ui/DynamicIcon'
 import { Logo } from './Logo'
 import { useSidebarStore } from '@/store/useSidebarStore'
 
@@ -36,7 +37,7 @@ export default function Sidebar() {
           onClick={toggle}
           aria-label="Menu"
         >
-          {isOpen ? <Icons.X size={20} /> : <Icons.Menu size={20} />}
+          {isOpen ? <X size={20} /> : <Menu size={20} />}
         </button>
         <span className="sb-mobile-logo">Fluenix <span className="lab-tag">LAB</span></span>
       </div>
@@ -59,13 +60,12 @@ export default function Sidebar() {
             <span className="sb-logo-text">Fluenix <span className="lab-tag">LAB</span></span>
           </div>
           <button className="collapse-btn" onClick={toggle} aria-label="Toggle Menu">
-            {isOpen ? <Icons.PanelLeftClose size={18} /> : <Icons.PanelLeft size={18} />}
+            {isOpen ? <PanelLeftClose size={18} /> : <PanelLeft size={18} />}
           </button>
         </div>
 
         <nav className="sb-nav">
           {links.map((link) => {
-            const Icon = (Icons as any)[link.icon] || Icons.HelpCircle
             const isActive = pathname === link.href || (link.href !== '/dashboard' && pathname.startsWith(link.href))
 
             return (
@@ -75,7 +75,7 @@ export default function Sidebar() {
                 className={`sb-link ${isActive ? 'active' : ''}`}
                 onClick={() => setIsOpen(false)}
               >
-                <Icon size={18} className="sb-link-icon" />
+                <DynamicIcon name={link.icon} size={18} className="sb-link-icon" />
                 <span className="sb-link-label">{link.label}</span>
               </Link>
             )

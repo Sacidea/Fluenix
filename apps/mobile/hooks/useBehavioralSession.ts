@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
-import axios from 'axios';
 import { useAuth } from '@clerk/clerk-expo';
-import { Platform } from 'react-native';
+import { apiClient, aiClient } from '../utils/apiClient';
 
 export interface BehavioralQuestion {
   id: string;
@@ -24,18 +23,7 @@ export type StarFeedback = {
   };
 };
 
-const getApiUrl = () => {
-  if (Platform.OS === 'web') return 'http://localhost:3001';
-  return process.env.EXPO_PUBLIC_API_URL || 'http://10.0.2.2:3001';
-};
 
-const getAiUrl = () => {
-  if (Platform.OS === 'web') return 'http://localhost:8000';
-  return process.env.EXPO_PUBLIC_AI_URL || 'http://10.0.2.2:8000';
-};
-
-const API_URL = getApiUrl();
-const AI_URL = getAiUrl();
 
 export function useBehavioralSession() {
   const { getToken } = useAuth();
@@ -64,8 +52,8 @@ export function useBehavioralSession() {
     try {
       const token = await getToken();
       
-      const res = await axios.post(
-        `${API_URL}/api/behavioral/next`,
+      const res = await apiClient.post(
+        `/api/behavioral/next`,
         { level },
         { headers: { Authorization: `Bearer ${token}` } }
       );
@@ -74,7 +62,7 @@ export function useBehavioralSession() {
       } else {
         throw new Error('Failed to load next question');
       }
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error("Failed to fetch next question", err);
       setError("Failed to fetch next question. Please try again.");
     } finally {
@@ -99,7 +87,7 @@ export function useBehavioralSession() {
 
     try {
       const token = await getToken();
-      const res = await axios.post(`${AI_URL}/behavioral/analyze`, {
+      const res = await aiClient.post(`/behavioral/analyze`, {
         question: activeQuestion.question,
         category: activeQuestion.category,
         context: activeQuestion.context,

@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { apiClient } from '@/lib/apiClient'
 import axios from 'axios'
 import { useAuth, useUser } from '@clerk/nextjs'
 import { VocabWord } from '@/data/vocabulary'
@@ -16,14 +17,18 @@ export function useVocabularySession(sessionSize: number = 10) {
     setError(null)
     try {
       const token = await getToken()
-      const url = `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'}/api/vocabulary/session?count=${sessionSize}`
-      const res = await axios.get(url, {
+      const url = `/api/vocabulary/session?count=${sessionSize}`
+      const res = await apiClient.get(url, {
         headers: { Authorization: `Bearer ${token}` }
       })
       setSessionWords(res.data)
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Failed to fetch vocabulary session:', err)
-      setError(err.message || 'Error fetching words')
+      if (axios.isAxiosError(err)) {
+        setError(err.message || 'Error fetching words')
+      } else {
+        setError('Error fetching words')
+      }
     } finally {
       setLoading(false)
     }
@@ -42,8 +47,8 @@ export function useVocabularySession(sessionSize: number = 10) {
       // 1. Mark all words as seen in the vocabulary table
       const allWordIds = [...masteredWords, ...needsReviewWords]
       if (allWordIds.length > 0) {
-        await axios.post(
-          `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'}/api/vocabulary/complete`,
+        await apiClient.post(
+          '/api/vocabulary/complete',
           {
             userId: user.id,
             wordIds: allWordIds
@@ -54,8 +59,8 @@ export function useVocabularySession(sessionSize: number = 10) {
 
       // 2. Save session stats
       const score = Math.round((masteredWords.length / sessionSize) * 100)
-      await axios.post(
-        `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'}/api/sessions`,
+      await apiClient.post(
+        '/api/sessions',
         {
           userId: user.id,
           type: 'vocabulary',
@@ -69,7 +74,7 @@ export function useVocabularySession(sessionSize: number = 10) {
         },
         { headers: { Authorization: `Bearer ${token}` } }
       )
-    } catch (err) {
+    } catch (err: unknown) {
       console.error('Failed to save session:', err)
     }
   }

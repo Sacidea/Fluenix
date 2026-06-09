@@ -1,18 +1,10 @@
 import { useState, useEffect, useRef } from 'react';
 import { Platform } from 'react-native';
-import axios from 'axios';
 import { useAuth, useUser } from '@clerk/clerk-expo';
 import * as Speech from 'expo-speech';
+import { apiClient, aiClient } from '../utils/apiClient';
 
-// Dynamic require to prevent breaking the web build
-let Voice: any = null;
-if (Platform.OS !== 'web') {
-  try {
-    Voice = require('@react-native-voice/voice').default;
-  } catch (e) {
-    console.warn("Voice module not available");
-  }
-}
+import { ExpoSpeechRecognitionModule, useSpeechRecognitionEvent } from 'expo-speech-recognition';
 
 export type Word = {
   id: string;
@@ -28,18 +20,7 @@ export type PronunciationResult = {
   tip: string;
 };
 
-const getApiUrl = () => {
-  if (Platform.OS === 'web') return 'http://localhost:3001';
-  return process.env.EXPO_PUBLIC_API_URL || 'http://10.0.2.2:3001';
-};
 
-const getAiUrl = () => {
-  if (Platform.OS === 'web') return 'http://localhost:8000';
-  return process.env.EXPO_PUBLIC_AI_URL || 'http://10.0.2.2:8000';
-};
-
-const API_URL = getApiUrl();
-const AI_URL = getAiUrl();
 
 export function usePronunciationSession() {
   const { getToken } = useAuth();
@@ -53,8 +34,6 @@ export function usePronunciationSession() {
   const [result, setResult] = useState<PronunciationResult | null>(null);
   const [loading, setLoading] = useState(false);
   const [supported, setSupported] = useState(true);
-  
-  const recognitionRef = useRef<any>(null);
 
   const [selectedCategory, setSelectedCategory] = useState<string>('All');
   const [currentPage, setCurrentPage] = useState<number>(1);
@@ -65,37 +44,36 @@ export function usePronunciationSession() {
     const fetchWords = async () => {
       try {
         const token = await getToken();
-        const res = await axios.get(`${API_URL}/api/pronunciation/words`, {
+        const res = await apiClient.get(`/api/pronunciation/words`, {
           headers: token ? { Authorization: `Bearer ${token}` } : {}
         });
         setWords(res.data);
-      } catch (e) {
+      } catch (e: unknown) {
         console.error("Failed to fetch words", e);
       }
     };
 
     fetchWords();
 
+    // Check support using ExpoSpeechRecognitionModule
     if (Platform.OS === 'web') {
       const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
       if (!SpeechRecognition) setSupported(false);
-    } else {
-      if (!Voice) setSupported(false);
     }
   }, [getToken, selectedCategory]);
 
   const generateWords = async (topic: string) => {
     try {
       const token = await getToken();
-      await axios.post(`${API_URL}/api/pronunciation/generate`, { topic }, {
+      await apiClient.post(`/api/pronunciation/generate`, { topic }, {
         headers: token ? { Authorization: `Bearer ${token}` } : {}
       });
       // Fetch words again to update list
-      const res = await axios.get(`${API_URL}/api/pronunciation/words`, {
+      const res = await apiClient.get(`/api/pronunciation/words`, {
         headers: token ? { Authorization: `Bearer ${token}` } : {}
       });
       setWords(res.data);
-    } catch (e) {
+    } catch (e: unknown) {
       console.error("Failed to generate words", e);
     }
   };
@@ -103,12 +81,12 @@ export function usePronunciationSession() {
   const markWordAsMastered = async (wordId: string) => {
     try {
       const token = await getToken();
-      await axios.post(`${API_URL}/api/pronunciation/master`, { wordId }, {
+      await apiClient.post(`/api/pronunciation/master`, { wordId }, {
         headers: token ? { Authorization: `Bearer ${token}` } : {}
       });
       // We don't remove it from the local list immediately so the user can still see their score.
       // It will be filtered out on the next full page reload.
-    } catch (e) {
+    } catch (e: unknown) {
       console.error("Failed to mark mastered", e);
     }
   };
@@ -128,72 +106,45 @@ export function usePronunciationSession() {
     }
   }, [selectedCategory, filteredWords, words, currentIndex]);
 
-  // Setup Native Voice Listeners if applicable
-  useEffect(() => {
-    if (Platform.OS !== 'web' && Voice) {
-      Voice.onSpeechStart = () => setListening(true);
-      Voice.onSpeechEnd = () => setListening(false);
-      Voice.onSpeechResults = (e: any) => {
-        if (e.value && e.value.length > 0) {
-          const heard = e.value[0];
-          setTranscript(heard);
-          setListening(false);
-          Voice.stop();
-          analyzeResult(heard);
-        }
-      };
-      Voice.onSpeechError = (e: any) => {
-        console.error("Voice error", e);
+  // Setup Native Voice Listeners
+  useSpeechRecognitionEvent('start', () => setListening(true));
+  useSpeechRecognitionEvent('end', () => setListening(false));
+  useSpeechRecognitionEvent('error', (e) => {
+    console.error("Voice error", e.error);
+    setListening(false);
+  });
+  useSpeechRecognitionEvent('result', (e) => {
+    if (e.results && e.results.length > 0) {
+      // Get the most confident final transcript
+      const finalResult = e.results.find(r => r.isFinal);
+      const heard = finalResult ? finalResult.transcript : e.results[0].transcript;
+      
+      setTranscript(heard);
+      if (finalResult || !e.isSpeechDetected) {
         setListening(false);
-      };
-    }
-    return () => {
-      if (Platform.OS !== 'web' && Voice) {
-        Voice.destroy().then(Voice.removeAllListeners);
+        ExpoSpeechRecognitionModule.stop();
+        analyzeResult(heard);
       }
-    };
-  }, [currentIndex, words]);
+    }
+  });
 
   const startListening = async () => {
-    if (Platform.OS === 'web') {
-      const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
-      if (!SpeechRecognition) return;
-
-      const recognition = new SpeechRecognition();
-      recognition.lang = 'en-US';
-      recognition.interimResults = false;
-      recognition.maxAlternatives = 1;
-
-      recognition.onstart = () => setListening(true);
-      recognition.onresult = async (event: any) => {
-        const heard = event.results[0][0].transcript;
-        setTranscript(heard);
-        setListening(false);
-        await analyzeResult(heard);
-      };
-      recognition.onerror = () => setListening(false);
-      recognition.onend = () => setListening(false);
-
-      recognitionRef.current = recognition;
-      recognition.start();
-    } else {
-      if (!Voice) return;
-      try {
-        setTranscript('');
-        await Voice.start('en-US');
-        setListening(true);
-      } catch (e) {
-        console.error(e);
-      }
+    try {
+      setTranscript('');
+      await ExpoSpeechRecognitionModule.start({
+        lang: 'en-US',
+        interimResults: false,
+        maxAlternatives: 1
+      });
+      setListening(true);
+    } catch (e) {
+      console.error(e);
+      setListening(false);
     }
   };
 
   const stopListening = async () => {
-    if (Platform.OS === 'web') {
-      recognitionRef.current?.stop();
-    } else {
-      if (Voice) await Voice.stop();
-    }
+    await ExpoSpeechRecognitionModule.stop();
     setListening(false);
   };
 
@@ -204,7 +155,7 @@ export function usePronunciationSession() {
     try {
       const token = await getToken();
       // 1. Get AI Analysis
-      const res = await axios.post(`${AI_URL}/pronunciation/analyze`, {
+      const res = await aiClient.post(`/pronunciation/analyze`, {
         transcript: heard,
         target_word: words[currentIndex].word,
         level: userLevel

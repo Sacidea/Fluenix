@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import axios from 'axios'
+import { apiClient } from '@/lib/apiClient'
 import { useAuth, useUser } from '@clerk/nextjs'
 import { useLevel } from '@/context/LevelContext'
 
@@ -10,10 +10,10 @@ export interface ListeningScenario {
   level: string
   title: string
   context: string
-  dialogue: any[]
-  questions: any[]
-  dictation: any
-  shadowing: any
+  dialogue: { speaker: string, text: string, translation: string, startTime?: number, endTime?: number }[]
+  questions: { id: string, text: string, options: { id: string, text: string, isCorrect: boolean, explanation: string }[], correctAnswer: string, explanation: string }[]
+  dictation: { audioUrl?: string, correctText: string, answers: string[], textWithBlanks: string }
+  shadowing: { audioUrl?: string, text: string, translation: string, targetText: string }
 }
 
 export function useListeningSession() {
@@ -30,8 +30,8 @@ export function useListeningSession() {
     setError(null)
     try {
       const token = await getToken()
-      const res = await axios.post(
-        `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'}/api/listening/next`,
+      const res = await apiClient.post(
+        '/api/listening/next',
         { level },
         { headers: { Authorization: `Bearer ${token}` } }
       )
@@ -40,7 +40,7 @@ export function useListeningSession() {
       } else {
         throw new Error('Failed to load next scenario')
       }
-    } catch (err) {
+    } catch (err: unknown) {
       console.error(err)
       setError("Failed to fetch next listening task. Please try again.")
     } finally {

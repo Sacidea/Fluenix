@@ -8,18 +8,18 @@ export default function ListeningLabPage() {
   return (
     <div className="listening-lab-root">
       {/* Premium Header */}
-      <header className="lab-header" style={{ borderBottomColor: '#cffafe' }}>
+      <header className="lab-header border-cyan-100">
         <div className="header-content">
           <Link href="/dashboard" className="back-link">
             <ArrowLeft size={14} />
             RETURN TO DASHBOARD
           </Link>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+          <div className="flex justify-between items-start">
             <div>
-              <span className="eyebrow" style={{ color: '#0891b2', backgroundColor: '#cffafe' }}>Audio Lab</span>
+              <span className="eyebrow text-cyan-600 bg-cyan-100">Audio Lab</span>
               <h1 className="main-title">Listening Intelligence</h1>
             </div>
-            <div style={{ maxWidth: '300px', textAlign: 'right' }}>
+            <div className="max-w-[300px] text-right">
               <p className="sub-title">Decode fast-paced engineering meetings, idioms, and technical jargon.</p>
             </div>
           </div>
@@ -27,7 +27,7 @@ export default function ListeningLabPage() {
       </header>
 
       {/* Main Workspace Area */}
-      <main className="lab-main" style={{ alignItems: 'center' }}>
+      <main className="lab-main items-center">
         <ListeningWorkspace />
       </main>
     </div>

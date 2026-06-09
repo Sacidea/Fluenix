@@ -1,7 +1,7 @@
 'use client'
 
 import React, { useState, useEffect, useCallback } from 'react'
-import axios from 'axios'
+import { apiClient } from '@/lib/apiClient'
 import { useLevel } from '@/context/LevelContext'
 import { useAuth } from '@clerk/nextjs'
 import { CheckCircle2, XCircle, AlertCircle, Loader2, MessageSquare } from 'lucide-react'
@@ -45,7 +45,7 @@ export function GrammarWorkspace() {
     try {
       const token = await getToken()
       if (!token) return // Wait for token
-      const res = await axios.post(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'}/api/grammar/next`, 
+      const res = await apiClient.post('/api/grammar/next', 
         { level },
         { headers: { Authorization: `Bearer ${token}` } }
       )
@@ -105,7 +105,7 @@ export function GrammarWorkspace() {
     // Her durumda (doğru veya yanlış) soruyu gördü olarak işaretle ki bir sonraki soruya geçebilsin.
     try {
       const token = await getToken()
-      await axios.post(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'}/api/grammar/mark-seen`, 
+      await apiClient.post('/api/grammar/mark-seen', 
         { exerciseId: exercise.id },
         { headers: token ? { Authorization: `Bearer ${token}` } : undefined }
       )

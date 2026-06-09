@@ -9,12 +9,7 @@ import { StatsCards } from '../../components/StatsCards';
 import { LevelSelector } from '../../components/LevelSelector';
 import { Platform } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
-
-const getApiUrl = () => {
-  if (Platform.OS === 'web') return 'http://localhost:3001';
-  return process.env.EXPO_PUBLIC_API_URL || 'http://10.0.2.2:3001';
-};
-const API_URL = getApiUrl();
+import { apiClient } from '../../utils/apiClient';
 
 // Dummy API functions for mobile, normally you would share these or use a mobile-friendly fetch
 async function getDashboardStats(userId: string, token: string | null) {
@@ -22,12 +17,12 @@ async function getDashboardStats(userId: string, token: string | null) {
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), 2000); // 2 saniye içinde yanıt gelmezse iptal et (Backend kapalıysa beklemesin)
     
-    const res = await fetch(`${API_URL}/api/sessions/stats/${userId}`, {
+    const res = await apiClient.get(`/api/sessions/stats/${userId}`, {
       headers: token ? { Authorization: `Bearer ${token}` } : undefined,
       signal: controller.signal
     });
     clearTimeout(timeoutId);
-    return await res.json();
+    return res.data;
   } catch {
     return { totalSessions: 0, averageScore: 0, streak: 0 };
   }

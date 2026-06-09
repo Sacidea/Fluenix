@@ -14,12 +14,12 @@ export default function ErrorDecodingPage() {
             <ArrowLeft size={14} />
             RETURN TO DASHBOARD
           </Link>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+          <div className="flex justify-between items-start">
             <div>
               <span className="eyebrow">Decoding Lab</span>
               <h1 className="main-title">Error Decoder</h1>
             </div>
-            <div style={{ maxWidth: '300px', textAlign: 'right' }}>
+            <div className="max-w-[300px] text-right">
               <p className="sub-title">Master stack traces, debug logs, and technical documentation.</p>
             </div>
           </div>

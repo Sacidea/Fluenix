@@ -1,23 +1,19 @@
 import { useState, useEffect, useCallback } from 'react';
 import { Platform } from 'react-native';
-import axios from 'axios';
 import { useAuth, useUser } from '@clerk/clerk-expo';
+import { apiClient } from '../utils/apiClient';
 
-const getApiUrl = () => {
-  if (Platform.OS === 'web') return 'http://localhost:3001';
-  return process.env.EXPO_PUBLIC_API_URL || 'http://10.0.2.2:3001';
-};
-const API_URL = getApiUrl();
+
 
 export interface ListeningScenario {
   id: string;
   level: string;
   title: string;
   context: string;
-  dialogue: any[];
-  questions: any[];
-  dictation: any;
-  shadowing: any;
+  dialogue: unknown[];
+  questions: unknown[];
+  dictation: unknown;
+  shadowing: unknown;
 }
 
 export function useListeningSession() {
@@ -35,8 +31,8 @@ export function useListeningSession() {
     try {
       const level = (user.publicMetadata.level as string) || 'B2';
       const token = await getToken();
-      const res = await axios.post(
-        `${API_URL}/api/listening/next`,
+      const res = await apiClient.post(
+        `/api/listening/next`,
         { level },
         { headers: token ? { Authorization: `Bearer ${token}` } : {} }
       );

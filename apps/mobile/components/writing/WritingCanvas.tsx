@@ -2,7 +2,7 @@ import React from 'react';
 import { View, Text, TextInput, TouchableOpacity, ScrollView, ActivityIndicator, KeyboardAvoidingView, Platform } from 'react-native';
 import * as Icons from 'lucide-react-native';
 import { WritingExercise, WritingMission } from '@fluenix/shared';
-import { WritingFeedback } from './WritingFeedback';
+import { WritingFeedback, WritingFeedbackType } from './WritingFeedback';
 
 interface Props {
   exercise: WritingExercise;
@@ -12,7 +12,7 @@ interface Props {
   onSubmit: () => void;
   disabled?: boolean;
   loading?: boolean;
-  feedback?: any;
+  feedback?: WritingFeedbackType;
   error?: string | null;
   onNext?: () => void;
 }

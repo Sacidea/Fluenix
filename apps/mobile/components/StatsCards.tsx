@@ -2,8 +2,15 @@ import React from 'react';
 import { View, Text } from 'react-native';
 import * as Icons from 'lucide-react-native';
 
+export type Stats = {
+  totalSessions: number;
+  averageScore: number;
+  streak: number;
+  lastSession?: string | null;
+};
+
 interface Props {
-  stats: any;
+  stats: Stats;
 }
 
 export function StatsCards({ stats }: Props) {

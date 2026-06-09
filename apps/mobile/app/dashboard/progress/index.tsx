@@ -8,20 +8,15 @@ import { StatsCards } from '../../../components/StatsCards';
 import { ProgressInsights } from '../../../components/ProgressInsights';
 import { SessionItem } from '../../../components/SessionItem';
 import { SessionDetailModal } from '../../../components/SessionDetailModal';
-
-const getApiUrl = () => {
-  if (Platform.OS === 'web') return 'http://localhost:3001';
-  return process.env.EXPO_PUBLIC_API_URL || 'http://10.0.2.2:3001';
-};
-const API_URL = getApiUrl();
+import { apiClient } from '../../../utils/apiClient';
+import { Session } from '../../../components/SessionItem';
 
 async function getProgressData(userId: string, token: string | null) {
   try {
-    const res = await fetch(`${API_URL}/api/sessions/stats/${userId}?full=true`, {
+    const res = await apiClient.get(`/api/sessions/stats/${userId}?full=true`, {
       headers: token ? { Authorization: `Bearer ${token}` } : undefined
     });
-    if (!res.ok) throw new Error('Network response was not ok');
-    return await res.json();
+    return res.data;
   } catch {
     return { stats: { totalSessions: 0, averageScore: 0, streak: 0 }, sessions: [] };
   }
@@ -34,15 +29,14 @@ export default function ProgressScreen() {
 
   const [data, setData] = useState({ 
     stats: { totalSessions: 0, averageScore: 0, streak: 0, lastSession: null }, 
-    sessions: [] 
+    sessions: [] as Session[] 
   });
   const [loading, setLoading] = useState(true);
 
   // Client-side pagination state
   const [displayCount, setDisplayCount] = useState(10);
   
-  // Modal state
-  const [selectedSession, setSelectedSession] = useState<any>(null);
+  const [selectedSession, setSelectedSession] = useState<Session | null>(null);
 
   useEffect(() => {
     if (isLoaded && !isSignedIn) {
@@ -139,30 +133,24 @@ export default function ProgressScreen() {
     </View>
   );
 
-  const executeDelete = async (session: any) => {
+  const executeDelete = async (session: Session) => {
     try {
       const token = await getToken();
-      const res = await fetch(`${API_URL}/api/sessions/${session.id}`, {
-        method: 'DELETE',
+      await apiClient.delete(`/api/sessions/${session.id}`, {
         headers: token ? { Authorization: `Bearer ${token}` } : undefined
       });
       
-      if (res.ok) {
-        setData(prev => ({
-          ...prev,
-          sessions: prev.sessions.filter((s: any) => s.id !== session.id)
-        }));
-      } else {
-        if (Platform.OS === 'web') alert("Failed to delete session record.");
-        else Alert.alert("Error", "Failed to delete session record.");
-      }
+      setData(prev => ({
+        ...prev,
+        sessions: prev.sessions.filter((s: Session) => s.id !== session.id)
+      }));
     } catch (e) {
       if (Platform.OS === 'web') alert("Network error occurred.");
       else Alert.alert("Error", "Network error occurred.");
     }
   };
 
-  const handleDelete = (session: any) => {
+  const handleDelete = (session: Session) => {
     if (Platform.OS === 'web') {
       if (window.confirm("Are you sure you want to delete this session record?")) {
         executeDelete(session);
@@ -190,7 +178,7 @@ export default function ProgressScreen() {
         className="flex-1 bg-slate-50"
         contentContainerStyle={{ padding: 24, paddingTop: 60, paddingBottom: 100 }}
         data={data.sessions.slice(0, displayCount)}
-        keyExtractor={(item: any, index) => item.id || index.toString()}
+        keyExtractor={(item: Session, index) => String(item.id || index)}
         renderItem={({ item }) => (
           <SessionItem 
             session={item} 

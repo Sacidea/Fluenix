@@ -1,18 +1,10 @@
 import { useState, useRef, useEffect } from 'react';
 import { Alert, Platform } from 'react-native';
-import axios from 'axios';
 import { useAuth, useUser } from '@clerk/clerk-expo';
 import * as Speech from 'expo-speech';
 import { Message, ScenarioType, ScenarioMission, scenarios } from '@fluenix/shared';
 import EventSource from 'react-native-sse';
-
-const getBaseUrl = (port: number) => {
-  if (Platform.OS === 'web') return `http://localhost:${port}`;
-  return `http://10.0.2.2:${port}`;
-};
-
-const API_URL = process.env.EXPO_PUBLIC_API_URL || getBaseUrl(3001);
-const AI_URL = process.env.EXPO_PUBLIC_AI_URL || getBaseUrl(8000);
+import { apiClient, aiClient, AI_URL } from '../utils/apiClient';
 
 export function useScenarioSession() {
   const { getToken } = useAuth();
@@ -29,9 +21,9 @@ export function useScenarioSession() {
   const [durationStr, setDurationStr] = useState('00:00');
   const [listening, setListening] = useState(false);
   const [isLoadingMission, setIsLoadingMission] = useState(false);
-  const [analysisResult, setAnalysisResult] = useState<any>(null);
+  const [analysisResult, setAnalysisResult] = useState<unknown>(null);
 
-  const bottomRef = useRef<any>(null);
+  const bottomRef = useRef<unknown>(null);
 
   useEffect(() => {
     if (!started || !startTime) return;
@@ -72,7 +64,7 @@ export function useScenarioSession() {
 
   const executeStream = (
     token: string | null,
-    payload: any,
+    payload: Record<string, unknown>,
     currentMessages: Message[],
     onComplete: (fullText: string) => void
   ) => {
@@ -127,8 +119,8 @@ export function useScenarioSession() {
     try {
       const token = await getToken();
       
-      const missionRes = await axios.post(
-        `${API_URL}/api/scenario/next`,
+      const missionRes = await apiClient.post(
+        `/api/scenario/next`,
         { category: scenario, level },
         { headers: { Authorization: `Bearer ${token}` } }
       );
@@ -206,7 +198,7 @@ export function useScenarioSession() {
     Speech.stop();
     try {
       const token = await getToken();
-      const res = await axios.post(`${AI_URL}/scenario/analyze`, {
+      const res = await aiClient.post(`/scenario/analyze`, {
         scenario,
         level,
         messages
@@ -235,8 +227,8 @@ export function useScenarioSession() {
 
       if (user) {
         const diffSeconds = startTime ? Math.floor((new Date().getTime() - startTime.getTime()) / 1000) : 0;
-        await axios.post(
-          `${API_URL}/api/sessions`,
+        await apiClient.post(
+          `/api/sessions`,
           {
             userId: user.id,
             type: 'scenario',
@@ -257,8 +249,8 @@ export function useScenarioSession() {
         );
 
         if (activeMission?.id) {
-          await axios.post(
-            `${API_URL}/api/scenario/complete`,
+          await apiClient.post(
+            `/api/scenario/complete`,
             { userId: user.id, missionId: activeMission.id },
             { headers: { Authorization: `Bearer ${token}` } }
           );
@@ -277,7 +269,7 @@ export function useScenarioSession() {
     }
   };
 
-  const activeScenarioObj = scenarios?.find((s: any) => s.id === scenario) || { title: 'Scenario', description: '' };
+  const activeScenarioObj = scenarios?.find((s) => s.id === scenario) || { title: 'Scenario', description: '' };
 
   return {
     scenario, setScenario,

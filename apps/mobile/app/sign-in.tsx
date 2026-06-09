@@ -34,7 +34,8 @@ export default function SignInScreen() {
         console.log("No createdSessionId returned.", result);
         Alert.alert("Error", "Google Login didn't complete (no session ID).");
       }
-    } catch (err: any) {
+    } catch (error: unknown) {
+      const err = error as any;
       console.error('Google Sign-In error:', err);
       Alert.alert("Sign In Failed", err.errors?.[0]?.longMessage || err.errors?.[0]?.message || err.message || 'Google sign-in failed');
     }
@@ -50,7 +51,8 @@ export default function SignInScreen() {
       });
       await setActive({ session: completeSignIn.createdSessionId });
       router.replace('/');
-    } catch (err: any) {
+    } catch (error: unknown) {
+      const err = error as any;
       console.error("Sign in error:", err);
       Alert.alert("Sign In Failed", err.errors?.[0]?.longMessage || err.errors?.[0]?.message || err.message || 'Failed to sign in');
     } finally {

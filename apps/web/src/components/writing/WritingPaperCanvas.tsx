@@ -4,6 +4,7 @@ import React from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { ClipboardList, PenLine, Send } from 'lucide-react'
 import { WritingExercise, WritingMission } from '@fluenix/shared'
+import { WritingFeedback } from '@/hooks/useWritingSession'
 import { WritingNoteFeedback } from './WritingNoteFeedback'
 
 interface Props {
@@ -14,7 +15,7 @@ interface Props {
   onSubmit: () => void
   disabled?: boolean
   loading?: boolean
-  feedback?: any
+  feedback?: WritingFeedback | null
   error?: string | null
   onNext?: () => void
 }

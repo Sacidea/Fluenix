@@ -1,6 +1,7 @@
 'use client'
 
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react'
+import { apiClient } from '@/lib/apiClient'
 import axios from 'axios'
 import { useAuth, useUser } from '@clerk/nextjs'
 
@@ -29,17 +30,17 @@ export function LevelProvider({ children }: { children: ReactNode }) {
           console.warn('No token available from Clerk yet.')
           return
         }
-        const res = await axios.get(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'}/api/users/${user.id}`, {
+        const res = await apiClient.get(`/api/users/${user.id}`, {
           headers: { Authorization: `Bearer ${token}` }
         })
         if (res.data?.level) {
           setInternalLevel(res.data.level)
         }
-      } catch (err: any) {
-        if (err?.code === 'ERR_NETWORK') {
+      } catch (err: unknown) {
+        if (axios.isAxiosError(err) && err.code === 'ERR_NETWORK') {
           console.warn('[Fluenix] Backend unavailable — using default level (B2).')
         } else {
-          console.warn('Failed to fetch initial level', err?.message)
+          console.warn('Failed to fetch initial level', err instanceof Error ? err.message : '')
         }
       } finally {
         setLoading(false)
@@ -57,14 +58,14 @@ export function LevelProvider({ children }: { children: ReactNode }) {
 
     try {
       const token = await getToken()
-      await axios.put(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'}/api/users/${user.id}/level`, {
+      await apiClient.put(`/api/users/${user.id}/level`, {
         email: user.primaryEmailAddress?.emailAddress,
         name: user.fullName,
         level: newLevel
       }, {
         headers: token ? { Authorization: `Bearer ${token}` } : undefined
       })
-    } catch (err) {
+    } catch (err: unknown) {
       console.error('Failed to sync level with DB', err)
     }
   }

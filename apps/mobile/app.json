@@ -12,9 +12,18 @@
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },
+    "updates": {
+      "fallbackToCacheTimeout": 0
+    },
+    "runtimeVersion": {
+      "policy": "appVersion"
+    },
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.fluenix.app"
+      "bundleIdentifier": "com.fluenix.app",
+      "associatedDomains": [
+        "applinks:fluenix.com"
+      ]
     },
     "android": {
       "package": "com.fluenix.app",
@@ -24,7 +33,26 @@
         "backgroundImage": "./assets/android-icon-background.png",
         "monochromeImage": "./assets/android-icon-monochrome.png"
       },
-      "predictiveBackGestureEnabled": false
+      "predictiveBackGestureEnabled": false,
+      "intentFilters": [
+        {
+          "action": "VIEW",
+          "data": [
+            {
+              "scheme": "https",
+              "host": "fluenix.com",
+              "pathPrefix": "/"
+            }
+          ],
+          "category": [
+            "BROWSABLE",
+            "DEFAULT"
+          ]
+        }
+      ],
+      "permissions": [
+        "android.permission.RECORD_AUDIO"
+      ]
     },
     "web": {
       "favicon": "./assets/favicon.png"
@@ -33,11 +61,20 @@
       "expo-router",
       "expo-secure-store",
       [
-        "@react-native-voice/voice",
+        "expo-speech-recognition",
         {
-          "microphonePermission": "Allow Fluenix to access the microphone for acoustic analysis."
+          "microphonePermission": "Allow Fluenix to access the microphone for voice analysis and speaking exercises."
         }
-      ]
-    ]
+      ],
+      "@sentry/react-native",
+      "expo-image"
+    ],
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "aff6309b-daac-4d7a-a1ea-17fcd547b21b"
+      }
+    },
+    "owner": "sacidea"
   }
 }

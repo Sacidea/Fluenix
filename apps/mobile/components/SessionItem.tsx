@@ -20,7 +20,16 @@ const iconMap: Record<string, any> = {
   'grammar-lab': Icons.CheckSquare
 };
 
-export function SessionItem({ session, onPress, onDelete }: { session: any; onPress: () => void; onDelete?: () => void }) {
+export type Session = {
+  id: string;
+  type: string;
+  score?: number;
+  createdAt: string;
+  feedback?: any;
+  scenario?: string;
+};
+
+export function SessionItem({ session, onPress, onDelete }: { session: Session; onPress: () => void; onDelete?: () => void }) {
   const IconComp = iconMap[session.type] || Icons.FileText;
   const hasScore = typeof session.score === 'number';
 

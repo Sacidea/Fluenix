@@ -32,6 +32,15 @@ jobs:
       - name: Run Tests
         run: pnpm test
 
+      - name: Mobile Type Check
+        run: pnpm --filter mobile exec tsc --noEmit
+
+      - name: Install Playwright Browsers
+        run: pnpm --filter web exec playwright install --with-deps chromium
+
+      - name: Run Playwright tests
+        run: pnpm --filter web exec playwright test
+
   docker-build:
     runs-on: ubuntu-latest
     needs: test

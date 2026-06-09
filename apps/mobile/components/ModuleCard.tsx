@@ -1,5 +1,6 @@
 import React from 'react';
-import { View, Text, TouchableOpacity, Image } from 'react-native';
+import { View, Text, TouchableOpacity } from 'react-native';
+import { Image } from 'expo-image';
 import { useRouter } from 'expo-router';
 import * as Icons from 'lucide-react-native';
 import { ModuleItem } from '@fluenix/shared';
@@ -25,7 +26,7 @@ export function ModuleCard({ moduleData }: ModuleCardProps) {
   return (
     <TouchableOpacity 
       activeOpacity={0.85}
-      onPress={() => router.push(href as any)}
+      onPress={() => router.push(href as never)}
       className="mb-8"
     >
       <View className="relative w-full">
@@ -54,9 +55,10 @@ export function ModuleCard({ moduleData }: ModuleCardProps) {
             }}
           >
             <Image 
-              source={{ uri: image }} 
-              style={{ width: '100%', height: '100%' }} 
-              resizeMode="cover"
+              source={image}
+              style={{ width: '100%', height: '100%' }}
+              contentFit="cover"
+              transition={200}
             />
           </View>
         )}

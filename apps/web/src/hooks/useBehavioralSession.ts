@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import axios from 'axios'
+import { apiClient, aiClient } from '@/lib/apiClient'
 import { useAuth } from '@clerk/nextjs'
 import { useLevel } from '@/context/LevelContext'
 
@@ -53,8 +54,8 @@ export function useBehavioralSession() {
       console.log("Level:", level)
       console.log("API URL:", process.env.NEXT_PUBLIC_API_URL)
       
-      const res = await axios.post(
-        `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'}/api/behavioral/next`,
+      const res = await apiClient.post(
+        '/api/behavioral/next',
         { level },
         { headers: { Authorization: `Bearer ${token}` } }
       )
@@ -63,10 +64,14 @@ export function useBehavioralSession() {
       } else {
         throw new Error('Failed to load next question')
       }
-    } catch (err: any) {
-      console.log("Axios Error Data:", err.response?.data)
-      console.log("Axios Error Status:", err.response?.status)
-      console.log("Axios Error Message:", err.message)
+    } catch (err: unknown) {
+      if (axios.isAxiosError(err)) {
+        console.log("Axios Error Data:", err.response?.data)
+        console.log("Axios Error Status:", err.response?.status)
+        console.log("Axios Error Message:", err.message)
+      } else {
+        console.error(err)
+      }
       setError("Failed to fetch next question. Please try again.")
     } finally {
       setIsLoadingQuestion(false)
@@ -91,7 +96,7 @@ export function useBehavioralSession() {
 
     try {
       const token = await getToken()
-      const res = await axios.post(`${process.env.NEXT_PUBLIC_AI_URL || 'http://localhost:8000'}/behavioral/analyze`, {
+      const res = await aiClient.post('/behavioral/analyze', {
         question: activeQuestion.question,
         category: activeQuestion.category,
         context: activeQuestion.context,

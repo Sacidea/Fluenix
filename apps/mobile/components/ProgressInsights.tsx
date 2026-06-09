@@ -4,7 +4,9 @@ import { ActivityHeatmap } from './ActivityHeatmap';
 import { CompetencyRadar } from './CompetencyRadar';
 import { LinearGradient } from 'expo-linear-gradient';
 
-export function ProgressInsights({ sessions }: { sessions: any[] }) {
+import { Session } from './SessionItem';
+
+export function ProgressInsights({ sessions }: { sessions: Session[] }) {
   const scored = sessions.filter(s => typeof s.score === 'number');
   const weeklyTarget = 5;
   

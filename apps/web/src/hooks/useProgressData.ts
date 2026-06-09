@@ -1,5 +1,5 @@
 import { useState, useCallback, useEffect } from 'react'
-import axios from 'axios'
+import { apiClient } from '@/lib/apiClient'
 import { useAuth } from '@clerk/nextjs'
 
 export type Stats = {
@@ -35,8 +35,8 @@ export function useProgressData(userId?: string) {
             if (!token) return // Wait for Clerk to initialize
             const headers = { Authorization: `Bearer ${token}` }
             const [statsRes, sessionsRes] = await Promise.all([
-                axios.get(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'}/api/sessions/stats/${userId}`, { headers }),
-                axios.get(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'}/api/sessions/user/${userId}`, { headers })
+                apiClient.get(`/api/sessions/stats/${userId}`, { headers }),
+                apiClient.get(`/api/sessions/user/${userId}`, { headers })
             ])
             setStats(statsRes.data)
             setSessions(sessionsRes.data)

@@ -1,12 +1,14 @@
 'use client'
 
-import React from 'react'
+import React, { useMemo } from 'react'
 import * as Icons from 'lucide-react'
 import { ModuleCard } from '@/components/ModuleCard'
 import { modulesData } from '@/data/modules'
 import { ActivityHeatmap } from './ActivityHeatmap'
 import { RecentActivity } from './RecentActivity'
 import { CompetencyMatrix } from './CompetencyMatrix'
+import { WelcomeArea } from './WelcomeArea'
+import { GamificationWidget } from './GamificationWidget'
 import { SessionsIcon, AccuracyIcon, StreakIcon, ActivityIcon } from '../icons/PremiumIcons'
 
 interface Session {
@@ -15,54 +17,46 @@ interface Session {
   scenario: string
   createdAt: string
   score: number | null
-  feedback?: any
+  feedback?: unknown
 }
-
 interface Props {
-  user: any
-  stats: any
+  user: { firstName?: string | null, [key: string]: unknown } | null
+  stats: { totalSessions?: number, streak?: number, averageScore?: number, lastSession?: string | null } | null
   sessions: Session[]
 }
 
 export default function DashboardClient({ user, stats, sessions }: Props) {
-  const statsConfig = [
+  const statsConfig = useMemo(() => [
     { id: 'sessions', iconComp: SessionsIcon, value: stats?.totalSessions ?? 0, label: 'Total Sessions' },
     { id: 'streak', iconComp: StreakIcon, value: stats?.streak ?? 0, label: 'Day Streak' },
     { id: 'score', iconComp: AccuracyIcon, value: stats?.averageScore ? `${Math.round(stats.averageScore)}` : '—', label: 'Avg Score' },
     { id: 'last_login', iconComp: ActivityIcon, value: stats?.lastSession ? new Date(stats.lastSession).toLocaleDateString(undefined, { month: 'short', day: 'numeric' }) : '--', label: 'Last Login' },
-  ]
+  ], [stats])
 
-  const now = new Date()
-  const thisWeekStart = new Date(now)
-  thisWeekStart.setDate(now.getDate() - 7)
-  const safeSessions = Array.isArray(sessions) ? sessions : []
-  const currentWeeklyCount = safeSessions.filter(s => {
-    if (!s || !s.createdAt) return false
-    const d = new Date(s.createdAt)
-    return d >= thisWeekStart && d <= now
-  }).length
-  const weeklyTarget = 5
-  const weeklyProgress = Math.min((currentWeeklyCount / weeklyTarget) * 100, 100)
+  const { currentWeeklyCount, weeklyTarget, weeklyProgress } = useMemo(() => {
+    const now = new Date()
+    const thisWeekStart = new Date(now)
+    thisWeekStart.setDate(now.getDate() - 7)
+    const safeSessions = Array.isArray(sessions) ? sessions : []
+    const count = safeSessions.filter(s => {
+      if (!s || !s.createdAt) return false
+      const d = new Date(s.createdAt)
+      return d >= thisWeekStart && d <= now
+    }).length
+    const target = 5
+    return {
+      currentWeeklyCount: count,
+      weeklyTarget: target,
+      weeklyProgress: Math.min((count / target) * 100, 100)
+    }
+  }, [sessions])
 
   return (
     <div className="ledger-dash">
       <main className="dash-container">
 
         {/* CORPORATE GREETING SECTION */}
-        <section className="welcome-area">
-          <div className="eyebrow-group">
-            <div className="line" />
-            <span className="eyebrow">Operational Terminal</span>
-          </div>
-
-          <h1 className="welcome-text">
-            Welcome, {user?.firstName ?? 'Engineer'} —<br />
-            <span className="serif-grad">Technical communication environment active.</span>
-          </h1>
-          <p className="description">
-            Access your technical lab modules below. Each module is optimized for high-stakes FAANG-level communication standards.
-          </p>
-        </section>
+        <WelcomeArea firstName={user?.firstName} />
 
         <div className="layout-grid">
           {/* LEFT: MODULES GRID */}
@@ -85,24 +79,12 @@ export default function DashboardClient({ user, stats, sessions }: Props) {
           <aside className="layout-right">
             <div className="stats-col">
               {/* GAMIFICATION WIDGET */}
-              <div className="gamification-card">
-                <div className="gamification-header" style={{ justifyContent: 'flex-end' }}>
-                  <div className="xp-badge">
-                    <span className="xp-val">{(stats?.totalSessions || 0) * 150}</span>
-                    <span className="xp-lbl">XP</span>
-                  </div>
-                </div>
-                
-                <div className="goal-container">
-                  <div className="goal-text">
-                    <span className="goal-title">Weekly Goal</span>
-                    <span className="goal-progress">{currentWeeklyCount}/{weeklyTarget} Sessions</span>
-                  </div>
-                  <div className="progress-track">
-                    <div className="progress-fill" style={{ width: `${weeklyProgress}%` }} />
-                  </div>
-                </div>
-              </div>
+              <GamificationWidget 
+                totalSessions={stats?.totalSessions ?? 0}
+                currentWeeklyCount={currentWeeklyCount}
+                weeklyTarget={weeklyTarget}
+                weeklyProgress={weeklyProgress}
+              />
 
             </div>
 
@@ -160,55 +142,6 @@ export default function DashboardClient({ user, stats, sessions }: Props) {
         .dash-container {
           max-width: 1200px;
           margin: 0 auto;
-        }
-
-        .welcome-area {
-          margin-bottom: 60px;
-        }
-
-        .eyebrow-group {
-          display: flex;
-          align-items: center;
-          gap: 12px;
-          margin-bottom: 24px;
-        }
-
-        .line {
-          width: 32px;
-          height: 1px;
-          background: var(--color-primary);
-        }
-
-        .eyebrow {
-          font-size: 10px;
-          font-weight: 800;
-          text-transform: uppercase;
-          letter-spacing: 3px;
-          color: var(--color-text-light);
-        }
-
-        .welcome-text {
-          font-family: var(--font-base);
-          font-size: 40px;
-          font-weight: 900;
-          line-height: 1.2;
-          letter-spacing: -1.5px;
-          color: var(--color-text-dark);
-          margin-bottom: 24px;
-        }
-
-        .serif-grad {
-          font-family: 'Georgia', serif;
-          font-style: italic;
-          color: var(--color-primary);
-          font-weight: 400;
-        }
-
-        .description {
-          font-size: 15px;
-          color: var(--color-text-mid);
-          max-width: 550px;
-          line-height: 1.8;
         }
 
         .layout-grid {
@@ -301,76 +234,7 @@ export default function DashboardClient({ user, stats, sessions }: Props) {
           position: absolute;
           top: 0; left: 0; bottom: 0;
           width: 6px;
-          background: linear-gradient(to bottom, #FFC107, #F43F5E); /* Matching the progress bar candy gradient */
-        }
-
-        .gamification-header {
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-          margin-bottom: 24px;
-        }
-
-
-
-        .xp-badge {
-          display: flex;
-          align-items: baseline;
-          gap: 4px;
-        }
-
-        .xp-val {
-          font-family: 'Georgia', serif;
-          font-weight: 900;
-          font-style: italic;
-          font-size: 24px;
-          color: var(--color-primary);
-        }
-
-        .xp-lbl {
-          font-family: var(--font-mono);
-          font-size: 10px;
-          font-weight: 800;
-          color: var(--color-text-light);
-        }
-
-        .goal-container {
-          display: flex;
-          flex-direction: column;
-          gap: 12px;
-        }
-
-        .goal-text {
-          display: flex;
-          justify-content: space-between;
-          align-items: flex-end;
-        }
-
-        .goal-title {
-          font-size: 13px;
-          font-weight: 700;
-          color: var(--color-text-dark);
-        }
-
-        .goal-progress {
-          font-size: 12px;
-          font-weight: 700;
-          color: var(--color-text-light);
-        }
-
-        .progress-track {
-          width: 100%;
-          height: 8px;
-          background: #f1f5f9;
-          border-radius: 99px;
-          overflow: hidden;
-        }
-
-        .progress-fill {
-          height: 100%;
-          background: linear-gradient(90deg, #FFC107, #F43F5E); /* Candy gradient matching the icons */
-          border-radius: 99px;
-          transition: width 1s cubic-bezier(0.34, 1.56, 0.64, 1);
+          background: linear-gradient(to bottom, #FFC107, #F43F5E);
         }
 
         .analytics-col {

@@ -2,7 +2,7 @@ import React from 'react'
 import { Target } from 'lucide-react'
 
 interface Session {
-  feedback?: any
+  feedback?: unknown
 }
 
 interface Props {
@@ -19,9 +19,11 @@ export function CompetencyMatrix({ sessions }: Props) {
 
   sessions.forEach(s => {
     if (s.feedback) {
-      let fb = s.feedback
-      if (typeof fb === 'string') {
-        try { fb = JSON.parse(fb) } catch(e) {}
+      let fb: Record<string, number> = {}
+      if (typeof s.feedback === 'string') {
+        try { fb = JSON.parse(s.feedback) } catch(e) {}
+      } else if (typeof s.feedback === 'object' && s.feedback !== null) {
+        fb = s.feedback as Record<string, number>
       }
 
       if (fb.fluency_score || fb.vocabulary_score || fb.technical_accuracy || fb.clarity_score) {

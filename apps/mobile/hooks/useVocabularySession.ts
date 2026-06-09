@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Platform } from 'react-native';
-import axios from 'axios';
 import { useAuth, useUser } from '@clerk/clerk-expo';
+import { apiClient } from '../utils/apiClient';
 
 export type VocabWord = {
   id: string;
@@ -14,12 +14,7 @@ export type VocabWord = {
   contextSentence: string;
 };
 
-const getApiUrl = () => {
-  if (Platform.OS === 'web') return 'http://localhost:3001';
-  return process.env.EXPO_PUBLIC_API_URL || 'http://10.0.2.2:3001';
-};
 
-const API_URL = getApiUrl();
 
 export function useVocabularySession(sessionSize: number = 10) {
   const { getToken } = useAuth();
@@ -34,13 +29,14 @@ export function useVocabularySession(sessionSize: number = 10) {
     setError(null);
     try {
       const token = await getToken();
-      const res = await axios.get(`${API_URL}/api/vocabulary/session?count=${sessionSize}`, {
+      const res = await apiClient.get(`/api/vocabulary/session?count=${sessionSize}`, {
         headers: token ? { Authorization: `Bearer ${token}` } : {}
       });
       setSessionWords(res.data);
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Failed to fetch vocabulary session:', err);
-      setError(err.message || 'Error fetching words');
+      const errorMessage = err instanceof Error ? err.message : 'Error fetching words';
+      setError(errorMessage);
     } finally {
       setLoading(false);
     }
@@ -58,8 +54,8 @@ export function useVocabularySession(sessionSize: number = 10) {
       const allWordIds = [...masteredWords, ...needsReviewWords];
       
       if (allWordIds.length > 0) {
-        await axios.post(
-          `${API_URL}/api/vocabulary/complete`,
+        await apiClient.post(
+          `/api/vocabulary/complete`,
           {
             userId: user.id,
             wordIds: allWordIds
@@ -69,8 +65,8 @@ export function useVocabularySession(sessionSize: number = 10) {
       }
 
       const score = Math.round((masteredWords.length / sessionSize) * 100);
-      await axios.post(
-        `${API_URL}/api/sessions`,
+      await apiClient.post(
+        `/api/sessions`,
         {
           userId: user.id,
           type: 'vocabulary',

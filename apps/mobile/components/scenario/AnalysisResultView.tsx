@@ -2,9 +2,19 @@ import React from 'react';
 import { View, Text, ScrollView, TouchableOpacity } from 'react-native';
 import * as Icons from 'lucide-react-native';
 
+export type AnalysisResult = {
+  overall_score: number;
+  fluency_score: number;
+  vocabulary_score: number;
+  technical_accuracy: number;
+  strengths: string[];
+  improvements: string[];
+  overall_feedback: string;
+};
+
 interface Props {
-  analysisResult: any;
-  setAnalysisResult: (a: any) => void;
+  analysisResult: AnalysisResult;
+  setAnalysisResult: (a: AnalysisResult | null) => void;
 }
 
 export function AnalysisResultView({ analysisResult, setAnalysisResult }: Props) {

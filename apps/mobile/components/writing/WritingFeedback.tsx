@@ -2,8 +2,24 @@ import React from 'react';
 import { View, Text, ScrollView } from 'react-native';
 import * as Icons from 'lucide-react-native';
 
+export type WritingFeedbackType = {
+  overall_score: number;
+  grammar_score: number;
+  vocabulary_score: number;
+  task_achievement: number;
+  strengths: string[];
+  improvements: string[];
+  detailed_analysis: {
+    original: string;
+    correction: string;
+    explanation: string;
+  }[];
+  overall_feedback?: string;
+  feedback?: string;
+};
+
 interface Props {
-  feedback: any;
+  feedback: WritingFeedbackType;
   theme?: 'lilac' | 'yellow' | 'blue';
 }
 

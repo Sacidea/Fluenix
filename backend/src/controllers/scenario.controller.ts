@@ -1,5 +1,15 @@
 import { Request, Response } from 'express'
 import { IScenarioService } from '../interfaces/IScenarioService'
+import { z } from 'zod'
+
+const GetNextMissionSchema = z.object({
+  category: z.string({ required_error: 'category is required' }),
+  level: z.string().optional().default('B2')
+})
+
+const MarkMissionCompleteSchema = z.object({
+  missionId: z.string({ required_error: 'missionId is required' })
+})
 
 export class ScenarioController {
   constructor(private service: IScenarioService) {}
@@ -8,11 +18,11 @@ export class ScenarioController {
     try {
       // userId comes from verified JWT — not from client body
       const userId = (req as any).auth?.userId || null
-      const { category, level } = req.body
-
-      if (!category) {
-        return res.status(400).json({ success: false, error: 'category is required' })
+      const parsed = GetNextMissionSchema.safeParse(req.body)
+      if (!parsed.success) {
+        return res.status(400).json({ success: false, error: parsed.error.errors[0].message })
       }
+      const { category, level } = parsed.data
 
       const mission = await this.service.getNextMission(userId, category, level || 'B2')
       
@@ -31,10 +41,14 @@ export class ScenarioController {
     try {
       // userId comes from verified JWT — ignore client-supplied userId
       const userId = (req as any).auth?.userId
-      const { missionId } = req.body
+      const parsed = MarkMissionCompleteSchema.safeParse(req.body)
+      if (!parsed.success) {
+        return res.status(400).json({ success: false, error: parsed.error.errors[0].message })
+      }
+      const { missionId } = parsed.data
 
-      if (!userId || !missionId) {
-        return res.status(400).json({ success: false, error: 'userId and missionId are required' })
+      if (!userId) {
+        return res.status(401).json({ success: false, error: 'Unauthorized' })
       }
 
       await this.service.markMissionComplete(userId, missionId)

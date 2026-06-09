@@ -3,7 +3,7 @@
 import React, { useState, useEffect, useCallback } from 'react'
 import { CheckCircle2, XCircle, Wand2, Loader2 } from 'lucide-react'
 import { useUser, useAuth } from '@clerk/nextjs'
-import axios from 'axios'
+import { apiClient } from '@/lib/apiClient'
 import { ErrorScenario } from '@/data/error-decoding'
 import { useLevel } from '@/context/LevelContext'
 
@@ -53,7 +53,7 @@ export function ErrorWorkspace() {
       const role = (user.publicMetadata.role as string) || 'Full Stack'
       
       const token = await getToken()
-      const res = await axios.post(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'}/api/error-decoding/scenario`, {
+      const res = await apiClient.post('/api/error-decoding/scenario', {
         level,
         role
       }, {
@@ -62,7 +62,7 @@ export function ErrorWorkspace() {
       
       const data = typeof res.data.scenario === 'string' ? JSON.parse(res.data.scenario) : res.data.scenario
       setScenario(data)
-    } catch (err) {
+    } catch (err: unknown) {
       console.error('Failed to fetch scenario', err)
     } finally {
       setLoading(false)
@@ -90,8 +90,8 @@ export function ErrorWorkspace() {
   const saveSessionProgress = async (finalScore: number) => {
     try {
       const token = await getToken()
-      await axios.post(
-        `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'}/api/sessions/complete`,
+      await apiClient.post(
+        '/api/sessions/complete',
         {
           type: 'error-decoding',
           score: finalScore,
@@ -100,7 +100,7 @@ export function ErrorWorkspace() {
         },
         { headers: { Authorization: `Bearer ${token}` } }
       )
-    } catch (err) {
+    } catch (err: unknown) {
       console.error('Failed to save session progress', err)
     }
   }

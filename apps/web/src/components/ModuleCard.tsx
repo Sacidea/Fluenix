@@ -2,7 +2,9 @@
 
 import React from 'react'
 import Link from 'next/link'
-import * as Icons from 'lucide-react'
+import Image from 'next/image'
+import { Lock } from 'lucide-react'
+import { DynamicIcon } from '@/components/ui/DynamicIcon'
 import { ModuleItem } from '@fluenix/shared'
 
 interface ModuleCardProps {
@@ -12,8 +14,6 @@ interface ModuleCardProps {
 
 export function ModuleCard({ moduleData, index }: ModuleCardProps) {
     const { available, href, color, icon, title, description, image } = moduleData
-    const IconComponent = (Icons as any)[icon] || Icons.HelpCircle
-
     if (!available) {
         return (
             <div 
@@ -58,7 +58,7 @@ export function ModuleCard({ moduleData, index }: ModuleCardProps) {
                     }
                 `}</style>
                 <div className="lock-icon">
-                    <Icons.Lock size={32} />
+                    <Lock size={32} />
                 </div>
                 <h3 className="module-title">{title}</h3>
                 <p className="module-desc">{description}</p>
@@ -86,11 +86,13 @@ export function ModuleCard({ moduleData, index }: ModuleCardProps) {
                     {/* The image offset to top-right */}
                     {image && (
                         <div className="card-image-container">
-                            <img 
+                            <Image 
                                 src={image} 
                                 alt={title} 
                                 className="card-image"
-                                style={{ objectPosition: moduleData.imagePosition || 'center' }}
+                                fill
+                                sizes="(max-width: 768px) 100vw, 350px"
+                                style={{ objectFit: 'cover', objectPosition: moduleData.imagePosition || 'center' }}
                             />
                         </div>
                     )}
