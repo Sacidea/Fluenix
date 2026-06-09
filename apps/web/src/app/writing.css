@@ -294,3 +294,26 @@
     height: auto;
   }
 }
+
+@media (max-width: 768px) {
+  .lab-header {
+    padding: 16px 20px;
+  }
+  .header-content {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+  .lab-main {
+    padding: 16px;
+  }
+  .context-panel {
+    min-height: 350px;
+  }
+  .editor-panel {
+    min-height: 400px;
+  }
+  .main-title {
+    font-size: 24px;
+  }
+}
