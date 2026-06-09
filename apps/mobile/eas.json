@@ -8,15 +8,19 @@
       "developmentClient": true,
       "distribution": "internal",
       "env": {
-        "EXPO_PUBLIC_API_URL": "http://10.0.2.2:3001",
-        "EXPO_PUBLIC_AI_API_URL": "http://10.0.2.2:8000",
+        "EXPO_PUBLIC_API_URL": "https://fluenix-production.up.railway.app",
+        "EXPO_PUBLIC_AI_URL": "https://fluenixai-service-production.up.railway.app",
+        "EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY": "pk_test_b25lLWFscGFjYS0zNC5jbGVyay5hY2NvdW50cy5kZXYk",
         "SENTRY_DISABLE_AUTO_UPLOAD": "true"
       }
     },
     "preview": {
       "distribution": "internal",
       "env": {
-        "SENTRY_DISABLE_AUTO_UPLOAD": "true"
+        "SENTRY_DISABLE_AUTO_UPLOAD": "true",
+        "EXPO_PUBLIC_API_URL": "https://fluenix-production.up.railway.app",
+        "EXPO_PUBLIC_AI_URL": "https://fluenixai-service-production.up.railway.app",
+        "EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY": "pk_test_b25lLWFscGFjYS0zNC5jbGVyay5hY2NvdW50cy5kZXYk"
       }
     },
     "production": {
