@@ -36,12 +36,18 @@ jobs:
         run: pnpm --filter mobile exec tsc --noEmit
 
       - name: Build Web App
+        env:
+          NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: "pk_test_ZHVtbXkua2V5LmNsZXJrLmRldiQ"
+          CLERK_SECRET_KEY: "sk_test_dummykey"
         run: pnpm --filter web run build
 
       - name: Install Playwright Browsers
         run: pnpm --filter web exec playwright install --with-deps chromium
 
       - name: Run Playwright tests
+        env:
+          NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: "pk_test_ZHVtbXkua2V5LmNsZXJrLmRldiQ"
+          CLERK_SECRET_KEY: "sk_test_dummykey"
         run: pnpm --filter web exec playwright test
 
   docker-build:
