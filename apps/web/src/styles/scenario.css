@@ -489,17 +489,19 @@
   .scenarios-grid {
     grid-template-columns: repeat(2, 1fr);
   }
+  .simulation-workspace {
+    grid-template-columns: 1fr;
+    height: auto;
+    min-height: calc(100vh - 200px);
+  }
+  .comms-channel {
+    height: 70vh;
+  }
 }
 
 @media (max-width: 768px) {
   .scenarios-grid {
     grid-template-columns: 1fr;
-  }
-  
-  .simulation-workspace {
-    grid-template-columns: 1fr;
-    height: auto;
-    min-height: calc(100vh - 200px);
   }
 
   .selector-intro {
@@ -522,6 +524,7 @@
 
   .comms-channel {
     height: 70vh; /* slightly larger */
+    border-radius: 12px;
   }
   
   .comms-header {
@@ -534,6 +537,11 @@
     width: 100%;
     display: flex;
     justify-content: space-between;
+  }
+  
+  .comms-transcript {
+    padding: 16px;
+    gap: 16px;
   }
   
   .comms-input {
