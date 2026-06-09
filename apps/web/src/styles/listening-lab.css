@@ -462,3 +462,35 @@
   font-weight: 900;
   margin-bottom: 8px;
 }
+
+/* ====================================
+   MOBILE RESPONSIVE FIXES
+==================================== */
+@media (max-width: 768px) {
+  .audio-player-card {
+    padding: 20px;
+  }
+  .play-btn {
+    width: 64px;
+    height: 64px;
+  }
+  .listening-quiz {
+    padding: 20px;
+  }
+  .l-option-btn {
+    padding: 12px 16px;
+    font-size: 14px;
+  }
+  .dictation-input {
+    font-size: 16px; /* Prevents iOS Safari zoom */
+  }
+  .target-text-box {
+    padding: 16px;
+  }
+  .target-text {
+    font-size: 18px;
+  }
+  .transcript-panel {
+    padding: 16px;
+  }
+}

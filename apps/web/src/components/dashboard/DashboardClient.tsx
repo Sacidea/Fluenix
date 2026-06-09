@@ -440,6 +440,7 @@ export default function DashboardClient({ user, stats, sessions }: Props) {
         }
 
         @media (max-width: 768px) {
+          .ledger-dash { padding: 40px 20px; }
           .modules-grid { grid-template-columns: 1fr; }
           .welcome-text { font-size: 32px; }
           .stats-col { flex-direction: column; gap: 16px; }

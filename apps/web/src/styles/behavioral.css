@@ -453,3 +453,41 @@
   opacity: 0.7;
   cursor: not-allowed;
 }
+
+/* ====================================
+   MOBILE RESPONSIVE FIXES
+==================================== */
+@media (max-width: 768px) {
+  .lab-header {
+    padding: 16px 20px;
+  }
+  .header-content {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+  .behavioral-handbook-container,
+  .behavioral-workspace {
+    padding: 20px;
+    border-radius: 0;
+    border-left: none;
+    border-right: none;
+  }
+  .handbook-header h2 {
+    font-size: 24px;
+  }
+  .star-card {
+    flex-direction: column;
+    gap: 12px;
+    padding: 16px;
+  }
+  .star-textarea {
+    font-size: 16px; /* Prevents iOS Safari zoom */
+  }
+  .handbook-footer {
+    flex-direction: column;
+  }
+  .grammar-tabs {
+    flex-wrap: wrap;
+  }
+}
