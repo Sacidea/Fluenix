@@ -131,32 +131,32 @@ export function BehavioralWorkspace() {
             <CheckCircle2 color="#10b981" size={28} /> AI Evaluation Report
           </h3>
           
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '16px', marginBottom: '32px' }}>
-            <div style={{ background: 'white', padding: '20px', borderRadius: '12px', border: '1px solid #e2e8f0', textAlign: 'center' }}>
-              <div style={{ fontSize: '32px', fontWeight: 900, color: '#0f172a' }}>{feedback.overall_score}/100</div>
-              <div style={{ fontSize: '13px', color: '#64748b', textTransform: 'uppercase', fontWeight: 700, marginTop: '4px' }}>Overall Score</div>
+          <div className="feedback-scores-grid">
+            <div className="feedback-score-card">
+              <div className="score-value" style={{ color: '#0f172a' }}>{feedback.overall_score}/100</div>
+              <div className="score-label">Overall Score</div>
             </div>
-            <div style={{ background: 'white', padding: '20px', borderRadius: '12px', border: '1px solid #e2e8f0', textAlign: 'center' }}>
-              <div style={{ fontSize: '32px', fontWeight: 900, color: '#8b5cf6' }}>{feedback.leadership_alignment}/100</div>
-              <div style={{ fontSize: '13px', color: '#64748b', textTransform: 'uppercase', fontWeight: 700, marginTop: '4px' }}>Leadership Alignment</div>
+            <div className="feedback-score-card">
+              <div className="score-value" style={{ color: '#8b5cf6' }}>{feedback.leadership_alignment}/100</div>
+              <div className="score-label">Leadership Alignment</div>
             </div>
-            <div style={{ background: 'white', padding: '20px', borderRadius: '12px', border: '1px solid #e2e8f0', textAlign: 'center' }}>
-              <div style={{ fontSize: '32px', fontWeight: 900, color: '#3b82f6' }}>{feedback.english_quality}/100</div>
-              <div style={{ fontSize: '13px', color: '#64748b', textTransform: 'uppercase', fontWeight: 700, marginTop: '4px' }}>English Quality (Level: {level})</div>
+            <div className="feedback-score-card">
+              <div className="score-value" style={{ color: '#3b82f6' }}>{feedback.english_quality}/100</div>
+              <div className="score-label">English Quality (Level: {level})</div>
             </div>
           </div>
 
-          <div style={{ display: 'flex', gap: '24px', marginBottom: '32px' }}>
-            <div style={{ flex: 1, background: '#f0fdf4', border: '1px solid #bbf7d0', padding: '20px', borderRadius: '12px' }}>
-              <h4 style={{ color: '#166534', fontWeight: 700, marginBottom: '12px' }}>Strengths</h4>
-              <ul style={{ paddingLeft: '20px', color: '#15803d', lineHeight: 1.6 }}>
-                {feedback.strengths.map((s, i) => <li key={i}>{s}</li>)}
+          <div className="feedback-details-flex">
+            <div className="feedback-strengths">
+              <h4>Strengths</h4>
+              <ul>
+                {feedback.strengths.map((s: string, i: number) => <li key={i}>{s}</li>)}
               </ul>
             </div>
-            <div style={{ flex: 1, background: '#fef2f2', border: '1px solid #fecaca', padding: '20px', borderRadius: '12px' }}>
-              <h4 style={{ color: '#991b1b', fontWeight: 700, marginBottom: '12px' }}>Areas to Improve</h4>
-              <ul style={{ paddingLeft: '20px', color: '#b91c1c', lineHeight: 1.6 }}>
-                {feedback.improvements.map((s, i) => <li key={i}>{s}</li>)}
+            <div className="feedback-improvements">
+              <h4>Areas to Improve</h4>
+              <ul>
+                {feedback.improvements.map((s: string, i: number) => <li key={i}>{s}</li>)}
               </ul>
             </div>
           </div>

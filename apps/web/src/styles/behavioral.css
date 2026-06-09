@@ -454,10 +454,85 @@
   cursor: not-allowed;
 }
 
+/* Feedback Layouts */
+.feedback-scores-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 16px;
+  margin-bottom: 32px;
+}
+
+.feedback-score-card {
+  background: white;
+  padding: 20px;
+  border-radius: 12px;
+  border: 1px solid #e2e8f0;
+  text-align: center;
+}
+
+.score-value {
+  font-size: 32px;
+  font-weight: 900;
+}
+
+.score-label {
+  font-size: 13px;
+  color: #64748b;
+  text-transform: uppercase;
+  font-weight: 700;
+  margin-top: 4px;
+}
+
+.feedback-details-flex {
+  display: flex;
+  gap: 24px;
+  margin-bottom: 32px;
+}
+
+.feedback-strengths {
+  flex: 1;
+  background: #f0fdf4;
+  border: 1px solid #bbf7d0;
+  padding: 20px;
+  border-radius: 12px;
+}
+
+.feedback-strengths h4 {
+  color: #166534;
+  font-weight: 700;
+  margin-bottom: 12px;
+}
+
+.feedback-strengths ul {
+  padding-left: 20px;
+  color: #15803d;
+  line-height: 1.6;
+}
+
+.feedback-improvements {
+  flex: 1;
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  padding: 20px;
+  border-radius: 12px;
+}
+
+.feedback-improvements h4 {
+  color: #991b1b;
+  font-weight: 700;
+  margin-bottom: 12px;
+}
+
+.feedback-improvements ul {
+  padding-left: 20px;
+  color: #b91c1c;
+  line-height: 1.6;
+}
+
 /* ====================================
    MOBILE RESPONSIVE FIXES
 ==================================== */
-@media (max-width: 768px) {
+@media (max-width: 1024px) {
   .lab-header {
     padding: 16px 20px;
   }
@@ -489,5 +564,11 @@
   }
   .grammar-tabs {
     flex-wrap: wrap;
+  }
+  .feedback-scores-grid {
+    grid-template-columns: 1fr;
+  }
+  .feedback-details-flex {
+    flex-direction: column;
   }
 }
