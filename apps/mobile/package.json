@@ -16,7 +16,6 @@
     "@expo/metro-runtime": "^55.0.11",
     "@fluenix/shared": "workspace:*",
     "@react-native-picker/picker": "^2.11.4",
-    "@react-native-voice/voice": "^3.2.4",
     "@sentry/react-native": "^7.11.0",
     "axios": "^1.13.6",
     "expo": "~55.0.26",

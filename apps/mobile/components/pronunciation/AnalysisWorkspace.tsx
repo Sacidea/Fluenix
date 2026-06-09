@@ -34,7 +34,7 @@ export function AnalysisWorkspace({
         <Icons.AlertCircle size={48} color="#ef4444" />
         <Text className="text-xl font-black text-slate-800 mt-4 mb-2 text-center">Environment Error</Text>
         <Text className="text-slate-600 text-center leading-relaxed">
-          Acoustic analysis requires Web Speech API or @react-native-voice/voice support. Please test in a supported environment or rebuild the dev client.
+          Acoustic analysis requires Web Speech API or Expo Speech Recognition support. Please test in a supported environment or rebuild the dev client.
         </Text>
       </View>
     );
