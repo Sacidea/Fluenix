@@ -55,8 +55,8 @@ export function SessionItem({ session, onPress, onDelete }: { session: Session; 
         <View className="items-end">
           {hasScore ? (
             <>
-              <Text className={`font-black text-lg ${session.score >= 80 ? 'text-green-600' : 'text-indigo-600'}`}>
-                {Math.round(session.score)}
+              <Text className={`font-black text-lg ${session.score !== undefined ? (session.score >= 80 ? 'text-green-600' : 'text-indigo-600') : ''}`}>
+                {session.score !== undefined ? Math.round(session.score) : ''}
               </Text>
               <Text className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Score</Text>
             </>

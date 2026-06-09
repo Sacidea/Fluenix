@@ -23,6 +23,6 @@ export const ListeningScenarioSchema = z.object({
 });
 
 // Infer types
-export type ScenarioType = z.infer<typeof ScenarioTypeSchema>;
-export type ScenarioMission = z.infer<typeof ScenarioMissionSchema>;
-export type ListeningScenario = z.infer<typeof ListeningScenarioSchema>;
+export type ZodScenarioType = z.infer<typeof ScenarioTypeSchema>;
+export type ZodScenarioMission = z.infer<typeof ScenarioMissionSchema>;
+export type ZodListeningScenario = z.infer<typeof ListeningScenarioSchema>;

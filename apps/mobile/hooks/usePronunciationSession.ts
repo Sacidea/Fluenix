@@ -116,11 +116,11 @@ export function usePronunciationSession() {
   useSpeechRecognitionEvent('result', (e) => {
     if (e.results && e.results.length > 0) {
       // Get the most confident final transcript
-      const finalResult = e.results.find(r => r.isFinal);
+      const finalResult = e.results.find((r: any) => r.isFinal);
       const heard = finalResult ? finalResult.transcript : e.results[0].transcript;
       
       setTranscript(heard);
-      if (finalResult || !e.isSpeechDetected) {
+      if (finalResult || !(e as any).isSpeechDetected) {
         setListening(false);
         ExpoSpeechRecognitionModule.stop();
         analyzeResult(heard);

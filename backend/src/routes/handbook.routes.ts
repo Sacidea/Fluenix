@@ -11,7 +11,7 @@ router.get('/rules', requireAuth, async (req, res) => {
     })
     
     // Group rules by category
-    const groupedRules = rules.reduce((acc, rule) => {
+    const groupedRules = rules.reduce((acc: any, rule: any) => {
       if (!acc[rule.category]) {
         acc[rule.category] = []
       }
