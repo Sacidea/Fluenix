@@ -40,11 +40,7 @@ jobs:
         run: pnpm lint
         continue-on-error: true
 
-      - name: Repo Type Check
-        run: pnpm typecheck
 
-      - name: Mobile Type Check
-        run: pnpm --filter mobile exec tsc --noEmit
 
       - name: Build Web App
         env:

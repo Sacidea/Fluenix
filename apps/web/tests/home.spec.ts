@@ -1,7 +1,10 @@
 import { test, expect } from '@playwright/test';
 
 test('has title and dashboard link', async ({ page }) => {
-  await page.goto('/');
+  page.on('console', msg => console.log('PAGE LOG:', msg.text()));
+  page.on('pageerror', err => console.log('PAGE ERROR:', err.message));
+  const res = await page.goto('/');
+  console.log('STATUS:', res?.status());
 
   // Expect a title "to contain" a substring.
   await expect(page).toHaveTitle(/Fluenix/);
