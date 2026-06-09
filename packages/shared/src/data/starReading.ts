@@ -636,6 +636,7 @@ An exceptional STAR response involves a **Situation** where you had strong incom
           "By stating that you only listen to the CEO's instructions."
         ],
         answerIndex: 1,
+        explanation: "Sifting through noise means filtering out irrelevant data to focus on the root cause, demonstrating analytical depth.",
       }
     },
     {
