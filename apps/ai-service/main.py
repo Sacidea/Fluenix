@@ -91,6 +91,7 @@ def scenario_chat(data: dict):
                 for text in stream.text_stream:
                     # Format as Server-Sent Event (SSE) chunk
                     yield f"data: {text}\n\n"
+                yield "data: [DONE]\n\n"
 
         # Check if client explicitly requested a stream via query or body
         # For backwards compatibility, if stream: true is passed, use StreamingResponse
