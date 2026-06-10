@@ -5,7 +5,6 @@ import { tokenCache } from '../utils/clerk';
 import '../global.css';
 
 import { OfflineWarning } from '../components/OfflineWarning';
-import { GlobalErrorBoundary } from '../components/GlobalErrorBoundary';
 
 if (process.env.EXPO_PUBLIC_SENTRY_DSN) {
   Sentry.init({
@@ -24,16 +23,14 @@ const publishableKey = process.env.EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY || '';
 
 function RootLayout() {
   return (
-    <GlobalErrorBoundary>
-      <ClerkProvider tokenCache={tokenCache} publishableKey={publishableKey}>
-        <ClerkLoaded>
-          <OfflineWarning />
-          <Stack screenOptions={{ headerShown: false }}>
-            <Stack.Screen name="index" options={{ title: 'Fluenix' }} />
-          </Stack>
-        </ClerkLoaded>
-      </ClerkProvider>
-    </GlobalErrorBoundary>
+    <ClerkProvider tokenCache={tokenCache} publishableKey={publishableKey}>
+      <ClerkLoaded>
+        <OfflineWarning />
+        <Stack screenOptions={{ headerShown: false }}>
+          <Stack.Screen name="index" options={{ title: 'Fluenix' }} />
+        </Stack>
+      </ClerkLoaded>
+    </ClerkProvider>
   );
 }
 
