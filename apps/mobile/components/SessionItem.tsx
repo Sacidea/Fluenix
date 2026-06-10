@@ -1,6 +1,7 @@
 import React from 'react';
-import { View, Text, TouchableOpacity } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import * as Icons from 'lucide-react-native';
+import { colors, shadow } from '../utils/theme';
 
 const labelMap: Record<string, string> = {
   'scenario': 'Scenario Simulation',
@@ -34,35 +35,35 @@ export function SessionItem({ session, onPress, onDelete }: { session: Session; 
   const hasScore = typeof session.score === 'number';
 
   return (
-    <View className="flex-row items-center gap-2 mb-3">
+    <View style={styles.row}>
       <TouchableOpacity 
         onPress={onPress}
-        className="flex-1 bg-white border border-slate-200 rounded-2xl p-4 flex-row items-center justify-between shadow-sm active:bg-slate-50"
+        style={styles.card}
       >
-        <View className="flex-row items-center gap-4">
-          <View className="w-10 h-10 rounded-xl bg-slate-100 items-center justify-center">
+        <View style={styles.cardLeft}>
+          <View style={styles.iconBox}>
             <IconComp size={20} color="#64748b" />
           </View>
           <View>
-            <Text className="font-bold text-slate-800 text-base">{labelMap[session.type] || session.type}</Text>
-            <Text className="text-xs text-slate-500 mt-1">
+            <Text style={styles.sessionType}>{labelMap[session.type] || session.type}</Text>
+            <Text style={styles.sessionDate}>
               {new Date(session.createdAt).toLocaleDateString(undefined, { 
                 month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' 
               })}
             </Text>
           </View>
         </View>
-        <View className="items-end">
+        <View style={styles.scoreSection}>
           {hasScore ? (
             <>
-              <Text className={`font-black text-lg ${session.score !== undefined ? (session.score >= 80 ? 'text-green-600' : 'text-indigo-600') : ''}`}>
+              <Text style={[styles.scoreValue, session.score !== undefined ? (session.score >= 80 ? styles.scoreGreen : styles.scorePrimary) : undefined]}>
                 {session.score !== undefined ? Math.round(session.score) : ''}
               </Text>
-              <Text className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Score</Text>
+              <Text style={styles.scoreLabel}>Score</Text>
             </>
           ) : (
-            <View className="bg-slate-100 px-2 py-1 rounded">
-              <Text className="text-[10px] font-bold text-slate-500 uppercase">No Score</Text>
+            <View style={styles.noScoreBadge}>
+              <Text style={styles.noScoreText}>No Score</Text>
             </View>
           )}
         </View>
@@ -71,7 +72,7 @@ export function SessionItem({ session, onPress, onDelete }: { session: Session; 
       {onDelete && (
         <TouchableOpacity 
           onPress={onDelete}
-          className="bg-red-50 w-12 h-[72px] rounded-2xl items-center justify-center border border-red-100"
+          style={styles.deleteButton}
         >
           <Icons.Trash2 size={20} color="#ef4444" />
         </TouchableOpacity>
@@ -79,3 +80,89 @@ export function SessionItem({ session, onPress, onDelete }: { session: Session; 
     </View>
   );
 }
+
+const styles = StyleSheet.create({
+  row: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    marginBottom: 12,
+  },
+  card: {
+    flex: 1,
+    backgroundColor: colors.white,
+    borderWidth: 1,
+    borderColor: colors.slate200,
+    borderRadius: 16,
+    padding: 16,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    ...shadow.sm,
+  },
+  cardLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 16,
+  },
+  iconBox: {
+    width: 40,
+    height: 40,
+    borderRadius: 12,
+    backgroundColor: colors.slate100,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  sessionType: {
+    fontWeight: '700',
+    color: colors.slate800,
+    fontSize: 14,
+  },
+  sessionDate: {
+    fontSize: 10,
+    color: colors.slate500,
+    marginTop: 4,
+  },
+  scoreSection: {
+    alignItems: 'flex-end',
+  },
+  scoreValue: {
+    fontWeight: '900',
+    fontSize: 18,
+  },
+  scoreGreen: {
+    color: colors.green600,
+  },
+  scorePrimary: {
+    color: colors.primary,
+  },
+  scoreLabel: {
+    fontSize: 10,
+    fontWeight: '700',
+    color: colors.slate400,
+    textTransform: 'uppercase',
+    letterSpacing: 2,
+  },
+  noScoreBadge: {
+    backgroundColor: colors.slate100,
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 4,
+  },
+  noScoreText: {
+    fontSize: 10,
+    fontWeight: '700',
+    color: colors.slate500,
+    textTransform: 'uppercase',
+  },
+  deleteButton: {
+    backgroundColor: '#fef2f2',
+    width: 48,
+    height: 72,
+    borderRadius: 16,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 1,
+    borderColor: '#fee2e2',
+  },
+});

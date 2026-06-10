@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, ScrollView } from 'react-native';
+import { View, Text, ScrollView, StyleSheet } from 'react-native';
 import * as Icons from 'lucide-react-native';
 
 export type WritingFeedbackType = {
@@ -28,36 +28,36 @@ export function WritingFeedback({ feedback, theme = 'blue' }: Props) {
 
   const score = feedback.overall_score ?? 0;
   
-  let colors = { bg: 'bg-blue-50', border: 'border-blue-200', text: 'text-blue-800', icon: '#3b82f6' };
-  if (theme === 'lilac') colors = { bg: 'bg-indigo-50', border: 'border-indigo-200', text: 'text-indigo-800', icon: '#6366f1' };
-  if (theme === 'yellow') colors = { bg: 'bg-amber-50', border: 'border-amber-200', text: 'text-amber-800', icon: '#f59e0b' };
-  if (score >= 90) colors = { bg: 'bg-emerald-50', border: 'border-emerald-200', text: 'text-emerald-800', icon: '#10b981' };
-  else if (score < 60) colors = { bg: 'bg-rose-50', border: 'border-rose-200', text: 'text-rose-800', icon: '#f43f5e' };
+  let colors = { bg: '#eff6ff', border: '#bfdbfe', text: '#1e40af', icon: '#3b82f6' };
+  if (theme === 'lilac') colors = { bg: '#eef2ff', border: '#c7d2fe', text: '#3730a3', icon: '#6366f1' };
+  if (theme === 'yellow') colors = { bg: '#fffbeb', border: '#fde68a', text: '#92400e', icon: '#f59e0b' };
+  if (score >= 90) colors = { bg: '#ecfdf5', border: '#a7f3d0', text: '#065f46', icon: '#10b981' };
+  else if (score < 60) colors = { bg: '#fff1f2', border: '#fecdd3', text: '#9f1239', icon: '#f43f5e' };
 
   return (
-    <View className={`w-full rounded-2xl p-5 border ${colors.bg} ${colors.border} mt-4`}>
-      <View className="flex-row items-center justify-between mb-4 pb-4 border-b border-white/40">
-        <View className="flex-row items-center gap-2">
+    <View style={[styles.container, { backgroundColor: colors.bg, borderColor: colors.border }]}>
+      <View style={styles.header}>
+        <View style={styles.headerLeft}>
           <Icons.Activity size={18} color={colors.icon} />
-          <Text className={`font-bold uppercase tracking-widest text-[10px] ${colors.text}`}>AI Analysis Complete</Text>
+          <Text style={[styles.headerTitle, { color: colors.text }]}>AI Analysis Complete</Text>
         </View>
-        <Text className={`text-2xl font-black font-serif ${colors.text}`}>{score}/100</Text>
+        <Text style={[styles.scoreText, { color: colors.text }]}>{score}/100</Text>
       </View>
 
-      <Text className={`font-bold text-sm mb-2 ${colors.text}`}>Feedback</Text>
-      <Text className={`text-sm leading-relaxed mb-4 ${colors.text} opacity-90`}>
+      <Text style={[styles.sectionTitle, { color: colors.text }]}>Feedback</Text>
+      <Text style={[styles.feedbackText, { color: colors.text }]}>
         {feedback.overall_feedback || feedback.feedback || "Good job."}
       </Text>
 
       {feedback.improvements && feedback.improvements.length > 0 && (
         <>
-          <Text className={`font-bold text-sm mt-2 mb-2 ${colors.text}`}>Areas to Improve</Text>
+          <Text style={[styles.sectionTitle, { color: colors.text }]}>Areas to Improve</Text>
           {feedback.improvements.map((imp: string, i: number) => (
-            <View key={i} className="flex-row items-start gap-2 mb-2">
-              <View className="mt-1">
+            <View key={i} style={styles.listItem}>
+              <View style={styles.listIcon}>
                 <Icons.AlertCircle size={14} color={colors.icon} />
               </View>
-              <Text className={`flex-1 text-sm ${colors.text} opacity-90`}>{imp}</Text>
+              <Text style={[styles.listText, { color: colors.text }]}>{imp}</Text>
             </View>
           ))}
         </>
@@ -65,13 +65,13 @@ export function WritingFeedback({ feedback, theme = 'blue' }: Props) {
 
       {feedback.strengths && feedback.strengths.length > 0 && (
         <>
-          <Text className={`font-bold text-sm mt-4 mb-2 ${colors.text}`}>Strengths</Text>
+          <Text style={[styles.sectionTitle, { color: colors.text, marginTop: 16 }]}>Strengths</Text>
           {feedback.strengths.map((st: string, i: number) => (
-            <View key={i} className="flex-row items-start gap-2 mb-2">
-              <View className="mt-1">
+            <View key={i} style={styles.listItem}>
+              <View style={styles.listIcon}>
                 <Icons.CheckCircle2 size={14} color={colors.icon} />
               </View>
-              <Text className={`flex-1 text-sm ${colors.text} opacity-90`}>{st}</Text>
+              <Text style={[styles.listText, { color: colors.text }]}>{st}</Text>
             </View>
           ))}
         </>
@@ -79,3 +79,63 @@ export function WritingFeedback({ feedback, theme = 'blue' }: Props) {
     </View>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    width: '100%',
+    borderRadius: 16,
+    padding: 20,
+    borderWidth: 1,
+    marginTop: 16,
+  },
+  header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: 16,
+    paddingBottom: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: 'rgba(255, 255, 255, 0.4)',
+  },
+  headerLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  headerTitle: {
+    fontWeight: '700',
+    textTransform: 'uppercase',
+    letterSpacing: 2,
+    fontSize: 10,
+  },
+  scoreText: {
+    fontSize: 24,
+    fontWeight: '900',
+    fontFamily: 'serif',
+  },
+  sectionTitle: {
+    fontWeight: '700',
+    fontSize: 14,
+    marginBottom: 8,
+  },
+  feedbackText: {
+    fontSize: 14,
+    lineHeight: 22,
+    marginBottom: 16,
+    opacity: 0.9,
+  },
+  listItem: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    gap: 8,
+    marginBottom: 8,
+  },
+  listIcon: {
+    marginTop: 4,
+  },
+  listText: {
+    flex: 1,
+    fontSize: 14,
+    opacity: 0.9,
+  },
+});

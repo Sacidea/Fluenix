@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, ActivityIndicator, TouchableOpacity, Platform, FlatList, Alert } from 'react-native';
+import { View, Text, ActivityIndicator, TouchableOpacity, Platform, FlatList, Alert, StyleSheet } from 'react-native';
 import { useAuth, useUser } from '@clerk/clerk-expo';
 import { useRouter, useFocusEffect } from 'expo-router';
 import * as Icons from 'lucide-react-native';
@@ -10,6 +10,7 @@ import { SessionItem } from '../../../components/SessionItem';
 import { SessionDetailModal } from '../../../components/SessionDetailModal';
 import { apiClient } from '../../../utils/apiClient';
 import { Session } from '../../../components/SessionItem';
+import { colors } from '../../../utils/theme';
 
 async function getProgressData(userId: string, token: string | null) {
   try {
@@ -69,9 +70,9 @@ export default function ProgressScreen() {
 
   if (!isLoaded || loading) {
     return (
-      <View className="flex-1 items-center justify-center bg-slate-50">
+      <View style={styles.loadingContainer}>
         <ActivityIndicator size="large" color="#4f46e5" />
-        <Text className="text-slate-500 font-medium mt-4">Compiling personnel dossier...</Text>
+        <Text style={styles.loadingText}>Compiling personnel dossier...</Text>
       </View>
     );
   }
@@ -85,16 +86,16 @@ export default function ProgressScreen() {
   const renderHeader = () => (
     <View>
       {/* HEADER SECTION */}
-      <View className="mb-10 border-b border-slate-200 pb-8">
-        <View className="flex-row items-center gap-3 mb-4">
-          <View className="w-8 h-px bg-indigo-600" />
-          <Text className="text-[10px] font-extrabold uppercase tracking-widest text-slate-400">Personnel Dossier</Text>
+      <View style={styles.headerSection}>
+        <View style={styles.headerLabelRow}>
+          <View style={styles.headerAccent} />
+          <Text style={styles.headerLabel}>Personnel Dossier</Text>
         </View>
 
-        <Text className="font-bold text-4xl text-slate-800 leading-tight mb-2">
-          Competency <Text className="font-serif italic font-normal text-indigo-600">Progress Map</Text>
+        <Text style={styles.headerTitle}>
+          Competency <Text style={styles.headerTitleAccent}>Progress Map</Text>
         </Text>
-        <Text className="text-slate-500 leading-relaxed text-base">
+        <Text style={styles.headerDescription}>
           Tracking technical proficiency across all active simulation environments.
         </Text>
       </View>
@@ -105,31 +106,31 @@ export default function ProgressScreen() {
       {/* VISUALIZATIONS */}
       <ProgressInsights sessions={data.sessions} />
 
-      <View className="flex-row items-center gap-4 mb-6 mt-4">
-        <Text className="font-bold text-[10px] uppercase tracking-[2px] text-slate-400">Operational Record Log</Text>
-        <View className="flex-1 h-px bg-slate-200" />
+      <View style={styles.logLabelRow}>
+        <Text style={styles.logLabel}>Operational Record Log</Text>
+        <View style={styles.logDivider} />
       </View>
     </View>
   );
 
   const renderEmpty = () => (
-    <View className="bg-white rounded-2xl p-8 border border-slate-200 items-center justify-center">
-      <Icons.Inbox size={48} color="#cbd5e1" className="mb-4" />
-      <Text className="font-bold text-slate-800 text-lg mb-2">No Operational Logs Found</Text>
-      <Text className="text-slate-500 text-center mb-6">Start your first session to begin building your personnel dossier.</Text>
+    <View style={styles.emptyContainer}>
+      <Icons.Inbox size={48} color="#cbd5e1" style={{ marginBottom: 16 }} />
+      <Text style={styles.emptyTitle}>No Operational Logs Found</Text>
+      <Text style={styles.emptyDescription}>Start your first session to begin building your personnel dossier.</Text>
       <TouchableOpacity 
-        className="bg-slate-900 px-6 py-3 rounded-xl"
+        style={styles.emptyButton}
         onPress={() => router.push('/dashboard')}
       >
-        <Text className="text-white font-bold">Return to Dashboard</Text>
+        <Text style={styles.emptyButtonText}>Return to Dashboard</Text>
       </TouchableOpacity>
     </View>
   );
 
   const renderFooter = () => (
-    <View className="mt-12 pt-8 border-t border-slate-200 flex-row items-center gap-2">
+    <View style={styles.footer}>
       <Icons.ShieldCheck size={14} color="#94a3b8" />
-      <Text className="font-bold text-[10px] text-slate-400 uppercase tracking-widest">Verified Technical Proficiency Record — v1.2</Text>
+      <Text style={styles.footerText}>Verified Technical Proficiency Record — v1.2</Text>
     </View>
   );
 
@@ -175,7 +176,7 @@ export default function ProgressScreen() {
   return (
     <>
       <FlatList
-        className="flex-1 bg-slate-50"
+        style={styles.flatList}
         contentContainerStyle={{ padding: 24, paddingTop: 60, paddingBottom: 100 }}
         data={data.sessions.slice(0, displayCount)}
         keyExtractor={(item: Session, index) => String(item.id || index)}
@@ -201,3 +202,128 @@ export default function ProgressScreen() {
     </>
   );
 }
+
+const styles = StyleSheet.create({
+  loadingContainer: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: colors.slate50,
+  },
+  loadingText: {
+    color: colors.slate500,
+    fontWeight: '500',
+    marginTop: 16,
+  },
+  flatList: {
+    flex: 1,
+    backgroundColor: colors.slate50,
+  },
+  headerSection: {
+    marginBottom: 40,
+    borderBottomWidth: 1,
+    borderBottomColor: colors.slate200,
+    paddingBottom: 32,
+  },
+  headerLabelRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    marginBottom: 16,
+  },
+  headerAccent: {
+    width: 32,
+    height: 1,
+    backgroundColor: colors.primary,
+  },
+  headerLabel: {
+    fontSize: 10,
+    fontWeight: '800',
+    textTransform: 'uppercase',
+    letterSpacing: 4,
+    color: colors.slate400,
+  },
+  headerTitle: {
+    fontWeight: '700',
+    fontSize: 36,
+    color: colors.slate800,
+    lineHeight: 40,
+    marginBottom: 8,
+  },
+  headerTitleAccent: {
+    fontFamily: 'serif',
+    fontStyle: 'italic',
+    fontWeight: '400',
+    color: colors.primary,
+  },
+  headerDescription: {
+    color: colors.slate500,
+    lineHeight: 22,
+    fontSize: 14,
+  },
+  logLabelRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 16,
+    marginBottom: 24,
+    marginTop: 16,
+  },
+  logLabel: {
+    fontWeight: '700',
+    fontSize: 10,
+    textTransform: 'uppercase',
+    letterSpacing: 2,
+    color: colors.slate400,
+  },
+  logDivider: {
+    flex: 1,
+    height: 1,
+    backgroundColor: colors.slate200,
+  },
+  emptyContainer: {
+    backgroundColor: colors.white,
+    borderRadius: 16,
+    padding: 32,
+    borderWidth: 1,
+    borderColor: colors.slate200,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  emptyTitle: {
+    fontWeight: '700',
+    color: colors.slate800,
+    fontSize: 18,
+    marginBottom: 8,
+  },
+  emptyDescription: {
+    color: colors.slate500,
+    textAlign: 'center',
+    marginBottom: 24,
+  },
+  emptyButton: {
+    backgroundColor: colors.slate900,
+    paddingHorizontal: 24,
+    paddingVertical: 12,
+    borderRadius: 12,
+  },
+  emptyButtonText: {
+    color: colors.white,
+    fontWeight: '700',
+  },
+  footer: {
+    marginTop: 48,
+    paddingTop: 32,
+    borderTopWidth: 1,
+    borderTopColor: colors.slate200,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  footerText: {
+    fontWeight: '700',
+    fontSize: 10,
+    color: colors.slate400,
+    textTransform: 'uppercase',
+    letterSpacing: 4,
+  },
+});

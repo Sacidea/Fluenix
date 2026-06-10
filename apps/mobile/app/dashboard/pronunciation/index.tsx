@@ -1,34 +1,35 @@
 import React from 'react';
-import { View, ScrollView, Text, TouchableOpacity } from 'react-native';
+import { View, ScrollView, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { useRouter } from 'expo-router';
 import * as Icons from 'lucide-react-native';
 import { usePronunciationSession } from '../../../hooks/usePronunciationSession';
 import { WordIndexSidebar } from '../../../components/pronunciation/WordIndexSidebar';
 import { AnalysisWorkspace } from '../../../components/pronunciation/AnalysisWorkspace';
+import { colors } from '../../../utils/theme';
 
 export default function PronunciationLabScreen() {
   const session = usePronunciationSession();
   const router = useRouter();
 
   return (
-    <View className="flex-1 bg-slate-50">
+    <View style={styles.container}>
       {/* Global Header Area */}
-      <View className="px-6 pt-10 pb-4 bg-white border-b border-slate-200">
+      <View style={styles.header}>
         <TouchableOpacity 
           onPress={() => router.back()} 
-          className="flex-row items-center mb-4"
+          style={styles.backButton}
         >
           <Icons.ChevronLeft size={16} color="#64748b" />
-          <Text className="text-slate-500 font-bold ml-1 text-sm">Return to Dashboard</Text>
+          <Text style={styles.backText}>Return to Dashboard</Text>
         </TouchableOpacity>
 
-        <View className="flex-row items-center justify-between">
+        <View style={styles.titleRow}>
           <View>
-            <View className="flex-row items-center gap-2 mb-1">
-              <View className="w-6 h-px bg-indigo-500" />
-              <Text className="text-[10px] font-extrabold uppercase tracking-widest text-slate-400">Acoustic Analysis Lab</Text>
+            <View style={styles.labelRow}>
+              <View style={styles.labelAccent} />
+              <Text style={styles.labelText}>Acoustic Analysis Lab</Text>
             </View>
-            <Text className="font-black text-2xl text-slate-800">Pronunciation Lab</Text>
+            <Text style={styles.title}>Pronunciation Lab</Text>
           </View>
         </View>
       </View>
@@ -46,7 +47,7 @@ export default function PronunciationLabScreen() {
         onGenerateWords={session.generateWords}
       />
       
-      <ScrollView className="flex-1" showsVerticalScrollIndicator={false}>
+      <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
         <AnalysisWorkspace 
           supported={session.supported}
           currentWord={session.currentWord}
@@ -63,3 +64,60 @@ export default function PronunciationLabScreen() {
     </View>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: colors.slate50,
+  },
+  header: {
+    paddingHorizontal: 24,
+    paddingTop: 40,
+    paddingBottom: 16,
+    backgroundColor: colors.white,
+    borderBottomWidth: 1,
+    borderBottomColor: colors.slate200,
+  },
+  backButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 16,
+  },
+  backText: {
+    color: colors.slate500,
+    fontWeight: '700',
+    marginLeft: 4,
+    fontSize: 12,
+  },
+  titleRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  labelRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    marginBottom: 4,
+  },
+  labelAccent: {
+    width: 24,
+    height: 1,
+    backgroundColor: '#6366f1',
+  },
+  labelText: {
+    fontSize: 10,
+    fontWeight: '800',
+    textTransform: 'uppercase',
+    letterSpacing: 4,
+    color: colors.slate400,
+  },
+  title: {
+    fontWeight: '900',
+    fontSize: 24,
+    color: colors.slate800,
+  },
+  scrollView: {
+    flex: 1,
+  },
+});

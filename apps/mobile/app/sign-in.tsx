@@ -4,6 +4,7 @@ import { useRouter } from 'expo-router';
 import { useState, useCallback } from 'react';
 import * as WebBrowser from 'expo-web-browser';
 import * as Linking from 'expo-linking';
+import { colors } from '../utils/theme';
 
 WebBrowser.maybeCompleteAuthSession();
 
@@ -116,24 +117,24 @@ export default function SignInScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: '#ffffff', padding: 24 },
-  title: { fontSize: 30, fontWeight: 'bold', color: '#1e293b', marginBottom: 32 },
+  container: { flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: colors.white, padding: 24 },
+  title: { fontSize: 30, fontWeight: '700', color: colors.slate800, marginBottom: 32 },
   googleButton: { 
-    flexDirection: 'row', width: '100%', maxWidth: 384, backgroundColor: '#ffffff', 
+    flexDirection: 'row', width: '100%', maxWidth: 384, backgroundColor: colors.white, 
     paddingVertical: 14, borderRadius: 12, alignItems: 'center', justifyContent: 'center',
-    marginBottom: 20, borderWidth: 1.5, borderColor: '#e2e8f0',
+    marginBottom: 20, borderWidth: 1.5, borderColor: colors.slate200,
   },
-  googleIcon: { fontSize: 20, fontWeight: 'bold', color: '#4285F4', marginRight: 10 },
-  googleText: { color: '#334155', fontWeight: '600', fontSize: 16 },
+  googleIcon: { fontSize: 20, fontWeight: '700', color: '#4285F4', marginRight: 10 },
+  googleText: { color: colors.slate700, fontWeight: '600', fontSize: 16 },
   dividerRow: { flexDirection: 'row', alignItems: 'center', width: '100%', maxWidth: 384, marginBottom: 20 },
-  dividerLine: { flex: 1, height: 1, backgroundColor: '#e2e8f0' },
-  dividerText: { marginHorizontal: 12, color: '#94a3b8', fontSize: 14 },
-  input: { width: '100%', maxWidth: 384, backgroundColor: '#f1f5f9', paddingHorizontal: 16, paddingVertical: 16, borderRadius: 12, marginBottom: 16, color: '#1e293b' },
-  button: { width: '100%', maxWidth: 384, backgroundColor: '#4f46e5', paddingVertical: 16, borderRadius: 12, alignItems: 'center', marginBottom: 16 },
-  buttonText: { color: '#ffffff', fontWeight: 'bold', fontSize: 18 },
+  dividerLine: { flex: 1, height: 1, backgroundColor: colors.slate200 },
+  dividerText: { marginHorizontal: 12, color: colors.slate400, fontSize: 14 },
+  input: { width: '100%', maxWidth: 384, backgroundColor: colors.slate100, paddingHorizontal: 16, paddingVertical: 16, borderRadius: 12, marginBottom: 16, color: colors.slate800 },
+  button: { width: '100%', maxWidth: 384, backgroundColor: colors.primary, paddingVertical: 16, borderRadius: 12, alignItems: 'center', marginBottom: 16 },
+  buttonText: { color: colors.white, fontWeight: '700', fontSize: 18 },
   cancelButton: { width: '100%', maxWidth: 384, paddingVertical: 16, alignItems: 'center' },
-  cancelText: { color: '#64748b', fontWeight: '600', fontSize: 16 },
+  cancelText: { color: colors.slate500, fontWeight: '600', fontSize: 16 },
   linkButton: { width: '100%', maxWidth: 384, paddingVertical: 12, alignItems: 'center' },
-  linkText: { color: '#64748b', fontSize: 14 },
-  linkBold: { color: '#4f46e5', fontWeight: 'bold' },
+  linkText: { color: colors.slate500, fontSize: 14 },
+  linkBold: { color: colors.primary, fontWeight: '700' },
 });

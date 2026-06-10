@@ -1,14 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TouchableOpacity, ActivityIndicator, ScrollView, Platform } from 'react-native';
+import { View, Text, TouchableOpacity, ActivityIndicator, ScrollView, StyleSheet } from 'react-native';
 import axios from 'axios';
 import { useAuth } from '@clerk/clerk-expo';
 import * as Icons from 'lucide-react-native';
-
-const getApiUrl = () => {
-  if (Platform.OS === 'web') return 'http://localhost:3001';
-  return process.env.EXPO_PUBLIC_API_URL || 'http://10.0.2.2:3001';
-};
-const API_URL = getApiUrl();
+import { API_URL } from '../../utils/apiClient';
+import { colors, shadow } from '../../utils/theme';
 
 type GrammarRule = {
   id: string;
@@ -44,9 +40,9 @@ const renderMarkdown = (text: string) => {
     const listMatch = line.match(/^[\-\*]\s+(.*)/);
     if (listMatch) {
       return (
-        <View key={lineIndex} className="flex-row items-start mb-2 pl-2">
-          <View className="w-1.5 h-1.5 rounded-full bg-slate-400 mt-2 mr-2" />
-          <Text style={markdownStyles.body} className="flex-1">
+        <View key={lineIndex} style={styles.listItem}>
+          <View style={styles.listBullet} />
+          <Text style={[markdownStyles.body, styles.listItemText]}>
             {parseInlineStyles(listMatch[1])}
           </Text>
         </View>
@@ -54,7 +50,7 @@ const renderMarkdown = (text: string) => {
     }
 
     // 3. Normal paragraph
-    if (line.trim() === '') return <View key={lineIndex} className="h-3" />;
+    if (line.trim() === '') return <View key={lineIndex} style={styles.emptyLine} />;
     return (
       <Text key={lineIndex} style={[markdownStyles.body, markdownStyles.paragraph]}>
         {parseInlineStyles(line)}
@@ -113,9 +109,9 @@ export function GrammarHandbook() {
 
   if (isLoading) {
     return (
-      <View className="flex-1 items-center justify-center p-8 mt-6 mx-5 bg-white rounded-2xl border border-slate-200">
+      <View style={styles.loadingContainer}>
         <ActivityIndicator size="large" color="#3b82f6" />
-        <Text className="text-slate-500 font-medium mt-4">Loading Handbook...</Text>
+        <Text style={styles.loadingText}>Loading Handbook...</Text>
       </View>
     );
   }
@@ -130,21 +126,27 @@ export function GrammarHandbook() {
   }
 
   return (
-    <View className="flex-1">
+    <View style={styles.flex1}>
       {/* Category Horizontal Scroll */}
-      <View className="bg-white border-b border-slate-200 pb-2">
+      <View style={styles.categoryBar}>
         <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ paddingHorizontal: 20, gap: 12 }}>
           {Object.keys(groupedRules).map(category => (
-            <View key={category} className="mr-2">
-              <Text className="font-bold text-xs uppercase tracking-widest text-slate-400 mb-2 mt-4">{category}</Text>
-              <View className="flex-row gap-2">
+            <View key={category} style={styles.categoryGroup}>
+              <Text style={styles.categoryLabel}>{category}</Text>
+              <View style={styles.categoryPills}>
                 {groupedRules[category].map(rule => (
                   <TouchableOpacity
                     key={rule.id}
                     onPress={() => setActiveRuleId(rule.id)}
-                    className={`px-4 py-2 rounded-full border ${activeRuleId === rule.id ? 'bg-blue-50 border-blue-200' : 'bg-slate-50 border-slate-200'}`}
+                    style={[
+                      styles.rulePill,
+                      activeRuleId === rule.id ? styles.rulePillActive : styles.rulePillInactive,
+                    ]}
                   >
-                    <Text className={`font-bold text-sm ${activeRuleId === rule.id ? 'text-blue-700' : 'text-slate-600'}`}>{rule.title}</Text>
+                    <Text style={[
+                      styles.rulePillText,
+                      activeRuleId === rule.id ? styles.rulePillTextActive : styles.rulePillTextInactive,
+                    ]}>{rule.title}</Text>
                   </TouchableOpacity>
                 ))}
               </View>
@@ -154,53 +156,53 @@ export function GrammarHandbook() {
       </View>
 
       {/* Main Content Area */}
-      <ScrollView className="flex-1" contentContainerStyle={{ padding: 20, paddingBottom: 100 }}>
+      <ScrollView style={styles.flex1} contentContainerStyle={{ padding: 20, paddingBottom: 100 }}>
         {activeRule ? (
-          <View className="bg-white rounded-3xl border border-slate-200 shadow-sm p-6 mb-6">
-            <View className="self-start bg-blue-50 px-3 py-1 rounded-full mb-4">
-              <Text className="text-xs font-bold text-blue-700">{activeRule.category}</Text>
+          <View style={[styles.ruleCard, shadow.sm]}>
+            <View style={styles.ruleCategoryBadge}>
+              <Text style={styles.ruleCategoryText}>{activeRule.category}</Text>
             </View>
             
-            <Text className="text-2xl font-black text-slate-800 mb-4">{activeRule.title}</Text>
+            <Text style={styles.ruleTitle}>{activeRule.title}</Text>
             
-            <View className="mb-6">
-              <View className="flex-row items-center gap-2 mb-2">
+            <View style={styles.ruleSection}>
+              <View style={styles.ruleSectionHeader}>
                 <Icons.AlertCircle size={18} color="#1e40af" />
-                <Text className="font-bold text-blue-900">The Rule</Text>
+                <Text style={styles.ruleSectionTitle}>The Rule</Text>
               </View>
-              <Text className="text-slate-600 leading-relaxed">{activeRule.explanation}</Text>
+              <Text style={styles.ruleExplanation}>{activeRule.explanation}</Text>
             </View>
 
-            <View className="flex-col gap-3 mb-6">
+            <View style={styles.examplesSection}>
               {/* Incorrect Example */}
-              <View className="bg-rose-50 p-4 rounded-xl border border-rose-100">
-                <View className="flex-row items-center gap-2 mb-2">
+              <View style={styles.wrongExampleCard}>
+                <View style={styles.exampleHeader}>
                   <Icons.XCircle size={16} color="#e11d48" />
-                  <Text className="font-bold text-rose-800 text-sm">Incorrect</Text>
+                  <Text style={styles.wrongExampleLabel}>Incorrect</Text>
                 </View>
-                <Text className="text-rose-900 line-through decoration-rose-300">- {activeRule.wrongExample}</Text>
+                <Text style={styles.wrongExampleText}>- {activeRule.wrongExample}</Text>
               </View>
 
               {/* Correct Example */}
-              <View className="bg-emerald-50 p-4 rounded-xl border border-emerald-100">
-                <View className="flex-row items-center gap-2 mb-2">
+              <View style={styles.correctExampleCard}>
+                <View style={styles.exampleHeader}>
                   <Icons.CheckCircle2 size={16} color="#10b981" />
-                  <Text className="font-bold text-emerald-800 text-sm">Correct</Text>
+                  <Text style={styles.correctExampleLabel}>Correct</Text>
                 </View>
-                <Text className="text-emerald-900">+ {activeRule.correctExample}</Text>
+                <Text style={styles.correctExampleText}>+ {activeRule.correctExample}</Text>
               </View>
             </View>
 
             {/* Lesson Content Toggle */}
             {activeRule.lessonContent && (
-              <View className="mt-2 border-t border-slate-100 pt-6">
+              <View style={styles.lessonContainer}>
                 <TouchableOpacity 
                   onPress={() => setShowLesson(!showLesson)}
-                  className="flex-row items-center justify-between bg-slate-50 border border-slate-200 p-4 rounded-xl"
+                  style={styles.lessonToggle}
                 >
-                  <View className="flex-row items-center gap-2">
+                  <View style={styles.lessonToggleLeft}>
                     <Icons.BookOpen size={20} color="#3b82f6" />
-                    <Text className="font-bold text-slate-700">{showLesson ? 'Close Lesson' : 'Read Full Lesson'}</Text>
+                    <Text style={styles.lessonToggleText}>{showLesson ? 'Close Lesson' : 'Read Full Lesson'}</Text>
                   </View>
                   <View style={{ transform: [{ rotate: showLesson ? '90deg' : '0deg' }] }}>
                     <Icons.ChevronRight size={20} color="#64748b" />
@@ -208,7 +210,7 @@ export function GrammarHandbook() {
                 </TouchableOpacity>
 
                 {showLesson && (
-                  <View className="mt-4 p-5 bg-white border border-slate-200 rounded-xl">
+                  <View style={styles.lessonContent}>
                     {renderMarkdown(activeRule.lessonContent || '')}
                   </View>
                 )}
@@ -216,7 +218,7 @@ export function GrammarHandbook() {
             )}
           </View>
         ) : (
-          <Text className="text-slate-500 text-center">Select a rule from the top menu to view details.</Text>
+          <Text style={styles.emptyText}>Select a rule from the top menu to view details.</Text>
         )}
       </ScrollView>
     </View>
@@ -261,3 +263,216 @@ const markdownStyles = {
     fontStyle: 'italic',
   }
 } as any;
+
+const styles = StyleSheet.create({
+  flex1: {
+    flex: 1,
+  },
+  loadingContainer: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: 32,
+    marginTop: 24,
+    marginHorizontal: 20,
+    backgroundColor: colors.white,
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: colors.slate200,
+  },
+  loadingText: {
+    color: colors.slate500,
+    fontWeight: '500',
+    marginTop: 16,
+  },
+  categoryBar: {
+    backgroundColor: colors.white,
+    borderBottomWidth: 1,
+    borderBottomColor: colors.slate200,
+    paddingBottom: 8,
+  },
+  categoryGroup: {
+    marginRight: 8,
+  },
+  categoryLabel: {
+    fontWeight: '700',
+    fontSize: 10,
+    textTransform: 'uppercase',
+    letterSpacing: 4,
+    color: colors.slate400,
+    marginBottom: 8,
+    marginTop: 16,
+  },
+  categoryPills: {
+    flexDirection: 'row',
+    gap: 8,
+  },
+  rulePill: {
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderRadius: 9999,
+    borderWidth: 1,
+  },
+  rulePillActive: {
+    backgroundColor: '#eff6ff',
+    borderColor: '#bfdbfe',
+  },
+  rulePillInactive: {
+    backgroundColor: colors.slate50,
+    borderColor: colors.slate200,
+  },
+  rulePillText: {
+    fontWeight: '700',
+    fontSize: 12,
+  },
+  rulePillTextActive: {
+    color: '#1d4ed8',
+  },
+  rulePillTextInactive: {
+    color: colors.slate600,
+  },
+  ruleCard: {
+    backgroundColor: colors.white,
+    borderRadius: 24,
+    borderWidth: 1,
+    borderColor: colors.slate200,
+    padding: 24,
+    marginBottom: 24,
+  },
+  ruleCategoryBadge: {
+    alignSelf: 'flex-start',
+    backgroundColor: '#eff6ff',
+    paddingHorizontal: 12,
+    paddingVertical: 4,
+    borderRadius: 9999,
+    marginBottom: 16,
+  },
+  ruleCategoryText: {
+    fontSize: 10,
+    fontWeight: '700',
+    color: '#1d4ed8',
+  },
+  ruleTitle: {
+    fontSize: 24,
+    fontWeight: '900',
+    color: colors.slate800,
+    marginBottom: 16,
+  },
+  ruleSection: {
+    marginBottom: 24,
+  },
+  ruleSectionHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    marginBottom: 8,
+  },
+  ruleSectionTitle: {
+    fontWeight: '700',
+    color: '#1e3a5f',
+  },
+  ruleExplanation: {
+    color: colors.slate600,
+    lineHeight: 26,
+  },
+  examplesSection: {
+    flexDirection: 'column',
+    gap: 12,
+    marginBottom: 24,
+  },
+  wrongExampleCard: {
+    backgroundColor: '#fff1f2',
+    padding: 16,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: '#ffe4e6',
+  },
+  exampleHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    marginBottom: 8,
+  },
+  wrongExampleLabel: {
+    fontWeight: '700',
+    color: '#9f1239',
+    fontSize: 12,
+  },
+  wrongExampleText: {
+    color: '#881337',
+    textDecorationLine: 'line-through',
+  },
+  correctExampleCard: {
+    backgroundColor: '#ecfdf5',
+    padding: 16,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: '#d1fae5',
+  },
+  correctExampleLabel: {
+    fontWeight: '700',
+    color: '#065f46',
+    fontSize: 12,
+  },
+  correctExampleText: {
+    color: '#064e3b',
+  },
+  lessonContainer: {
+    marginTop: 8,
+    borderTopWidth: 1,
+    borderTopColor: colors.slate100,
+    paddingTop: 24,
+  },
+  lessonToggle: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    backgroundColor: colors.slate50,
+    borderWidth: 1,
+    borderColor: colors.slate200,
+    padding: 16,
+    borderRadius: 12,
+  },
+  lessonToggleLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  lessonToggleText: {
+    fontWeight: '700',
+    color: colors.slate700,
+  },
+  lessonContent: {
+    marginTop: 16,
+    padding: 20,
+    backgroundColor: colors.white,
+    borderWidth: 1,
+    borderColor: colors.slate200,
+    borderRadius: 12,
+  },
+  emptyText: {
+    color: colors.slate500,
+    textAlign: 'center',
+  },
+  // Markdown list items
+  listItem: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    marginBottom: 8,
+    paddingLeft: 8,
+  },
+  listBullet: {
+    width: 6,
+    height: 6,
+    borderRadius: 9999,
+    backgroundColor: colors.slate400,
+    marginTop: 8,
+    marginRight: 8,
+  },
+  listItemText: {
+    flex: 1,
+  },
+  emptyLine: {
+    height: 12,
+  },
+});

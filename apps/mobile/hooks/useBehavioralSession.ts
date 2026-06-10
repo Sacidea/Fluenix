@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useAuth } from '@clerk/clerk-expo';
+import { useAuth, useUser } from '@clerk/clerk-expo';
 import { apiClient, aiClient } from '../utils/apiClient';
 
 export interface BehavioralQuestion {
@@ -27,7 +27,8 @@ export type StarFeedback = {
 
 export function useBehavioralSession() {
   const { getToken } = useAuth();
-  const level = 'B2'; // Hardcoded for mobile until LevelContext is shared
+  const { user } = useUser();
+  const level = (user?.publicMetadata?.level as string) || 'B2';
   
   const [activeQuestion, setActiveQuestion] = useState<BehavioralQuestion | null>(null);
   const [isLoadingQuestion, setIsLoadingQuestion] = useState(true);
@@ -105,6 +106,24 @@ export function useBehavioralSession() {
       const rawFeedback = res.data.analysis;
       const parsed = JSON.parse(rawFeedback.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim()) as StarFeedback;
       setFeedback(parsed);
+      
+      // Save session to backend
+      try {
+        if (user?.id) {
+          await apiClient.post('/api/sessions', {
+            userId: user.id,
+            type: 'behavioral',
+            scenario: activeQuestion.category,
+            duration: 300, // mock duration
+            score: parsed.overall_score,
+            feedback: parsed
+          }, {
+            headers: { Authorization: `Bearer ${token}` }
+          });
+        }
+      } catch (saveErr) {
+        console.error("Failed to save session to backend:", saveErr);
+      }
       
     } catch (err) {
       console.error(err);

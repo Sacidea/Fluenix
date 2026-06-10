@@ -1,11 +1,12 @@
 import React from 'react';
-import { View, Text, TouchableOpacity } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { Stack, useRouter } from 'expo-router';
 import * as Icons from 'lucide-react-native';
 import { useScenarioSession } from '../../../hooks/useScenarioSession';
 import { ScenarioSelector } from '../../../components/scenario/ScenarioSelector';
 import { SimulationWorkspace } from '../../../components/scenario/SimulationWorkspace';
 import { AnalysisResultView } from '../../../components/scenario/AnalysisResultView';
+import { colors, shadow } from '../../../utils/theme';
 
 export default function ScenarioPage() {
   const router = useRouter();
@@ -20,24 +21,24 @@ export default function ScenarioPage() {
   return (
     <>
       <Stack.Screen options={{ headerShown: false }} />
-      <View className="flex-1 bg-slate-50 pt-12">
+      <View style={styles.container}>
         
         {/* WEB-STYLE HEADER */}
-        <View className="px-4 pb-4 border-b border-slate-200 flex-row items-center justify-between bg-slate-50">
+        <View style={styles.header}>
           <TouchableOpacity 
             onPress={() => router.replace('/dashboard')} 
-            className="flex-row items-center gap-1.5 bg-white px-3 py-2 border border-slate-200 rounded-lg shadow-sm"
+            style={styles.backButton}
           >
             <Icons.ChevronLeft size={16} color="#475569" />
-            <Text className="font-bold text-slate-600 text-sm">Dashboard</Text>
+            <Text style={styles.backButtonText}>Dashboard</Text>
           </TouchableOpacity>
-          <View className="items-end">
-            <Text className="text-[10px] font-extrabold text-indigo-600 uppercase tracking-widest mb-1">Simulation Environment</Text>
-            <Text className="text-lg font-black text-slate-800 font-serif leading-none">Scenario Cockpit</Text>
+          <View style={styles.headerRight}>
+            <Text style={styles.headerSubtitle}>Simulation Environment</Text>
+            <Text style={styles.headerTitle}>Scenario Cockpit</Text>
           </View>
         </View>
 
-        <View className="flex-1">
+        <View style={styles.content}>
           {analysisResult ? (
             <AnalysisResultView 
               analysisResult={analysisResult as any} 
@@ -66,3 +67,58 @@ export default function ScenarioPage() {
     </>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: colors.slate50,
+    paddingTop: 48,
+  },
+  header: {
+    paddingHorizontal: 16,
+    paddingBottom: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: colors.slate200,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    backgroundColor: colors.slate50,
+  },
+  backButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    backgroundColor: colors.white,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderWidth: 1,
+    borderColor: colors.slate200,
+    borderRadius: 8,
+    ...shadow.sm,
+  },
+  backButtonText: {
+    fontWeight: '700',
+    color: colors.slate600,
+    fontSize: 14,
+  },
+  headerRight: {
+    alignItems: 'flex-end',
+  },
+  headerSubtitle: {
+    fontSize: 10,
+    fontWeight: '800',
+    color: colors.primary,
+    textTransform: 'uppercase',
+    letterSpacing: 4,
+    marginBottom: 4,
+  },
+  headerTitle: {
+    fontSize: 18,
+    fontWeight: '900',
+    color: colors.slate800,
+    fontFamily: 'serif',
+  },
+  content: {
+    flex: 1,
+  },
+});

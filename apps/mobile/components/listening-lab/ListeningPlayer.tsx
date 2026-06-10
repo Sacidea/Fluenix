@@ -1,7 +1,8 @@
 import React from 'react';
-import { View, Text, TouchableOpacity } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import * as Icons from 'lucide-react-native';
 import { ListeningScenario } from '../../hooks/useListeningSession';
+import { colors, shadow } from '../../utils/theme';
 
 type DialogueLine = {
   text: string;
@@ -23,46 +24,51 @@ interface Props {
 
 export function ListeningPlayer({ scenario, isPlaying, onPlayPause, showTranscript, onToggleTranscript, renderLineWithIdioms }: Props) {
   return (
-    <View className="bg-white rounded-[20px] p-6 mb-6 shadow-sm border border-slate-200 overflow-hidden">
-      <View className="absolute top-0 left-0 right-0 h-1.5 bg-cyan-500" />
+    <View style={styles.container}>
+      <View style={styles.topBar} />
       
-      <Text className="text-slate-900 text-xl font-black mb-1 mt-2 text-center">{scenario.title}</Text>
-      <Text className="text-slate-500 text-sm mb-6 text-center italic">{scenario.context}</Text>
+      <Text style={styles.title}>{scenario.title}</Text>
+      <Text style={styles.context}>{scenario.context}</Text>
 
-      <View className="flex-row items-center justify-between">
+      <View style={styles.playerRow}>
         <TouchableOpacity 
-          className="w-16 h-16 bg-cyan-500 rounded-full items-center justify-center shadow-md"
+          style={styles.playButton}
           onPress={onPlayPause}
         >
           {isPlaying ? <Icons.Square size={24} color="white" /> : <Icons.Play size={24} color="white" style={{ marginLeft: 4 }} />}
         </TouchableOpacity>
         
-        <View className="flex-1 flex-row items-center justify-between mx-4 h-10 overflow-hidden gap-1">
+        <View style={styles.waveformContainer}>
           {[...Array(15)].map((_, i) => (
             <View 
               key={i} 
-              className={`w-1.5 rounded-full ${isPlaying ? 'bg-cyan-400' : 'bg-cyan-100'}`} 
-              style={{ height: isPlaying ? 16 + Math.random() * 24 : 8 }} 
+              style={[
+                styles.waveformBar, 
+                { 
+                  backgroundColor: isPlaying ? colors.cyan500 : '#cffafe',
+                  height: isPlaying ? 16 + Math.random() * 24 : 8 
+                }
+              ]} 
             />
           ))}
         </View>
       </View>
 
       <TouchableOpacity 
-        className="mt-6 flex-row items-center justify-center py-2 rounded-xl"
+        style={styles.toggleButton}
         onPress={onToggleTranscript}
       >
-        {showTranscript ? <Icons.EyeOff size={14} color="#06b6d4" /> : <Icons.Eye size={14} color="#06b6d4" />}
-        <Text className="text-cyan-600 font-bold ml-2 text-xs uppercase tracking-widest">{showTranscript ? 'Hide Transcript' : 'Show Transcript'}</Text>
+        {showTranscript ? <Icons.EyeOff size={14} color={colors.cyan500} /> : <Icons.Eye size={14} color={colors.cyan500} />}
+        <Text style={styles.toggleButtonText}>{showTranscript ? 'Hide Transcript' : 'Show Transcript'}</Text>
       </TouchableOpacity>
 
       {showTranscript && (
-        <View className="mt-4 pt-4 border-t border-slate-200 border-dashed">
+        <View style={styles.transcriptContainer}>
           {(scenario.dialogue as unknown[]).map((line: unknown, idx: number) => {
             const typedLine = line as DialogueLine;
             return (
-            <View key={idx} className="mb-4">
-              <Text className="font-bold text-[11px] uppercase text-slate-400 tracking-widest mb-1">{typedLine.speaker}</Text>
+            <View key={idx} style={styles.dialogueLine}>
+              <Text style={styles.speakerText}>{typedLine.speaker}</Text>
               {renderLineWithIdioms(typedLine)}
             </View>
           )})}
@@ -71,3 +77,101 @@ export function ListeningPlayer({ scenario, isPlaying, onPlayPause, showTranscri
     </View>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    backgroundColor: colors.white,
+    borderRadius: 20,
+    padding: 24,
+    marginBottom: 24,
+    borderWidth: 1,
+    borderColor: colors.slate200,
+    overflow: 'hidden',
+    ...shadow.sm,
+  },
+  topBar: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    height: 6,
+    backgroundColor: colors.cyan500,
+  },
+  title: {
+    color: colors.slate900,
+    fontSize: 20,
+    fontWeight: '900',
+    marginBottom: 4,
+    marginTop: 8,
+    textAlign: 'center',
+  },
+  context: {
+    color: colors.slate500,
+    fontSize: 14,
+    marginBottom: 24,
+    textAlign: 'center',
+    fontStyle: 'italic',
+  },
+  playerRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  playButton: {
+    width: 64,
+    height: 64,
+    backgroundColor: colors.cyan500,
+    borderRadius: 32,
+    alignItems: 'center',
+    justifyContent: 'center',
+    ...shadow.md,
+  },
+  waveformContainer: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginHorizontal: 16,
+    height: 40,
+    overflow: 'hidden',
+    gap: 4,
+  },
+  waveformBar: {
+    width: 6,
+    borderRadius: 9999,
+  },
+  toggleButton: {
+    marginTop: 24,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 8,
+    borderRadius: 12,
+  },
+  toggleButtonText: {
+    color: colors.cyan500,
+    fontWeight: '700',
+    marginLeft: 8,
+    fontSize: 12,
+    textTransform: 'uppercase',
+    letterSpacing: 2,
+  },
+  transcriptContainer: {
+    marginTop: 16,
+    paddingTop: 16,
+    borderTopWidth: 1,
+    borderTopColor: colors.slate200,
+    borderStyle: 'dashed',
+  },
+  dialogueLine: {
+    marginBottom: 16,
+  },
+  speakerText: {
+    fontWeight: '700',
+    fontSize: 11,
+    textTransform: 'uppercase',
+    color: colors.slate400,
+    letterSpacing: 2,
+    marginBottom: 4,
+  },
+});

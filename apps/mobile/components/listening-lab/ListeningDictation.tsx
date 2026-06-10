@@ -1,6 +1,7 @@
 import React from 'react';
-import { View, Text, TouchableOpacity, TextInput } from 'react-native';
+import { View, Text, TouchableOpacity, TextInput, StyleSheet } from 'react-native';
 import { ListeningScenario } from '../../hooks/useListeningSession';
+import { colors, shadow } from '../../utils/theme';
 
 interface Props {
   scenario: ListeningScenario;
@@ -17,13 +18,20 @@ export function ListeningDictation({ scenario, dictationAnswers, dictationChecke
     const parts = (scenario.dictation as any).textWithBlanks.split('____');
     
     return (
-      <View className="flex-row flex-wrap items-center">
+      <View style={styles.lineWrap}>
         {parts.map((part: string, i: number) => (
           <React.Fragment key={i}>
-            <Text className="text-slate-700 text-base leading-8">{part}</Text>
+            <Text style={styles.lineText}>{part}</Text>
             {i < parts.length - 1 && (
               <TextInput
-                className={`border-b-2 px-2 text-base mx-1 min-w-[80px] h-8 p-0 text-center ${dictationChecked ? (dictationAnswers[i]?.toLowerCase().trim() === (scenario.dictation as any).answers[i]?.toLowerCase() ? 'border-emerald-500 text-emerald-700 bg-emerald-50' : 'border-rose-500 text-rose-700 bg-rose-50') : 'border-slate-300 text-slate-800'}`}
+                style={[
+                  styles.blankInput,
+                  dictationChecked 
+                    ? (dictationAnswers[i]?.toLowerCase().trim() === (scenario.dictation as any).answers[i]?.toLowerCase() 
+                        ? styles.blankCorrect 
+                        : styles.blankIncorrect) 
+                    : styles.blankDefault,
+                ]}
                 value={dictationAnswers[i] || ''}
                 onChangeText={(val) => onUpdateAnswer(i, val)}
                 placeholder="type"
@@ -40,16 +48,77 @@ export function ListeningDictation({ scenario, dictationAnswers, dictationChecke
 
   return (
     <View>
-      <Text className="text-lg font-black text-slate-800 mb-4">Listen to the audio and fill in the missing words.</Text>
-      <View className="bg-slate-50 p-5 rounded-2xl border border-slate-200 mb-4">
+      <Text style={styles.title}>Listen to the audio and fill in the missing words.</Text>
+      <View style={styles.dictationBox}>
         {renderDictationLine()}
       </View>
       <TouchableOpacity 
-        className="bg-indigo-600 py-3.5 rounded-xl items-center shadow-sm"
+        style={[styles.checkBtn, shadow.sm]}
         onPress={onCheckSpelling}
       >
-        <Text className="text-white font-bold">Check Spelling</Text>
+        <Text style={styles.checkBtnText}>Check Spelling</Text>
       </TouchableOpacity>
     </View>
   );
 }
+
+const styles = StyleSheet.create({
+  title: {
+    fontSize: 18,
+    fontWeight: '900',
+    color: colors.slate800,
+    marginBottom: 16,
+  },
+  dictationBox: {
+    backgroundColor: colors.slate50,
+    padding: 20,
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: colors.slate200,
+    marginBottom: 16,
+  },
+  lineWrap: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    alignItems: 'center',
+  },
+  lineText: {
+    color: colors.slate700,
+    fontSize: 14,
+    lineHeight: 32,
+  },
+  blankInput: {
+    borderBottomWidth: 2,
+    paddingHorizontal: 8,
+    fontSize: 14,
+    marginHorizontal: 4,
+    minWidth: 80,
+    height: 32,
+    padding: 0,
+    textAlign: 'center',
+  },
+  blankDefault: {
+    borderBottomColor: colors.slate300,
+    color: colors.slate800,
+  },
+  blankCorrect: {
+    borderBottomColor: colors.emerald500,
+    color: '#047857',
+    backgroundColor: '#ecfdf5',
+  },
+  blankIncorrect: {
+    borderBottomColor: colors.rose500,
+    color: '#be123c',
+    backgroundColor: '#fff1f2',
+  },
+  checkBtn: {
+    backgroundColor: colors.primary,
+    paddingVertical: 14,
+    borderRadius: 12,
+    alignItems: 'center',
+  },
+  checkBtnText: {
+    color: colors.white,
+    fontWeight: '700',
+  },
+});

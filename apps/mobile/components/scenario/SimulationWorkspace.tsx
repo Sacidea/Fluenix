@@ -1,7 +1,8 @@
 import React, { useRef } from 'react';
-import { View, Text, TextInput, TouchableOpacity, ScrollView, KeyboardAvoidingView, Platform, ActivityIndicator } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, ScrollView, KeyboardAvoidingView, Platform, ActivityIndicator, StyleSheet } from 'react-native';
 import * as Icons from 'lucide-react-native';
 import { Message } from '@fluenix/shared';
+import { colors, shadow } from '../../utils/theme';
 
 interface Props {
   durationStr: string;
@@ -26,57 +27,56 @@ export function SimulationWorkspace({
 
   return (
     <KeyboardAvoidingView 
-      className="flex-1 bg-slate-50" 
+      style={styles.container} 
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}
     >
-      <View className="flex-row items-center justify-between p-4 bg-white border-b border-slate-200 shadow-sm z-10">
-        <View className="flex-row items-center gap-2">
-          <View className="w-2.5 h-2.5 rounded-full bg-red-500 animate-pulse" />
-          <Text className="font-bold text-slate-800 tracking-widest font-serif">{durationStr}</Text>
+      <View style={styles.topBar}>
+        <View style={styles.timerRow}>
+          <View style={styles.liveDot} />
+          <Text style={styles.timerText}>{durationStr}</Text>
         </View>
         <TouchableOpacity 
           onPress={endAndAnalyzeSession} 
-          className="bg-red-50 px-4 py-2 rounded-lg border border-red-100 flex-row items-center gap-1"
+          style={styles.endBtn}
         >
-          <Icons.Square size={12} color="#ef4444" fill="#ef4444" />
-          <Text className="text-red-600 font-bold text-xs uppercase tracking-wider">End Session</Text>
+          <Icons.Square size={12} color={colors.red500} fill={colors.red500} />
+          <Text style={styles.endBtnText}>End Session</Text>
         </TouchableOpacity>
       </View>
 
       <ScrollView 
         ref={scrollViewRef}
-        className="flex-1 px-4 pt-4"
+        style={styles.messagesScroll}
         onContentSizeChange={() => scrollViewRef.current?.scrollToEnd({ animated: true })}
       >
         {messages.map((msg, idx) => (
           <View 
             key={idx} 
-            className={`mb-4 max-w-[85%] rounded-2xl p-4 shadow-sm ${
-              msg.role === 'user' 
-                ? 'self-end bg-indigo-600 rounded-br-sm' 
-                : 'self-start bg-white border border-slate-100 rounded-bl-sm'
-            }`}
+            style={[
+              styles.messageBubble,
+              msg.role === 'user' ? styles.userBubble : styles.aiBubble,
+            ]}
           >
-            <Text className={`text-base leading-relaxed ${msg.role === 'user' ? 'text-white' : 'text-slate-800'}`}>
+            <Text style={[styles.messageText, msg.role === 'user' ? styles.userText : styles.aiText]}>
               {msg.content.replace(/\*\*(.*?)\*\*/g, '$1')}
             </Text>
           </View>
         ))}
         {loading && (
-          <View className="mb-4 max-w-[85%] rounded-2xl p-4 self-start bg-white border border-slate-100 rounded-bl-sm w-16 items-center shadow-sm">
-            <ActivityIndicator color="#4f46e5" size="small" />
+          <View style={styles.loadingBubble}>
+            <ActivityIndicator color={colors.primary} size="small" />
           </View>
         )}
       </ScrollView>
 
-      <View className="p-4 bg-white border-t border-slate-200 pb-8 pt-4">
-        <View className="flex-row items-center gap-2 mb-2 px-2">
-           <Icons.Info size={14} color="#94a3b8" />
-           <Text className="text-xs text-slate-400">Use your keyboard's mic icon to speak.</Text>
+      <View style={styles.inputArea}>
+        <View style={styles.hintRow}>
+           <Icons.Info size={14} color={colors.slate400} />
+           <Text style={styles.hintText}>Use your keyboard's mic icon to speak.</Text>
         </View>
-        <View className="flex-row items-center gap-3">
+        <View style={styles.inputRow}>
           <TextInput
-            className="flex-1 bg-slate-100 px-5 py-3.5 rounded-2xl text-slate-800 text-base border border-slate-200/50"
+            style={styles.textInput}
             placeholder="Type your response..."
             value={input}
             onChangeText={setInput}
@@ -84,17 +84,167 @@ export function SimulationWorkspace({
             editable={!loading}
             multiline
             maxLength={500}
-            style={{ maxHeight: 100 }}
           />
           <TouchableOpacity 
-            className={`w-12 h-12 rounded-full items-center justify-center shadow-sm ${(!input.trim() || loading) ? 'bg-slate-200' : 'bg-indigo-600'}`}
+            style={[styles.sendBtn, (!input.trim() || loading) ? styles.sendBtnDisabled : styles.sendBtnActive]}
             onPress={() => sendMessage()}
             disabled={!input.trim() || loading}
           >
-            <Icons.Send size={20} color={(!input.trim() || loading) ? '#94a3b8' : 'white'} />
+            <Icons.Send size={20} color={(!input.trim() || loading) ? colors.slate400 : colors.white} />
           </TouchableOpacity>
         </View>
       </View>
     </KeyboardAvoidingView>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: colors.slate50,
+  },
+  topBar: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    padding: 16,
+    backgroundColor: colors.white,
+    borderBottomWidth: 1,
+    borderBottomColor: colors.slate200,
+    ...shadow.sm,
+    zIndex: 10,
+  },
+  timerRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  liveDot: {
+    width: 10,
+    height: 10,
+    borderRadius: 9999,
+    backgroundColor: colors.red500,
+  },
+  timerText: {
+    fontWeight: '700',
+    color: colors.slate800,
+    letterSpacing: 4,
+    fontFamily: 'serif',
+  },
+  endBtn: {
+    backgroundColor: '#fef2f2',
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: '#fecaca',
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+  },
+  endBtnText: {
+    color: colors.red600,
+    fontWeight: '700',
+    fontSize: 10,
+    textTransform: 'uppercase',
+    letterSpacing: 2,
+  },
+  messagesScroll: {
+    flex: 1,
+    paddingHorizontal: 16,
+    paddingTop: 16,
+  },
+  messageBubble: {
+    marginBottom: 16,
+    maxWidth: '85%',
+    borderRadius: 16,
+    padding: 16,
+    ...shadow.sm,
+  },
+  userBubble: {
+    alignSelf: 'flex-end',
+    backgroundColor: colors.primary,
+    borderBottomRightRadius: 4,
+  },
+  aiBubble: {
+    alignSelf: 'flex-start',
+    backgroundColor: colors.white,
+    borderWidth: 1,
+    borderColor: colors.slate100,
+    borderBottomLeftRadius: 4,
+  },
+  messageText: {
+    fontSize: 14,
+    lineHeight: 22,
+  },
+  userText: {
+    color: colors.white,
+  },
+  aiText: {
+    color: colors.slate800,
+  },
+  loadingBubble: {
+    marginBottom: 16,
+    maxWidth: '85%',
+    borderRadius: 16,
+    padding: 16,
+    alignSelf: 'flex-start',
+    backgroundColor: colors.white,
+    borderWidth: 1,
+    borderColor: colors.slate100,
+    borderBottomLeftRadius: 4,
+    width: 64,
+    alignItems: 'center',
+    ...shadow.sm,
+  },
+  inputArea: {
+    padding: 16,
+    backgroundColor: colors.white,
+    borderTopWidth: 1,
+    borderTopColor: colors.slate200,
+    paddingBottom: 32,
+    paddingTop: 16,
+  },
+  hintRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    marginBottom: 8,
+    paddingHorizontal: 8,
+  },
+  hintText: {
+    fontSize: 10,
+    color: colors.slate400,
+  },
+  inputRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+  },
+  textInput: {
+    flex: 1,
+    backgroundColor: colors.slate100,
+    paddingHorizontal: 20,
+    paddingVertical: 14,
+    borderRadius: 16,
+    color: colors.slate800,
+    fontSize: 14,
+    borderWidth: 1,
+    borderColor: 'rgba(226, 232, 240, 0.5)',
+    maxHeight: 100,
+  },
+  sendBtn: {
+    width: 48,
+    height: 48,
+    borderRadius: 9999,
+    alignItems: 'center',
+    justifyContent: 'center',
+    ...shadow.sm,
+  },
+  sendBtnDisabled: {
+    backgroundColor: colors.slate200,
+  },
+  sendBtnActive: {
+    backgroundColor: colors.primary,
+  },
+});

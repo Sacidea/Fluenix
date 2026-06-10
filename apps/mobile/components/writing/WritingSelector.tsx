@@ -1,7 +1,8 @@
 import React from 'react';
-import { View, Text, TouchableOpacity, ScrollView } from 'react-native';
+import { View, Text, TouchableOpacity, ScrollView, StyleSheet } from 'react-native';
 import * as Icons from 'lucide-react-native';
 import { WritingExerciseId, writingExercises } from '@fluenix/shared';
+import { colors, shadow } from '../../utils/theme';
 
 interface Props {
   changeExercise: (id: WritingExerciseId) => void;
@@ -15,15 +16,15 @@ const iconMap: Record<string, any> = {
 
 export function WritingSelector({ changeExercise }: Props) {
   return (
-    <ScrollView className="flex-1 px-4 pt-6 bg-slate-50">
-      <View className="mb-8 items-center mt-2">
-        <Text className="text-3xl font-black text-slate-800 font-serif mb-3">Select an Operation</Text>
-        <Text className="text-slate-500 text-center leading-relaxed">
+    <ScrollView style={styles.container} contentContainerStyle={styles.contentContainer}>
+      <View style={styles.header}>
+        <Text style={styles.title}>Select an Operation</Text>
+        <Text style={styles.subtitle}>
           Choose a technical writing scenario to calibrate your FAANG-level communication skills.
         </Text>
       </View>
 
-      <View className="pb-12">
+      <View style={styles.listContainer}>
         {writingExercises.map((ex) => {
           const Icon = iconMap[ex.icon] || Icons.FileText;
 
@@ -31,21 +32,17 @@ export function WritingSelector({ changeExercise }: Props) {
             <TouchableOpacity
               key={ex.id}
               onPress={() => changeExercise(ex.id)}
-              className="relative overflow-hidden mb-5 rounded-2xl bg-white border border-slate-200 shadow-sm flex-row items-start p-5"
-              style={{ shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.05, shadowRadius: 10 }}
+              style={styles.card}
             >
-              <View className="absolute top-0 bottom-0 left-0 w-1.5" style={{ backgroundColor: ex.color }} />
+              <View style={[styles.cardStrip, { backgroundColor: ex.color }]} />
               
-              <View 
-                className="w-14 h-14 rounded-xl items-center justify-center mr-4" 
-                style={{ backgroundColor: ex.bg }}
-              >
+              <View style={[styles.iconContainer, { backgroundColor: ex.bg }]}>
                 <Icon size={26} color={ex.color} />
               </View>
 
-              <View className="flex-1">
-                <Text className="text-xl font-black text-slate-800 font-serif mb-1.5">{ex.label}</Text>
-                <Text className="text-sm text-slate-500 leading-relaxed">{ex.desc}</Text>
+              <View style={styles.cardContent}>
+                <Text style={styles.cardTitle}>{ex.label}</Text>
+                <Text style={styles.cardDesc}>{ex.desc}</Text>
               </View>
             </TouchableOpacity>
           );
@@ -54,3 +51,80 @@ export function WritingSelector({ changeExercise }: Props) {
     </ScrollView>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: colors.slate50,
+  },
+  contentContainer: {
+    paddingHorizontal: 16,
+    paddingTop: 24,
+  },
+  header: {
+    marginBottom: 32,
+    alignItems: 'center',
+    marginTop: 8,
+  },
+  title: {
+    fontSize: 30,
+    fontWeight: '900',
+    color: colors.slate800,
+    fontFamily: 'serif',
+    marginBottom: 12,
+  },
+  subtitle: {
+    color: colors.slate500,
+    textAlign: 'center',
+    lineHeight: 22,
+  },
+  listContainer: {
+    paddingBottom: 48,
+  },
+  card: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    backgroundColor: colors.white,
+    borderWidth: 1,
+    borderColor: colors.slate200,
+    borderRadius: 16,
+    padding: 20,
+    marginBottom: 20,
+    overflow: 'hidden',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 10,
+    elevation: 2,
+  },
+  cardStrip: {
+    position: 'absolute',
+    top: 0,
+    bottom: 0,
+    left: 0,
+    width: 6,
+  },
+  iconContainer: {
+    width: 56,
+    height: 56,
+    borderRadius: 12,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: 16,
+  },
+  cardContent: {
+    flex: 1,
+  },
+  cardTitle: {
+    fontSize: 20,
+    fontWeight: '900',
+    color: colors.slate800,
+    fontFamily: 'serif',
+    marginBottom: 6,
+  },
+  cardDesc: {
+    fontSize: 14,
+    color: colors.slate500,
+    lineHeight: 22,
+  },
+});

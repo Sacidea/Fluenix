@@ -3,8 +3,7 @@ import { Alert, Platform } from 'react-native';
 import { useAuth, useUser } from '@clerk/clerk-expo';
 import * as Speech from 'expo-speech';
 import { Message, ScenarioType, ScenarioMission, scenarios } from '@fluenix/shared';
-import EventSource from 'react-native-sse';
-import { apiClient, aiClient, AI_URL } from '../utils/apiClient';
+import { apiClient, aiClient } from '../utils/apiClient';
 
 export function useScenarioSession() {
   const { getToken } = useAuth();
@@ -47,11 +46,13 @@ export function useScenarioSession() {
     setTimeout(() => {
       const cleanText = text
         .replace(/\*\*(.*?)\*\*/g, '$1')
+        .replace(/^(Interviewer|AI|User|Candidate|You|System):\s*/gmi, '')
+        .replace(/[-*_]{2,}/g, '') // Remove 2 or more consecutive dashes/asterisks (e.g. ---)
+        .replace(/^[-*#>]\s+/gm, '') // Remove bullet points and headers at start of line
+        .replace(/[*#_~>|]/g, '') // Remove any remaining stray markdown symbols
         .replace(/`/g, '')
-        .replace(/[-*_]{3,}/g, '')
-        .replace(/^#+\s+/gm, '')
-        .replace(/^[-*]\s+/gm, '')
         .replace(/\[([^\]]+)\]/g, '$1')
+        .replace(/[:;]/g, ',')
         .trim();
         
       Speech.speak(cleanText, {
@@ -60,52 +61,6 @@ export function useScenarioSession() {
         pitch: 1.0,
       });
     }, 100);
-  };
-
-  const executeStream = (
-    token: string | null,
-    payload: Record<string, unknown>,
-    currentMessages: Message[],
-    onComplete: (fullText: string) => void
-  ) => {
-    // Start with an empty assistant message
-    setMessages([...currentMessages, { role: 'assistant', content: '' }]);
-    
-    let fullText = '';
-    
-    // Add stream flag to payload
-    payload.stream = true;
-
-    const es = new EventSource(`${AI_URL}/scenario/chat`, {
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`
-      },
-      method: 'POST',
-      body: JSON.stringify(payload)
-    });
-
-    es.addEventListener('message', (event) => {
-      if (event.data) {
-        fullText += event.data;
-        setMessages([...currentMessages, { role: 'assistant', content: fullText }]);
-      }
-    });
-
-    es.addEventListener('error', (err) => {
-      console.error('SSE Error:', err);
-      es.close();
-      setLoading(false);
-      setIsLoadingMission(false);
-      onComplete(fullText);
-    });
-
-    es.addEventListener('close', () => {
-      es.close();
-      setLoading(false);
-      setIsLoadingMission(false);
-      onComplete(fullText);
-    });
   };
 
   const startScenario = async () => {
@@ -133,18 +88,25 @@ export function useScenarioSession() {
       
       const initialMessages: Message[] = [{ role: 'user', content: 'Begin terminal session.' }];
       
-      executeStream(token, {
+      const res = await aiClient.post('/scenario/chat', {
         scenario,
         level,
         context: missionContent,
         messages: initialMessages
-      }, initialMessages, (fullText) => {
-        speakAIResponse(fullText);
+      }, {
+        headers: { Authorization: `Bearer ${token}` }
       });
+      
+      const reply = res.data.reply;
+      // Don't display the hidden initial message on screen, only show the AI's response.
+      setMessages([{ role: 'assistant', content: reply }]);
+      speakAIResponse(reply);
+      setLoading(false);
+      setIsLoadingMission(false);
       
     } catch (err) {
       console.error(err);
-      Alert.alert('Bağlantı Hatası', 'Yapay zeka veya backend sunucusuna ulaşılamıyor.');
+      Alert.alert('Connection Error', 'Cannot reach the AI or backend server.');
       setLoading(false);
       setIsLoadingMission(false);
     }
@@ -162,18 +124,23 @@ export function useScenarioSession() {
     try {
       const token = await getToken();
       
-      executeStream(token, {
+      const res = await aiClient.post('/scenario/chat', {
         scenario,
         level,
         context: activeMission?.content || '',
         messages: newMessages
-      }, newMessages, (fullText) => {
-        speakAIResponse(fullText);
+      }, {
+        headers: { Authorization: `Bearer ${token}` }
       });
+      
+      const reply = res.data.reply;
+      setMessages([...newMessages, { role: 'assistant', content: reply }]);
+      speakAIResponse(reply);
+      setLoading(false);
       
     } catch (err) {
       console.error(err);
-      Alert.alert('Bağlantı Hatası', 'Yapay zeka sunucusuna ulaşılamıyor (Backend kapalı olabilir).');
+      Alert.alert('Connection Error', 'Cannot reach the AI server (Backend may be down).');
       setLoading(false);
     }
   };
@@ -189,7 +156,7 @@ export function useScenarioSession() {
 
   const endAndAnalyzeSession = async () => {
     if (!started || messages.length <= 1) {
-      Alert.alert("Hata", "Analiz edilecek kadar konuşma yapılmadı. Oturum sonlandırıldı.");
+      Alert.alert("Error", "Not enough conversation to analyze. Session ended.");
       endSession();
       return;
     }
@@ -262,7 +229,7 @@ export function useScenarioSession() {
 
     } catch (err) {
       console.error(err);
-      Alert.alert("Hata", "Analiz edilemedi. Konsolu kontrol edin.");
+      Alert.alert("Error", "Analysis failed. Check the console.");
       endSession();
     } finally {
       setLoading(false);

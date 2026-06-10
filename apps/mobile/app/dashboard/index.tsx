@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, ScrollView, TouchableOpacity } from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity, StyleSheet } from 'react-native';
 import { useAuth, useUser } from '@clerk/clerk-expo';
 import { useRouter, useFocusEffect } from 'expo-router';
 import * as Icons from 'lucide-react-native';
@@ -10,6 +10,7 @@ import { LevelSelector } from '../../components/LevelSelector';
 import { Platform } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { apiClient } from '../../utils/apiClient';
+import { colors, shadow } from '../../utils/theme';
 
 // Dummy API functions for mobile, normally you would share these or use a mobile-friendly fetch
 async function getDashboardStats(userId: string, token: string | null) {
@@ -38,7 +39,7 @@ export default function DashboardScreen() {
 
   useEffect(() => {
     if (isLoaded && !isSignedIn) {
-      // router.replace('/sign-in'); // Disabled for Bypass Auth test
+      router.replace('/sign-in');
     }
   }, [isLoaded, isSignedIn]);
 
@@ -65,8 +66,8 @@ export default function DashboardScreen() {
 
   if (!isLoaded || loading) {
     return (
-      <View className="flex-1 items-center justify-center bg-slate-50">
-        <Text className="text-slate-500 font-medium">Loading Terminal...</Text>
+      <View style={styles.loadingContainer}>
+        <Text style={styles.loadingText}>Loading Terminal...</Text>
       </View>
     );
   }
@@ -75,50 +76,50 @@ export default function DashboardScreen() {
   const progressPercent = (((stats.totalSessions || 0) % 5) / 5) * 100;
 
   return (
-    <ScrollView className="flex-1 bg-slate-50" contentContainerStyle={{ padding: 24, paddingTop: 60, paddingBottom: 100 }}>
+    <ScrollView style={styles.scrollView} contentContainerStyle={{ padding: 24, paddingTop: 60, paddingBottom: 100 }}>
       {/* HEADER SECTION */}
-      <View className="mb-10">
-        <View className="flex-row items-center justify-between mb-4">
-          <View className="flex-row items-center gap-3">
-            <View className="w-8 h-px bg-indigo-600" />
-            <Text className="text-[10px] font-extrabold uppercase tracking-widest text-slate-400">Operational Terminal</Text>
+      <View style={styles.headerSection}>
+        <View style={styles.headerTopRow}>
+          <View style={styles.headerLabelRow}>
+            <View style={styles.headerAccent} />
+            <Text style={styles.headerLabel}>Operational Terminal</Text>
           </View>
           <LevelSelector />
         </View>
 
-        <Text className="font-bold text-4xl text-slate-800 leading-tight mb-2">
+        <Text style={styles.welcomeTitle}>
           Welcome, {user?.firstName ?? 'Engineer'} —
         </Text>
-        <Text className="text-indigo-600 italic text-2xl font-serif mb-6">
+        <Text style={styles.welcomeSubtitle}>
           Technical communication environment active.
         </Text>
-        <Text className="text-slate-500 leading-relaxed text-base">
+        <Text style={styles.welcomeDescription}>
           Access your technical lab modules below. Each module is optimized for high-stakes FAANG-level communication standards.
         </Text>
       </View>
 
       {/* GAMIFICATION WIDGET */}
-      <View className="bg-white rounded-3xl p-6 border border-slate-200 shadow-sm mb-10 overflow-hidden relative">
+      <View style={styles.gamificationCard}>
         <LinearGradient 
           colors={['#FFC107', '#F43F5E']} 
           style={{ position: 'absolute', left: 0, top: 0, bottom: 0, width: 6 }} 
           start={{ x: 0, y: 0 }} 
           end={{ x: 0, y: 1 }} 
         />
-        <View className="flex-row justify-between items-center mb-6">
-          <Text className="font-bold text-slate-700">Current Progress</Text>
-          <View className="flex-row items-baseline gap-1">
-            <Text className="font-serif italic font-black text-2xl text-indigo-600">{xpAmount}</Text>
-            <Text className="font-bold text-[10px] text-slate-400 tracking-wider">XP</Text>
+        <View style={styles.gamificationHeader}>
+          <Text style={styles.gamificationTitle}>Current Progress</Text>
+          <View style={styles.xpRow}>
+            <Text style={styles.xpValue}>{xpAmount}</Text>
+            <Text style={styles.xpLabel}>XP</Text>
           </View>
         </View>
         
-        <View className="flex-col gap-3">
-          <View className="flex-row justify-between items-end">
-            <Text className="font-bold text-sm text-slate-800">Weekly Goal</Text>
-            <Text className="font-bold text-xs text-slate-400">{(stats.totalSessions || 0) % 5}/5 Sessions</Text>
+        <View style={styles.goalSection}>
+          <View style={styles.goalHeaderRow}>
+            <Text style={styles.goalTitle}>Weekly Goal</Text>
+            <Text style={styles.goalCount}>{(stats.totalSessions || 0) % 5}/5 Sessions</Text>
           </View>
-          <View className="w-full h-2.5 bg-slate-100 rounded-full overflow-hidden">
+          <View style={styles.progressBarBg}>
             <LinearGradient 
               colors={['#FFC107', '#F43F5E']} 
               start={{ x: 0, y: 0 }} 
@@ -133,18 +134,18 @@ export default function DashboardScreen() {
       <StatsCards stats={stats} />
       
       <TouchableOpacity 
-        className="bg-indigo-50 py-4 rounded-xl flex-row items-center justify-center mb-10 shadow-sm border border-indigo-100"
+        style={styles.progressButton}
         onPress={() => router.push('/dashboard/progress')}
       >
         <Icons.TrendingUp size={18} color="#4f46e5" />
-        <Text className="font-bold text-indigo-600 ml-2 text-base">View Full Progress Map</Text>
+        <Text style={styles.progressButtonText}>View Full Progress Map</Text>
       </TouchableOpacity>
 
       {/* MODULES SECTION */}
-      <View className="mb-10">
-        <View className="flex-row items-center gap-4 mb-8">
-          <Text className="font-bold text-[10px] uppercase tracking-[3px] text-slate-400">Available Lab Modules</Text>
-          <View className="flex-1 h-px bg-slate-200" />
+      <View style={styles.modulesSection}>
+        <View style={styles.modulesSectionHeader}>
+          <Text style={styles.modulesSectionLabel}>Available Lab Modules</Text>
+          <View style={styles.modulesDivider} />
         </View>
 
         <View>
@@ -155,11 +156,194 @@ export default function DashboardScreen() {
       </View>
 
       {/* FOOTER */}
-      <View className="mt-8 pt-8 border-t border-slate-200 flex-row items-center justify-center gap-2">
+      <View style={styles.footer}>
         <Icons.ShieldCheck size={14} color="#94a3b8" />
-        <Text className="font-bold text-[11px] text-slate-400 uppercase tracking-widest">Secure Environment — v1.2</Text>
+        <Text style={styles.footerText}>Secure Environment — v1.2</Text>
       </View>
 
     </ScrollView>
   );
 }
+
+const styles = StyleSheet.create({
+  loadingContainer: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: colors.slate50,
+  },
+  loadingText: {
+    color: colors.slate500,
+    fontWeight: '500',
+  },
+  scrollView: {
+    flex: 1,
+    backgroundColor: colors.slate50,
+  },
+  headerSection: {
+    marginBottom: 40,
+  },
+  headerTopRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: 16,
+  },
+  headerLabelRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+  },
+  headerAccent: {
+    width: 32,
+    height: 1,
+    backgroundColor: colors.primary,
+  },
+  headerLabel: {
+    fontSize: 10,
+    fontWeight: '800',
+    textTransform: 'uppercase',
+    letterSpacing: 4,
+    color: colors.slate400,
+  },
+  welcomeTitle: {
+    fontWeight: '700',
+    fontSize: 36,
+    color: colors.slate800,
+    lineHeight: 40,
+    marginBottom: 8,
+  },
+  welcomeSubtitle: {
+    color: colors.primary,
+    fontStyle: 'italic',
+    fontSize: 24,
+    fontFamily: 'serif',
+    marginBottom: 24,
+  },
+  welcomeDescription: {
+    color: colors.slate500,
+    lineHeight: 22,
+    fontSize: 14,
+  },
+  gamificationCard: {
+    backgroundColor: colors.white,
+    borderRadius: 24,
+    padding: 24,
+    borderWidth: 1,
+    borderColor: colors.slate200,
+    marginBottom: 40,
+    overflow: 'hidden',
+    position: 'relative',
+    ...shadow.sm,
+  },
+  gamificationHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 24,
+  },
+  gamificationTitle: {
+    fontWeight: '700',
+    color: colors.slate700,
+  },
+  xpRow: {
+    flexDirection: 'row',
+    alignItems: 'baseline',
+    gap: 4,
+  },
+  xpValue: {
+    fontFamily: 'serif',
+    fontStyle: 'italic',
+    fontWeight: '900',
+    fontSize: 24,
+    color: colors.primary,
+  },
+  xpLabel: {
+    fontWeight: '700',
+    fontSize: 10,
+    color: colors.slate400,
+    letterSpacing: 2,
+  },
+  goalSection: {
+    flexDirection: 'column',
+    gap: 12,
+  },
+  goalHeaderRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'flex-end',
+  },
+  goalTitle: {
+    fontWeight: '700',
+    fontSize: 12,
+    color: colors.slate800,
+  },
+  goalCount: {
+    fontWeight: '700',
+    fontSize: 10,
+    color: colors.slate400,
+  },
+  progressBarBg: {
+    width: '100%',
+    height: 10,
+    backgroundColor: colors.slate100,
+    borderRadius: 9999,
+    overflow: 'hidden',
+  },
+  progressButton: {
+    backgroundColor: colors.primaryBg,
+    paddingVertical: 16,
+    borderRadius: 12,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 40,
+    borderWidth: 1,
+    borderColor: colors.primaryLight,
+    ...shadow.sm,
+  },
+  progressButtonText: {
+    fontWeight: '700',
+    color: colors.primary,
+    marginLeft: 8,
+    fontSize: 14,
+  },
+  modulesSection: {
+    marginBottom: 40,
+  },
+  modulesSectionHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 16,
+    marginBottom: 32,
+  },
+  modulesSectionLabel: {
+    fontWeight: '700',
+    fontSize: 10,
+    textTransform: 'uppercase',
+    letterSpacing: 3,
+    color: colors.slate400,
+  },
+  modulesDivider: {
+    flex: 1,
+    height: 1,
+    backgroundColor: colors.slate200,
+  },
+  footer: {
+    marginTop: 32,
+    paddingTop: 32,
+    borderTopWidth: 1,
+    borderTopColor: colors.slate200,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+  },
+  footerText: {
+    fontWeight: '700',
+    fontSize: 11,
+    color: colors.slate400,
+    textTransform: 'uppercase',
+    letterSpacing: 4,
+  },
+});

@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TouchableOpacity, Modal, ActivityIndicator, Platform, Alert } from 'react-native';
+import { View, Text, TouchableOpacity, Modal, ActivityIndicator, Platform, Alert, StyleSheet } from 'react-native';
 import * as Icons from 'lucide-react-native';
 import { useAuth, useUser } from '@clerk/clerk-expo';
 import axios from 'axios';
+import { API_URL } from '../utils/apiClient';
+import { colors, shadow } from '../utils/theme';
 
 const LEVEL_MAP = {
   'A2': { label: 'A2 - Elementary', desc: 'Standard operations', color: '#4a6fa5' },
@@ -10,11 +12,6 @@ const LEVEL_MAP = {
   'B2': { label: 'B2 - Upper Inter.', desc: 'High-level analysis', color: '#c18161' },
   'C1': { label: 'C1 - Advanced', desc: 'Architectural mastery', color: '#4338ca' },
   'C2': { label: 'C2 - Mastery', desc: 'Strategic authority', color: '#0f172a' },
-};
-
-const getApiUrl = () => {
-  if (Platform.OS === 'web') return 'http://localhost:3001';
-  return process.env.EXPO_PUBLIC_API_URL || 'http://10.0.2.2:3001';
 };
 
 export function LevelSelector() {
@@ -30,7 +27,7 @@ export function LevelSelector() {
       try {
         const token = await getToken();
         if (!token) return;
-        const res = await axios.get(`${getApiUrl()}/api/users/${user.id}`, {
+        const res = await axios.get(`${API_URL}/api/users/${user.id}`, {
           headers: { Authorization: `Bearer ${token}` }
         });
         if (res.data?.level) {
@@ -53,7 +50,7 @@ export function LevelSelector() {
     
     try {
       const token = await getToken();
-      await axios.put(`${getApiUrl()}/api/users/${user.id}/level`, {
+      await axios.put(`${API_URL}/api/users/${user.id}/level`, {
         email: user.primaryEmailAddress?.emailAddress,
         name: user.fullName,
         level: newLevel
@@ -62,17 +59,17 @@ export function LevelSelector() {
       });
       // Tell user they need to reload apps for publicMetadata to sync right away if we use Clerk
       if (Platform.OS !== 'web') {
-        Alert.alert('Kalibrasyon Güncellendi', `Seviyeniz ${newLevel} olarak ayarlandı. Değişikliklerin etkili olması için modülleri yeniden açabilirsiniz.`);
+        Alert.alert('Calibration Updated', `Your level has been set to ${newLevel}. You can reopen modules for changes to take effect.`);
       }
     } catch (err) {
       console.error('Failed to sync level', err);
-      Alert.alert('Hata', 'Seviye güncellenirken bir hata oluştu.');
+      Alert.alert('Error', 'An error occurred while updating your level.');
     }
   };
 
   if (loading) {
     return (
-      <View className="bg-slate-100 rounded-lg px-3 py-1.5 flex-row items-center">
+      <View style={styles.loadingContainer}>
         <ActivityIndicator size="small" color="#94a3b8" />
       </View>
     );
@@ -84,13 +81,12 @@ export function LevelSelector() {
     <View>
       <TouchableOpacity 
         onPress={() => setModalVisible(true)}
-        className="bg-white border border-slate-200 shadow-sm rounded-lg flex-row items-center px-3 py-1.5 gap-2"
+        style={styles.triggerButton}
       >
         <Icons.Settings2 size={14} color="#64748b" />
-        <Text className="font-bold text-slate-700 text-xs">Seviye: {level}</Text>
+        <Text style={styles.triggerLabel}>Level: {level}</Text>
         <View 
-          className="w-2 h-2 rounded-full" 
-          style={{ backgroundColor: activeObj.color }}
+          style={[styles.levelDot, { backgroundColor: activeObj.color }]}
         />
       </TouchableOpacity>
 
@@ -101,38 +97,41 @@ export function LevelSelector() {
         onRequestClose={() => setModalVisible(false)}
       >
         <TouchableOpacity 
-          className="flex-1 justify-end bg-slate-900/50"
+          style={styles.modalOverlay}
           activeOpacity={1}
           onPress={() => setModalVisible(false)}
         >
           <TouchableOpacity 
             activeOpacity={1}
-            className="bg-white rounded-t-3xl p-6 shadow-xl"
+            style={styles.modalContent}
           >
-            <View className="flex-row items-center justify-between mb-6">
+            <View style={styles.modalHeader}>
               <View>
-                <Text className="font-black text-xl text-slate-800">Kalibrasyon Ayarları</Text>
-                <Text className="text-slate-500 mt-1">Sistem zorluk seviyesini seçin</Text>
+                <Text style={styles.modalTitle}>Calibration Settings</Text>
+                <Text style={styles.modalSubtitle}>Select system difficulty level</Text>
               </View>
-              <TouchableOpacity onPress={() => setModalVisible(false)} className="bg-slate-100 p-2 rounded-full">
+              <TouchableOpacity onPress={() => setModalVisible(false)} style={styles.closeButton}>
                 <Icons.X size={20} color="#64748b" />
               </TouchableOpacity>
             </View>
 
-            <View className="gap-3">
+            <View style={styles.levelList}>
               {Object.entries(LEVEL_MAP).map(([key, obj]) => {
                 const isSelected = key === level;
                 return (
                   <TouchableOpacity
                     key={key}
                     onPress={() => handleSelectLevel(key)}
-                    className={`flex-row items-center justify-between p-4 rounded-xl border ${isSelected ? 'bg-indigo-50 border-indigo-200' : 'bg-white border-slate-200'}`}
+                    style={[
+                      styles.levelItem,
+                      isSelected ? styles.levelItemSelected : styles.levelItemDefault,
+                    ]}
                   >
-                    <View className="flex-row items-center gap-3">
-                      <View className="w-3 h-3 rounded-full" style={{ backgroundColor: obj.color }} />
+                    <View style={styles.levelItemLeft}>
+                      <View style={[styles.levelItemDot, { backgroundColor: obj.color }]} />
                       <View>
-                        <Text className={`font-bold text-base ${isSelected ? 'text-indigo-900' : 'text-slate-700'}`}>{obj.label}</Text>
-                        <Text className={`font-mono text-[10px] uppercase tracking-wider ${isSelected ? 'text-indigo-600' : 'text-slate-400'}`}>{obj.desc}</Text>
+                        <Text style={[styles.levelItemLabel, isSelected ? styles.levelItemLabelSelected : styles.levelItemLabelDefault]}>{obj.label}</Text>
+                        <Text style={[styles.levelItemDesc, isSelected ? styles.levelItemDescSelected : styles.levelItemDescDefault]}>{obj.desc}</Text>
                       </View>
                     </View>
                     {isSelected && <Icons.Check size={20} color="#4f46e5" />}
@@ -146,3 +145,118 @@ export function LevelSelector() {
     </View>
   );
 }
+
+const styles = StyleSheet.create({
+  loadingContainer: {
+    backgroundColor: colors.slate100,
+    borderRadius: 8,
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  triggerButton: {
+    backgroundColor: colors.white,
+    borderWidth: 1,
+    borderColor: colors.slate200,
+    ...shadow.sm,
+    borderRadius: 8,
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    gap: 8,
+  },
+  triggerLabel: {
+    fontWeight: '700',
+    color: colors.slate700,
+    fontSize: 10,
+  },
+  levelDot: {
+    width: 8,
+    height: 8,
+    borderRadius: 9999,
+  },
+  modalOverlay: {
+    flex: 1,
+    justifyContent: 'flex-end',
+    backgroundColor: 'rgba(15, 23, 42, 0.5)',
+  },
+  modalContent: {
+    backgroundColor: colors.white,
+    borderTopLeftRadius: 24,
+    borderTopRightRadius: 24,
+    padding: 24,
+  },
+  modalHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: 24,
+  },
+  modalTitle: {
+    fontWeight: '900',
+    fontSize: 20,
+    color: colors.slate800,
+  },
+  modalSubtitle: {
+    color: colors.slate500,
+    marginTop: 4,
+  },
+  closeButton: {
+    backgroundColor: colors.slate100,
+    padding: 8,
+    borderRadius: 9999,
+  },
+  levelList: {
+    gap: 12,
+  },
+  levelItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    padding: 16,
+    borderRadius: 12,
+    borderWidth: 1,
+  },
+  levelItemSelected: {
+    backgroundColor: colors.primaryBg,
+    borderColor: '#c7d2fe',
+  },
+  levelItemDefault: {
+    backgroundColor: colors.white,
+    borderColor: colors.slate200,
+  },
+  levelItemLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+  },
+  levelItemDot: {
+    width: 12,
+    height: 12,
+    borderRadius: 9999,
+  },
+  levelItemLabel: {
+    fontWeight: '700',
+    fontSize: 14,
+  },
+  levelItemLabelSelected: {
+    color: '#312e81',
+  },
+  levelItemLabelDefault: {
+    color: colors.slate700,
+  },
+  levelItemDesc: {
+    fontFamily: 'monospace',
+    fontSize: 10,
+    textTransform: 'uppercase',
+    letterSpacing: 2,
+  },
+  levelItemDescSelected: {
+    color: colors.primary,
+  },
+  levelItemDescDefault: {
+    color: colors.slate400,
+  },
+});

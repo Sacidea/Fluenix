@@ -1,7 +1,6 @@
 import { useState, useCallback } from 'react';
 import { Alert } from 'react-native';
-// import { Audio } from 'expo-av';
-const Audio = { requestPermissionsAsync: async () => ({ status: 'granted' }) };
+import { Audio } from 'expo-av';
 export function usePermissions() {
   const [hasMicrophonePermission, setHasMicrophonePermission] = useState<boolean | null>(null);
 

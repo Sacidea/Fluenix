@@ -1,7 +1,8 @@
 import React from 'react';
-import { View, Text, TouchableOpacity, ScrollView, ActivityIndicator } from 'react-native';
+import { View, Text, TouchableOpacity, ScrollView, ActivityIndicator, StyleSheet } from 'react-native';
 import * as Icons from 'lucide-react-native';
 import { ScenarioType, scenarios } from '@fluenix/shared';
+import { colors, shadow } from '../../utils/theme';
 
 interface Props {
   scenario: ScenarioType;
@@ -25,21 +26,21 @@ export function ScenarioSelector({ scenario, setScenario, startScenario, loading
   };
 
   return (
-    <ScrollView className="flex-1 px-4 pt-6">
-      <View className="flex-row justify-between items-start mb-6">
-        <View className="flex-1 pr-4">
-          <Text className="text-2xl font-black text-slate-800 font-serif mb-2">Select Operational Context</Text>
-          <Text className="text-slate-500 text-sm leading-relaxed">Click on a scenario below to immediately initialize the AI simulation.</Text>
+    <ScrollView style={styles.scrollContainer}>
+      <View style={styles.headerRow}>
+        <View style={styles.headerLeft}>
+          <Text style={styles.headerTitle}>Select Operational Context</Text>
+          <Text style={styles.headerDesc}>Click on a scenario below to immediately initialize the AI simulation.</Text>
         </View>
-        <View className="items-end min-w-[100px]">
-          <Text className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1.5">AI Voice Persona</Text>
-          <View className="bg-white border border-slate-200 px-3 py-2 rounded-lg">
-            <Text className="text-xs text-slate-600 font-medium">System Default</Text>
+        <View style={styles.headerRight}>
+          <Text style={styles.voiceLabel}>AI Voice Persona</Text>
+          <View style={styles.voiceBadge}>
+            <Text style={styles.voiceText}>System Default</Text>
           </View>
         </View>
       </View>
 
-      <View className="pb-12">
+      <View style={styles.cardList}>
         {scenarios.map((s) => {
           const Icon = iconMap[s.icon] || Icons.Terminal;
           const isSelected = scenario === s.id;
@@ -49,24 +50,27 @@ export function ScenarioSelector({ scenario, setScenario, startScenario, loading
               key={s.id}
               disabled={loading}
               onPress={() => handleCardClick(s.id as ScenarioType)}
-              className={`relative overflow-hidden mb-4 rounded-2xl bg-white border ${isSelected ? 'border-indigo-500' : 'border-slate-200'} shadow-sm flex-row items-start p-5`}
+              style={[
+                styles.card,
+                isSelected ? styles.cardSelected : styles.cardDefault,
+              ]}
             >
-              <View className="absolute top-0 bottom-0 left-0 w-1" style={{ backgroundColor: s.color }} />
+              <View style={[styles.cardAccent, { backgroundColor: s.color }]} />
               
-              <View className="w-12 h-12 rounded-xl items-center justify-center mr-4" style={{ backgroundColor: `${s.color}15` }}>
+              <View style={[styles.iconBox, { backgroundColor: `${s.color}15` }]}>
                 <Icon size={24} color={s.color} />
               </View>
 
-              <View className="flex-1">
-                <View className="flex-row justify-between items-center mb-1.5">
-                  <Text className="text-lg font-black text-slate-800 font-serif">{s.label}</Text>
-                  <Text className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{s.id.replace('_', ' ')}</Text>
+              <View style={styles.cardContent}>
+                <View style={styles.cardHeaderRow}>
+                  <Text style={styles.cardTitle}>{s.label}</Text>
+                  <Text style={styles.cardId}>{s.id.replace('_', ' ')}</Text>
                 </View>
-                <Text className="text-sm text-slate-500 leading-relaxed">{s.desc}</Text>
+                <Text style={styles.cardDesc}>{s.desc}</Text>
               </View>
 
               {loading && isSelected && (
-                <View className="absolute inset-0 bg-white/80 items-center justify-center rounded-2xl z-10">
+                <View style={styles.loadingOverlay}>
                   <ActivityIndicator color={s.color} size="large" />
                 </View>
               )}
@@ -77,3 +81,133 @@ export function ScenarioSelector({ scenario, setScenario, startScenario, loading
     </ScrollView>
   );
 }
+
+const styles = StyleSheet.create({
+  scrollContainer: {
+    flex: 1,
+    paddingHorizontal: 16,
+    paddingTop: 24,
+  },
+  headerRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
+    marginBottom: 24,
+  },
+  headerLeft: {
+    flex: 1,
+    paddingRight: 16,
+  },
+  headerTitle: {
+    fontSize: 24,
+    fontWeight: '900',
+    color: colors.slate800,
+    fontFamily: 'serif',
+    marginBottom: 8,
+  },
+  headerDesc: {
+    color: colors.slate500,
+    fontSize: 12,
+    lineHeight: 20,
+  },
+  headerRight: {
+    alignItems: 'flex-end',
+    minWidth: 100,
+  },
+  voiceLabel: {
+    fontSize: 10,
+    fontWeight: '700',
+    color: colors.slate400,
+    textTransform: 'uppercase',
+    letterSpacing: 4,
+    marginBottom: 6,
+  },
+  voiceBadge: {
+    backgroundColor: colors.white,
+    borderWidth: 1,
+    borderColor: colors.slate200,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: 8,
+  },
+  voiceText: {
+    fontSize: 10,
+    color: colors.slate600,
+    fontWeight: '500',
+  },
+  cardList: {
+    paddingBottom: 48,
+  },
+  card: {
+    position: 'relative',
+    overflow: 'hidden',
+    marginBottom: 16,
+    borderRadius: 16,
+    backgroundColor: colors.white,
+    borderWidth: 1,
+    ...shadow.sm,
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    padding: 20,
+  },
+  cardSelected: {
+    borderColor: '#6366f1',
+  },
+  cardDefault: {
+    borderColor: colors.slate200,
+  },
+  cardAccent: {
+    position: 'absolute',
+    top: 0,
+    bottom: 0,
+    left: 0,
+    width: 4,
+  },
+  iconBox: {
+    width: 48,
+    height: 48,
+    borderRadius: 12,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: 16,
+  },
+  cardContent: {
+    flex: 1,
+  },
+  cardHeaderRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 6,
+  },
+  cardTitle: {
+    fontSize: 18,
+    fontWeight: '900',
+    color: colors.slate800,
+    fontFamily: 'serif',
+  },
+  cardId: {
+    fontSize: 10,
+    fontWeight: '700',
+    color: colors.slate400,
+    textTransform: 'uppercase',
+    letterSpacing: 4,
+  },
+  cardDesc: {
+    fontSize: 12,
+    color: colors.slate500,
+    lineHeight: 20,
+  },
+  loadingOverlay: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: 'rgba(255,255,255,0.8)',
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderRadius: 16,
+    zIndex: 10,
+  },
+});

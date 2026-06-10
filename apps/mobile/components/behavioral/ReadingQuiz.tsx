@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
-import { View, Text, TouchableOpacity, Platform } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { Picker } from '@react-native-picker/picker';
 import * as Icons from 'lucide-react-native';
 import { VocabularyWord, FillInBlankExercise, ScenarioExercise } from '@fluenix/shared';
+import { colors, shadow } from '../../utils/theme';
 
 interface ReadingQuizProps {
   vocabulary?: VocabularyWord[];
@@ -33,20 +34,20 @@ export function ReadingQuiz({ vocabulary, fillInBlank, scenario }: ReadingQuizPr
   };
 
   return (
-    <View className="mt-8 border-t-2 border-dashed border-slate-200 pt-8">
+    <View style={styles.container}>
       
       {/* 1. Vocabulary Section */}
       {vocabulary && vocabulary.length > 0 && (
-        <View className="mb-10">
-          <View className="flex-row items-center gap-2 mb-4">
+        <View style={styles.sectionContainer}>
+          <View style={styles.sectionHeaderRow}>
             <Icons.BookA size={20} color="#2563eb" />
-            <Text className="text-lg font-black text-slate-800">Key Vocabulary</Text>
+            <Text style={styles.sectionTitle}>Key Vocabulary</Text>
           </View>
-          <View className="gap-3">
+          <View style={styles.vocabList}>
             {vocabulary.map((v, i) => (
-              <View key={i} className="bg-slate-50 p-4 rounded-xl border border-slate-200">
-                <Text className="font-bold text-blue-800 mb-1">{v.word}</Text>
-                <Text className="text-slate-600 text-sm leading-relaxed">{v.meaning}</Text>
+              <View key={i} style={styles.vocabCard}>
+                <Text style={styles.vocabWord}>{v.word}</Text>
+                <Text style={styles.vocabMeaning}>{v.meaning}</Text>
               </View>
             ))}
           </View>
@@ -55,13 +56,13 @@ export function ReadingQuiz({ vocabulary, fillInBlank, scenario }: ReadingQuizPr
 
       {/* 2. Fill in the Blanks Section */}
       {fillInBlank && (
-        <View className="mb-10">
-          <View className="flex-row items-center gap-2 mb-4">
+        <View style={styles.sectionContainer}>
+          <View style={styles.sectionHeaderRow}>
             <Icons.Edit3 size={20} color="#9333ea" />
-            <Text className="text-lg font-black text-slate-800">Grammar & Context</Text>
+            <Text style={styles.sectionTitle}>Grammar & Context</Text>
           </View>
-          <View className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
-            <View className="flex-row flex-wrap items-center">
+          <View style={[styles.fillInCard, shadow.sm]}>
+            <View style={styles.fillInTextWrap}>
               {fillInBlank.sentenceParts.map((part, index) => {
                 const isLastPart = index === fillInBlank.sentenceParts.length - 1;
                 const correctWord = fillInBlank.missingWords[index];
@@ -70,15 +71,15 @@ export function ReadingQuiz({ vocabulary, fillInBlank, scenario }: ReadingQuizPr
                 
                 return (
                   <React.Fragment key={index}>
-                    <Text className="text-base text-slate-700 leading-8 mr-1 mb-2">{part}</Text>
+                    <Text style={styles.fillInPartText}>{part}</Text>
                     {!isLastPart && (
                       <View 
-                        className={`border-2 rounded-lg bg-slate-50 mb-2 overflow-hidden ${
+                        style={[
+                          styles.pickerContainer,
                           blankChecked 
-                            ? (isCorrect ? 'border-green-500 bg-green-50' : 'border-red-500 bg-red-50') 
-                            : 'border-slate-300'
-                        }`}
-                        style={{ minWidth: 100, height: 36, justifyContent: 'center' }}
+                            ? (isCorrect ? styles.pickerCorrect : styles.pickerIncorrect) 
+                            : styles.pickerDefault,
+                        ]}
                       >
                         <Picker
                           selectedValue={userWord}
@@ -99,12 +100,12 @@ export function ReadingQuiz({ vocabulary, fillInBlank, scenario }: ReadingQuizPr
               })}
             </View>
             
-            <View className="mt-6 items-end">
+            <View style={styles.checkAnswersRow}>
               <TouchableOpacity 
                 onPress={checkBlanks}
-                className="bg-blue-500 px-5 py-3 rounded-xl shadow-sm"
+                style={[styles.checkAnswersBtn, shadow.sm]}
               >
-                <Text className="text-white font-bold">Check Answers</Text>
+                <Text style={styles.checkAnswersBtnText}>Check Answers</Text>
               </TouchableOpacity>
             </View>
           </View>
@@ -113,35 +114,37 @@ export function ReadingQuiz({ vocabulary, fillInBlank, scenario }: ReadingQuizPr
 
       {/* 3. Scenario Section */}
       {scenario && (
-        <View className="mb-10">
-          <View className="flex-row items-center gap-2 mb-4">
+        <View style={styles.sectionContainer}>
+          <View style={styles.sectionHeaderRow}>
             <Icons.MessageSquare size={20} color="#ea580c" />
-            <Text className="text-lg font-black text-slate-800">Interview Scenario</Text>
+            <Text style={styles.sectionTitle}>Interview Scenario</Text>
           </View>
 
-          <View className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
-            <Text className="font-bold text-base text-slate-800 mb-5 leading-relaxed">
+          <View style={[styles.scenarioCard, shadow.sm]}>
+            <Text style={styles.scenarioQuestion}>
               {scenario.scenario}
             </Text>
             
-            <View className="gap-3">
+            <View style={styles.optionsList}>
               {scenario.options.map((opt, optIndex) => {
                 const hasAnswered = scenarioAnswer !== null;
                 const isCorrectAnswer = optIndex === scenario.answerIndex;
                 const isSelected = optIndex === scenarioAnswer;
                 
-                let containerClass = "bg-white border-slate-200";
-                let textClass = "text-slate-700";
+                let containerStyle: any = styles.optionDefault;
+                let textStyle: any = styles.optionTextDefault;
+                let extraStyle: any = {};
                 
                 if (hasAnswered) {
                   if (isCorrectAnswer) {
-                    containerClass = "bg-green-50 border-green-500";
-                    textClass = "text-green-800 font-bold";
+                    containerStyle = styles.optionCorrect;
+                    textStyle = styles.optionTextCorrect;
                   } else if (isSelected) {
-                    containerClass = "bg-red-50 border-red-500";
-                    textClass = "text-red-800 font-bold";
+                    containerStyle = styles.optionIncorrect;
+                    textStyle = styles.optionTextIncorrect;
                   } else {
-                    containerClass = "bg-white border-slate-100 opacity-50";
+                    containerStyle = styles.optionDimmed;
+                    extraStyle = { opacity: 0.5 };
                   }
                 }
 
@@ -150,20 +153,26 @@ export function ReadingQuiz({ vocabulary, fillInBlank, scenario }: ReadingQuizPr
                     key={optIndex}
                     onPress={() => handleScenarioSelect(optIndex)}
                     disabled={hasAnswered}
-                    className={`p-4 rounded-xl border-[1.5px] flex-row items-center justify-between ${containerClass}`}
+                    style={[styles.optionBase, containerStyle, extraStyle]}
                   >
-                    <Text className={`flex-1 text-sm leading-relaxed ${textClass}`}>{opt}</Text>
-                    {hasAnswered && isCorrectAnswer && <Icons.CheckCircle2 size={20} color="#22c55e" className="ml-2" />}
-                    {hasAnswered && isSelected && !isCorrectAnswer && <Icons.XCircle size={20} color="#ef4444" className="ml-2" />}
+                    <Text style={[styles.optionTextBase, textStyle]}>{opt}</Text>
+                    {hasAnswered && isCorrectAnswer && <Icons.CheckCircle2 size={20} color="#22c55e" style={{ marginLeft: 8 }} />}
+                    {hasAnswered && isSelected && !isCorrectAnswer && <Icons.XCircle size={20} color="#ef4444" style={{ marginLeft: 8 }} />}
                   </TouchableOpacity>
                 );
               })}
             </View>
 
             {scenarioAnswer !== null && (
-              <View className={`mt-5 p-4 rounded-xl border-l-4 ${scenarioAnswer === scenario.answerIndex ? 'bg-green-50 border-green-500' : 'bg-red-50 border-red-500'}`}>
-                <Text className={`text-sm leading-relaxed ${scenarioAnswer === scenario.answerIndex ? 'text-green-800' : 'text-red-800'}`}>
-                  <Text className="font-bold">Why this is {scenarioAnswer === scenario.answerIndex ? 'Correct' : 'Incorrect'}: </Text>
+              <View style={[
+                styles.explanationBox,
+                scenarioAnswer === scenario.answerIndex ? styles.explanationCorrect : styles.explanationIncorrect,
+              ]}>
+                <Text style={[
+                  styles.explanationText,
+                  scenarioAnswer === scenario.answerIndex ? styles.explanationTextCorrect : styles.explanationTextIncorrect,
+                ]}>
+                  <Text style={styles.boldInline}>Why this is {scenarioAnswer === scenario.answerIndex ? 'Correct' : 'Incorrect'}: </Text>
                   {scenario.explanation}
                 </Text>
               </View>
@@ -174,3 +183,188 @@ export function ReadingQuiz({ vocabulary, fillInBlank, scenario }: ReadingQuizPr
     </View>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    marginTop: 32,
+    borderTopWidth: 2,
+    borderStyle: 'dashed',
+    borderTopColor: colors.slate200,
+    paddingTop: 32,
+  },
+  sectionContainer: {
+    marginBottom: 40,
+  },
+  sectionHeaderRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    marginBottom: 16,
+  },
+  sectionTitle: {
+    fontSize: 18,
+    fontWeight: '900',
+    color: colors.slate800,
+  },
+  // Vocabulary
+  vocabList: {
+    gap: 12,
+  },
+  vocabCard: {
+    backgroundColor: colors.slate50,
+    padding: 16,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: colors.slate200,
+  },
+  vocabWord: {
+    fontWeight: '700',
+    color: '#1e40af',
+    marginBottom: 4,
+  },
+  vocabMeaning: {
+    color: colors.slate600,
+    fontSize: 12,
+    lineHeight: 20,
+  },
+  // Fill in the Blanks
+  fillInCard: {
+    backgroundColor: colors.white,
+    padding: 20,
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: colors.slate200,
+  },
+  fillInTextWrap: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    alignItems: 'center',
+  },
+  fillInPartText: {
+    fontSize: 14,
+    color: colors.slate700,
+    lineHeight: 32,
+    marginRight: 4,
+    marginBottom: 8,
+  },
+  pickerContainer: {
+    borderWidth: 2,
+    borderRadius: 8,
+    backgroundColor: colors.slate50,
+    marginBottom: 8,
+    overflow: 'hidden',
+    minWidth: 100,
+    height: 36,
+    justifyContent: 'center',
+  },
+  pickerDefault: {
+    borderColor: colors.slate300,
+  },
+  pickerCorrect: {
+    borderColor: colors.green500,
+    backgroundColor: '#f0fdf4',
+  },
+  pickerIncorrect: {
+    borderColor: colors.red500,
+    backgroundColor: '#fef2f2',
+  },
+  checkAnswersRow: {
+    marginTop: 24,
+    alignItems: 'flex-end',
+  },
+  checkAnswersBtn: {
+    backgroundColor: '#3b82f6',
+    paddingHorizontal: 20,
+    paddingVertical: 12,
+    borderRadius: 12,
+  },
+  checkAnswersBtnText: {
+    color: colors.white,
+    fontWeight: '700',
+  },
+  // Scenario
+  scenarioCard: {
+    backgroundColor: colors.white,
+    padding: 20,
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: colors.slate200,
+  },
+  scenarioQuestion: {
+    fontWeight: '700',
+    fontSize: 14,
+    color: colors.slate800,
+    marginBottom: 20,
+    lineHeight: 22,
+  },
+  optionsList: {
+    gap: 12,
+  },
+  optionBase: {
+    padding: 16,
+    borderRadius: 12,
+    borderWidth: 1.5,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  optionDefault: {
+    backgroundColor: colors.white,
+    borderColor: colors.slate200,
+  },
+  optionCorrect: {
+    backgroundColor: '#f0fdf4',
+    borderColor: colors.green500,
+  },
+  optionIncorrect: {
+    backgroundColor: '#fef2f2',
+    borderColor: colors.red500,
+  },
+  optionDimmed: {
+    backgroundColor: colors.white,
+    borderColor: colors.slate100,
+  },
+  optionTextBase: {
+    flex: 1,
+    fontSize: 12,
+    lineHeight: 20,
+  },
+  optionTextDefault: {
+    color: colors.slate700,
+  },
+  optionTextCorrect: {
+    color: '#166534',
+    fontWeight: '700',
+  },
+  optionTextIncorrect: {
+    color: '#991b1b',
+    fontWeight: '700',
+  },
+  explanationBox: {
+    marginTop: 20,
+    padding: 16,
+    borderRadius: 12,
+    borderLeftWidth: 4,
+  },
+  explanationCorrect: {
+    backgroundColor: '#f0fdf4',
+    borderLeftColor: colors.green500,
+  },
+  explanationIncorrect: {
+    backgroundColor: '#fef2f2',
+    borderLeftColor: colors.red500,
+  },
+  explanationText: {
+    fontSize: 12,
+    lineHeight: 20,
+  },
+  explanationTextCorrect: {
+    color: '#166534',
+  },
+  explanationTextIncorrect: {
+    color: '#991b1b',
+  },
+  boldInline: {
+    fontWeight: '700',
+  },
+});

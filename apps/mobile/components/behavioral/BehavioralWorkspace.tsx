@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import { View, Text, ScrollView, TouchableOpacity, TextInput, ActivityIndicator, KeyboardAvoidingView, Platform, StyleSheet } from 'react-native';
 import * as Icons from 'lucide-react-native';
 import { useBehavioralSession } from '../../hooks/useBehavioralSession';
+import { useUser } from '@clerk/clerk-expo';
+import { colors, shadow } from '../../utils/theme';
 
 export function BehavioralWorkspace() {
   const {
@@ -18,106 +20,120 @@ export function BehavioralWorkspace() {
     analyzeAnswer
   } = useBehavioralSession();
 
+  const { user } = useUser();
+  const level = (user?.publicMetadata?.level as string) || 'B2';
+
   const [activeTab, setActiveTab] = useState<'S'|'T'|'A'|'R'>('S');
 
   if (isLoadingQuestion) {
     return (
-      <View className="flex-1 items-center justify-center bg-slate-50">
+      <View style={styles.centeredContainer}>
         <ActivityIndicator size="large" color="#0ea5e9" />
-        <Text className="mt-4 text-slate-500 font-medium">Loading interview question...</Text>
+        <Text style={styles.loadingText}>Loading interview question...</Text>
       </View>
     );
   }
 
   if (!activeQuestion) {
     return (
-      <View className="flex-1 items-center justify-center bg-slate-50">
-        <Text className="text-slate-500 font-medium">No question available.</Text>
+      <View style={styles.centeredContainer}>
+        <Text style={styles.noQuestionText}>No question available.</Text>
       </View>
     );
   }
 
   return (
     <KeyboardAvoidingView 
-      style={{ flex: 1 }}
-      className="bg-slate-50" 
+      style={styles.flex1Bg}
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}
       keyboardVerticalOffset={100}
     >
-      <ScrollView style={{ flex: 1 }} className="bg-slate-50" contentContainerClassName="px-4 pt-6 pb-20">
+      <ScrollView style={styles.flex1Bg} contentContainerStyle={styles.scrollContent}>
         
         {/* Question Header */}
-        <View className="mb-6">
-          <View className="flex-row items-center gap-2 mb-2">
-            <View className="bg-sky-100 px-3 py-1 rounded-full border border-sky-200">
-              <Text className="text-xs font-bold text-sky-800">{activeQuestion.category}</Text>
+        <View style={styles.questionHeader}>
+          <View style={styles.categoryRow}>
+            <View style={styles.categoryBadge}>
+              <Text style={styles.categoryText}>{activeQuestion.category}</Text>
             </View>
           </View>
-          <Text className="text-xl font-black text-slate-800 font-serif leading-relaxed">
+          <Text style={styles.questionText}>
             {activeQuestion.question}
           </Text>
-          <Text className="text-slate-500 text-sm mt-3 bg-white p-3 rounded-lg border border-slate-200 shadow-sm leading-relaxed">
-            <Text className="font-bold text-slate-700">Context:</Text> {activeQuestion.context}
+          <Text style={styles.contextText}>
+            <Text style={styles.contextLabel}>Context:</Text> {activeQuestion.context}
           </Text>
         </View>
 
         {error && (
-          <View className="bg-red-50 border border-red-200 p-4 rounded-xl mb-6 flex-row items-center gap-3">
+          <View style={styles.errorContainer}>
             <Icons.AlertCircle size={20} color="#dc2626" />
-            <Text className="flex-1 text-red-800 font-medium">{error}</Text>
+            <Text style={styles.errorText}>{error}</Text>
           </View>
         )}
 
         {/* Feedback Section */}
         {feedback && (
-          <View className="mb-8">
-            <View className="flex-row items-center justify-between mb-4">
-              <Text className="text-xl font-bold text-slate-800">AI Analysis</Text>
-              <TouchableOpacity onPress={loadNextQuestion} className="flex-row items-center bg-sky-100 px-4 py-2 rounded-xl">
-                <Icons.ArrowRight size={16} color="#0369a1" className="mr-2" />
-                <Text className="text-sky-800 font-bold text-sm">Next Question</Text>
+          <View style={styles.feedbackSection}>
+            <View style={styles.feedbackHeader}>
+              <Text style={styles.feedbackTitle}>AI Analysis</Text>
+              <TouchableOpacity onPress={loadNextQuestion} style={styles.nextQuestionBtn}>
+                <Icons.ArrowRight size={16} color="#0369a1" style={{ marginRight: 8 }} />
+                <Text style={styles.nextQuestionText}>Next Question</Text>
               </TouchableOpacity>
             </View>
 
-            <View className="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm mb-4">
-              <View className="flex-row items-end justify-between mb-6 border-b border-slate-100 pb-4">
+            <View style={[styles.feedbackCard, shadow.sm]}>
+              <View style={styles.scoreRow}>
                 <View>
-                  <Text className="text-slate-500 font-medium mb-1">Overall Score</Text>
-                  <Text className="text-4xl font-black text-slate-800">{feedback.overall_score}<Text className="text-lg text-slate-400">/100</Text></Text>
+                  <Text style={styles.scoreLabel}>Overall Score</Text>
+                  <Text style={styles.scoreValue}>{feedback.overall_score}<Text style={styles.scoreMax}>/100</Text></Text>
                 </View>
-                <View className="items-end">
-                  <Text className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Leadership</Text>
-                  <View className="bg-sky-50 px-3 py-1 rounded-lg border border-sky-100">
-                    <Text className="text-sky-700 font-bold">{feedback.leadership_alignment}/100</Text>
+                <View style={styles.leadershipCol}>
+                  <Text style={styles.subScoreLabel}>Leadership</Text>
+                  <View style={styles.leadershipBadge}>
+                    <Text style={styles.leadershipValue}>{feedback.leadership_alignment}/100</Text>
                   </View>
                 </View>
               </View>
 
-              <View className="gap-4">
+              <View style={styles.scoreRow}>
                 <View>
-                  <Text className="font-bold text-emerald-700 mb-2 flex-row items-center"><Icons.ThumbsUp size={16} color="#059669" /> Strengths</Text>
-                  {feedback.strengths.map((s, i) => (
-                    <Text key={i} className="text-sm text-slate-600 mb-1 leading-relaxed">• {s}</Text>
+                  <Text style={styles.subScoreLabel}>English Quality</Text>
+                  <Text style={styles.englishLevelText}>Level: {level}</Text>
+                </View>
+                <View style={styles.leadershipCol}>
+                  <View style={styles.englishBadge}>
+                    <Text style={styles.englishValue}>{feedback.english_quality}/100</Text>
+                  </View>
+                </View>
+              </View>
+
+              <View style={styles.feedbackDetails}>
+                <View>
+                  <Text style={styles.strengthsTitle}><Icons.ThumbsUp size={16} color="#059669" /> Strengths</Text>
+                  {feedback.strengths.map((s: string, i: number) => (
+                    <Text key={i} style={styles.feedbackItem}>• {s}</Text>
                   ))}
                 </View>
                 <View>
-                  <Text className="font-bold text-rose-700 mb-2 flex-row items-center"><Icons.TrendingUp size={16} color="#e11d48" /> Areas to Improve</Text>
-                  {feedback.improvements.map((s, i) => (
-                    <Text key={i} className="text-sm text-slate-600 mb-1 leading-relaxed">• {s}</Text>
+                  <Text style={styles.improvementsTitle}><Icons.TrendingUp size={16} color="#e11d48" /> Areas to Improve</Text>
+                  {feedback.improvements.map((s: string, i: number) => (
+                    <Text key={i} style={styles.feedbackItem}>• {s}</Text>
                   ))}
                 </View>
               </View>
             </View>
             
-            <View className="h-[1px] bg-slate-200 my-4" />
-            <Text className="text-center font-medium text-slate-500 mb-4">You can edit your answer below and try again to improve your score.</Text>
+            <View style={styles.divider} />
+            <Text style={styles.retryHint}>You can edit your answer below and try again to improve your score.</Text>
           </View>
         )}
 
         {/* STAR Input Section */}
-        <View className="bg-white rounded-3xl border border-slate-200 shadow-sm overflow-hidden mb-12">
+        <View style={[styles.starInputContainer, shadow.sm]}>
           {/* Tab Bar */}
-          <View className="flex-row border-b border-slate-200 bg-slate-50">
+          <View style={styles.tabBar}>
             <StarTab label="S" title="Situation" isActive={activeTab === 'S'} onPress={() => setActiveTab('S')} hasValue={!!situation} />
             <StarTab label="T" title="Task" isActive={activeTab === 'T'} onPress={() => setActiveTab('T')} hasValue={!!task} />
             <StarTab label="A" title="Action" isActive={activeTab === 'A'} onPress={() => setActiveTab('A')} hasValue={!!action} />
@@ -125,7 +141,7 @@ export function BehavioralWorkspace() {
           </View>
 
           {/* Active Input Area */}
-          <View className="p-5">
+          <View style={styles.inputArea}>
             {activeTab === 'S' && (
               <InputArea 
                 label="Situation" 
@@ -166,18 +182,20 @@ export function BehavioralWorkspace() {
         </View>
 
         <TouchableOpacity
-          onPress={() => analyzeAnswer('B2')}
+          onPress={() => analyzeAnswer(level)}
           disabled={isAnalyzing}
-          className={`h-14 rounded-2xl flex-row items-center justify-center shadow-sm mb-12 ${
-            isAnalyzing ? 'bg-sky-300' : 'bg-sky-600'
-          }`}
+          style={[
+            styles.analyzeButton,
+            isAnalyzing ? styles.analyzeButtonDisabled : styles.analyzeButtonActive,
+            shadow.sm,
+          ]}
         >
           {isAnalyzing ? (
-            <ActivityIndicator color="white" className="mr-3" />
+            <ActivityIndicator color="white" style={{ marginRight: 12 }} />
           ) : (
-            <Icons.Sparkles size={20} color="white" className="mr-3" />
+            <Icons.Sparkles size={20} color="white" style={{ marginRight: 12 }} />
           )}
-          <Text className="text-white font-bold text-lg">{isAnalyzing ? 'Analyzing Response...' : 'Evaluate Answer'}</Text>
+          <Text style={styles.analyzeButtonText}>{isAnalyzing ? 'Analyzing Response...' : 'Evaluate Answer'}</Text>
         </TouchableOpacity>
 
       </ScrollView>
@@ -189,13 +207,16 @@ function StarTab({ label, title, isActive, onPress, hasValue }: { label: string,
   return (
     <TouchableOpacity 
       onPress={onPress}
-      className={`flex-1 py-4 items-center border-b-2 ${isActive ? 'border-sky-500 bg-white' : 'border-transparent'}`}
+      style={[
+        styles.starTab,
+        isActive ? styles.starTabActive : styles.starTabInactive,
+      ]}
     >
-      <View className="flex-row items-center gap-1.5">
-        <Text className={`font-black text-lg ${isActive ? 'text-sky-600' : 'text-slate-400'}`}>{label}</Text>
-        {hasValue && !isActive && <View className="w-1.5 h-1.5 rounded-full bg-emerald-500" />}
+      <View style={styles.starTabLabelRow}>
+        <Text style={[styles.starTabLabel, isActive ? styles.starTabLabelActive : styles.starTabLabelInactive]}>{label}</Text>
+        {hasValue && !isActive && <View style={styles.starTabDot} />}
       </View>
-      <Text className={`text-[10px] font-bold uppercase tracking-wider mt-0.5 ${isActive ? 'text-sky-800' : 'text-slate-400'}`}>
+      <Text style={[styles.starTabTitle, isActive ? styles.starTabTitleActive : styles.starTabTitleInactive]}>
         {title}
       </Text>
     </TouchableOpacity>
@@ -205,10 +226,9 @@ function StarTab({ label, title, isActive, onPress, hasValue }: { label: string,
 function InputArea({ label, placeholder, value, onChange, analysis }: { label: string, placeholder: string, value: string, onChange: (t: string) => void, analysis?: string }) {
   return (
     <View>
-      <Text className="text-sm font-bold text-slate-700 mb-3 ml-1 uppercase tracking-wider">{label}</Text>
+      <Text style={styles.inputLabel}>{label}</Text>
       <TextInput
-        className="bg-slate-50 border border-slate-200 rounded-xl p-4 text-slate-700 text-base leading-relaxed"
-        style={{ minHeight: 180, textAlignVertical: 'top' }}
+        style={styles.textInput}
         placeholder={placeholder}
         placeholderTextColor="#94a3b8"
         multiline
@@ -216,11 +236,354 @@ function InputArea({ label, placeholder, value, onChange, analysis }: { label: s
         onChangeText={onChange}
       />
       {analysis && (
-        <View className="mt-4 bg-sky-50 p-4 rounded-xl border border-sky-100">
-          <Text className="text-xs font-bold text-sky-800 mb-1 uppercase tracking-wider">AI Feedback for {label}</Text>
-          <Text className="text-sky-900 text-sm leading-relaxed">{analysis}</Text>
+        <View style={styles.analysisBox}>
+          <Text style={styles.analysisLabel}>AI Feedback for {label}</Text>
+          <Text style={styles.analysisText}>{analysis}</Text>
         </View>
       )}
     </View>
   );
 }
+
+const styles = StyleSheet.create({
+  flex1Bg: {
+    flex: 1,
+    backgroundColor: colors.slate50,
+  },
+  scrollContent: {
+    paddingHorizontal: 16,
+    paddingTop: 24,
+    paddingBottom: 80,
+  },
+  centeredContainer: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: colors.slate50,
+  },
+  loadingText: {
+    marginTop: 16,
+    color: colors.slate500,
+    fontWeight: '500',
+  },
+  noQuestionText: {
+    color: colors.slate500,
+    fontWeight: '500',
+  },
+  questionHeader: {
+    marginBottom: 24,
+  },
+  categoryRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    marginBottom: 8,
+  },
+  categoryBadge: {
+    backgroundColor: '#e0f2fe',
+    paddingHorizontal: 12,
+    paddingVertical: 4,
+    borderRadius: 9999,
+    borderWidth: 1,
+    borderColor: '#bae6fd',
+  },
+  categoryText: {
+    fontSize: 10,
+    fontWeight: '700',
+    color: '#075985',
+  },
+  questionText: {
+    fontSize: 20,
+    fontWeight: '900',
+    color: colors.slate800,
+    fontFamily: 'serif',
+    lineHeight: 30,
+  },
+  contextText: {
+    color: colors.slate500,
+    fontSize: 12,
+    marginTop: 12,
+    backgroundColor: colors.white,
+    padding: 12,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: colors.slate200,
+    lineHeight: 20,
+    ...shadow.sm,
+  },
+  contextLabel: {
+    fontWeight: '700',
+    color: colors.slate700,
+  },
+  errorContainer: {
+    backgroundColor: '#fef2f2',
+    borderWidth: 1,
+    borderColor: '#fecaca',
+    padding: 16,
+    borderRadius: 12,
+    marginBottom: 24,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+  },
+  errorText: {
+    flex: 1,
+    color: '#991b1b',
+    fontWeight: '500',
+  },
+  feedbackSection: {
+    marginBottom: 32,
+  },
+  feedbackHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: 16,
+  },
+  feedbackTitle: {
+    fontSize: 20,
+    fontWeight: '700',
+    color: colors.slate800,
+  },
+  nextQuestionBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#e0f2fe',
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderRadius: 12,
+  },
+  nextQuestionText: {
+    color: '#075985',
+    fontWeight: '700',
+    fontSize: 12,
+  },
+  feedbackCard: {
+    backgroundColor: colors.white,
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: colors.slate200,
+    padding: 20,
+    marginBottom: 16,
+  },
+  scoreRow: {
+    flexDirection: 'row',
+    alignItems: 'flex-end',
+    justifyContent: 'space-between',
+    marginBottom: 24,
+    borderBottomWidth: 1,
+    borderBottomColor: colors.slate100,
+    paddingBottom: 16,
+  },
+  scoreLabel: {
+    color: colors.slate500,
+    fontWeight: '500',
+    marginBottom: 4,
+  },
+  scoreValue: {
+    fontSize: 36,
+    fontWeight: '900',
+    color: colors.slate800,
+  },
+  scoreMax: {
+    fontSize: 18,
+    color: colors.slate400,
+  },
+  leadershipCol: {
+    alignItems: 'flex-end',
+  },
+  subScoreLabel: {
+    fontSize: 10,
+    fontWeight: '700',
+    color: colors.slate500,
+    textTransform: 'uppercase',
+    letterSpacing: 2,
+    marginBottom: 4,
+  },
+  leadershipBadge: {
+    backgroundColor: '#f0f9ff',
+    paddingHorizontal: 12,
+    paddingVertical: 4,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: '#e0f2fe',
+  },
+  leadershipValue: {
+    color: '#0369a1',
+    fontWeight: '700',
+  },
+  englishLevelText: {
+    fontSize: 12,
+    color: colors.slate500,
+    fontWeight: '500',
+  },
+  englishBadge: {
+    backgroundColor: '#ecfdf5',
+    paddingHorizontal: 12,
+    paddingVertical: 4,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: '#d1fae5',
+  },
+  englishValue: {
+    color: '#047857',
+    fontWeight: '700',
+  },
+  feedbackDetails: {
+    gap: 16,
+  },
+  strengthsTitle: {
+    fontWeight: '700',
+    color: '#047857',
+    marginBottom: 8,
+  },
+  improvementsTitle: {
+    fontWeight: '700',
+    color: '#be123c',
+    marginBottom: 8,
+  },
+  feedbackItem: {
+    fontSize: 12,
+    color: colors.slate600,
+    marginBottom: 4,
+    lineHeight: 20,
+  },
+  divider: {
+    height: 1,
+    backgroundColor: colors.slate200,
+    marginVertical: 16,
+  },
+  retryHint: {
+    textAlign: 'center',
+    fontWeight: '500',
+    color: colors.slate500,
+    marginBottom: 16,
+  },
+  starInputContainer: {
+    backgroundColor: colors.white,
+    borderRadius: 24,
+    borderWidth: 1,
+    borderColor: colors.slate200,
+    overflow: 'hidden',
+    marginBottom: 48,
+  },
+  tabBar: {
+    flexDirection: 'row',
+    borderBottomWidth: 1,
+    borderBottomColor: colors.slate200,
+    backgroundColor: colors.slate50,
+  },
+  inputArea: {
+    padding: 20,
+  },
+  analyzeButton: {
+    height: 56,
+    borderRadius: 16,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 48,
+  },
+  analyzeButtonActive: {
+    backgroundColor: '#0284c7',
+  },
+  analyzeButtonDisabled: {
+    backgroundColor: '#7dd3fc',
+  },
+  analyzeButtonText: {
+    color: colors.white,
+    fontWeight: '700',
+    fontSize: 18,
+  },
+  // StarTab styles
+  starTab: {
+    flex: 1,
+    paddingVertical: 16,
+    alignItems: 'center',
+    borderBottomWidth: 2,
+  },
+  starTabActive: {
+    borderBottomColor: '#0ea5e9',
+    backgroundColor: colors.white,
+  },
+  starTabInactive: {
+    borderBottomColor: 'transparent',
+  },
+  starTabLabelRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+  },
+  starTabLabel: {
+    fontWeight: '900',
+    fontSize: 18,
+  },
+  starTabLabelActive: {
+    color: '#0284c7',
+  },
+  starTabLabelInactive: {
+    color: colors.slate400,
+  },
+  starTabDot: {
+    width: 6,
+    height: 6,
+    borderRadius: 9999,
+    backgroundColor: colors.emerald500,
+  },
+  starTabTitle: {
+    fontSize: 10,
+    fontWeight: '700',
+    textTransform: 'uppercase',
+    letterSpacing: 2,
+    marginTop: 2,
+  },
+  starTabTitleActive: {
+    color: '#075985',
+  },
+  starTabTitleInactive: {
+    color: colors.slate400,
+  },
+  // InputArea styles
+  inputLabel: {
+    fontSize: 12,
+    fontWeight: '700',
+    color: colors.slate700,
+    marginBottom: 12,
+    marginLeft: 4,
+    textTransform: 'uppercase',
+    letterSpacing: 2,
+  },
+  textInput: {
+    backgroundColor: colors.slate50,
+    borderWidth: 1,
+    borderColor: colors.slate200,
+    borderRadius: 12,
+    padding: 16,
+    color: colors.slate700,
+    fontSize: 14,
+    lineHeight: 22,
+    minHeight: 180,
+    textAlignVertical: 'top',
+  },
+  analysisBox: {
+    marginTop: 16,
+    backgroundColor: '#f0f9ff',
+    padding: 16,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: '#e0f2fe',
+  },
+  analysisLabel: {
+    fontSize: 10,
+    fontWeight: '700',
+    color: '#075985',
+    marginBottom: 4,
+    textTransform: 'uppercase',
+    letterSpacing: 2,
+  },
+  analysisText: {
+    color: '#0c4a6e',
+    fontSize: 12,
+    lineHeight: 20,
+  },
+});

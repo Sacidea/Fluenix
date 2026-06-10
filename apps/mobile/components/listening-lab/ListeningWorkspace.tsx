@@ -1,11 +1,10 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { View, Text, TouchableOpacity, ActivityIndicator, ScrollView, Alert } from 'react-native';
+import { View, Text, TouchableOpacity, ActivityIndicator, ScrollView, Alert, StyleSheet } from 'react-native';
 import { useListeningSession } from '../../hooks/useListeningSession';
 import * as Icons from 'lucide-react-native';
 import * as Speech from 'expo-speech';
-// import { ExpoSpeechRecognitionModule, useSpeechRecognitionEvent } from 'expo-speech-recognition';
-const ExpoSpeechRecognitionModule = { start: async (_opts?: any) => {}, stop: async () => {} };
-const useSpeechRecognitionEvent = (event: string, callback: any) => {};
+import { ExpoSpeechRecognitionModule, useSpeechRecognitionEvent } from 'expo-speech-recognition';
+import { colors, shadow } from '../../utils/theme';
 
 import { usePermissions } from '../../hooks/usePermissions';
 
@@ -26,20 +25,19 @@ type DialogueLine = {
 };
 
 function renderLineWithIdioms(line: DialogueLine) {
-  if (!line.idiomHighlight || !line.idiomHighlight.word) return <Text className="text-slate-700 text-base">{line.text}</Text>;
+  if (!line.idiomHighlight || !line.idiomHighlight.word) return <Text style={styles.dialogueText}>{line.text}</Text>;
 
   const { word, meaning } = line.idiomHighlight;
   const parts = line.text.split(new RegExp("(" + word + ")", 'gi'));
 
   return (
-    <Text className="text-slate-700 text-base leading-relaxed">
+    <Text style={styles.dialogueText}>
       {parts.map((part: string, i: number) => {
         if (part.toLowerCase() === word.toLowerCase()) {
           return (
             <Text 
               key={i} 
-              className="text-cyan-700 font-bold bg-cyan-100" 
-              style={{ textDecorationLine: 'underline', textDecorationStyle: 'dashed', textDecorationColor: '#06b6d4' }}
+              style={styles.idiomHighlight}
               onPress={() => Alert.alert('Idiom Meaning', meaning)}
             >
               {part}
@@ -117,10 +115,10 @@ export function ListeningWorkspace() {
 
   if (isLoadingScenario || !scenario) {
     return (
-      <View className="flex-1 items-center justify-center p-8 mt-6 mx-5 bg-white rounded-2xl border border-slate-200">
+      <View style={styles.loadingContainer}>
         <ActivityIndicator size="large" color="#06b6d4" />
-        <Text className="text-xl font-black text-slate-800 mt-4 mb-2">Generating Audio...</Text>
-        <Text className="text-slate-500 text-center">Preparing a new FAANG-style listening task for you.</Text>
+        <Text style={styles.loadingTitle}>Generating Audio...</Text>
+        <Text style={styles.loadingSubtitle}>Preparing a new FAANG-style listening task for you.</Text>
       </View>
     );
   }
@@ -197,7 +195,7 @@ export function ListeningWorkspace() {
   };
 
   return (
-    <ScrollView className="flex-1" contentContainerStyle={{ padding: 20, paddingBottom: 100 }}>
+    <ScrollView style={styles.container} contentContainerStyle={styles.contentContainer}>
       
       <ListeningPlayer 
         scenario={scenario}
@@ -208,29 +206,29 @@ export function ListeningWorkspace() {
         renderLineWithIdioms={renderLineWithIdioms}
       />
 
-      <View className="bg-white rounded-3xl border border-slate-200 p-1 shadow-sm mb-6">
-        <View className="flex-row items-center bg-slate-50 p-1 rounded-2xl">
+      <View style={styles.workspaceCard}>
+        <View style={styles.tabContainer}>
           <TouchableOpacity 
-            className={`flex-1 items-center justify-center py-3 rounded-xl ${activeMode === 'quiz' ? 'bg-white shadow-sm' : ''}`}
+            style={[styles.tabButton, activeMode === 'quiz' && styles.tabButtonActive]}
             onPress={() => setActiveMode('quiz')}
           >
-            <Icons.ListChecks size={18} color={activeMode === 'quiz' ? '#06b6d4' : '#64748b'} />
+            <Icons.ListChecks size={18} color={activeMode === 'quiz' ? colors.cyan500 : colors.slate500} />
           </TouchableOpacity>
           <TouchableOpacity 
-            className={`flex-1 items-center justify-center py-3 rounded-xl ${activeMode === 'dictation' ? 'bg-white shadow-sm' : ''}`}
+            style={[styles.tabButton, activeMode === 'dictation' && styles.tabButtonActive]}
             onPress={() => setActiveMode('dictation')}
           >
-            <Icons.Keyboard size={18} color={activeMode === 'dictation' ? '#8b5cf6' : '#64748b'} />
+            <Icons.Keyboard size={18} color={activeMode === 'dictation' ? colors.purple500 : colors.slate500} />
           </TouchableOpacity>
           <TouchableOpacity 
-            className={`flex-1 items-center justify-center py-3 rounded-xl ${activeMode === 'shadowing' ? 'bg-white shadow-sm' : ''}`}
+            style={[styles.tabButton, activeMode === 'shadowing' && styles.tabButtonActive]}
             onPress={() => setActiveMode('shadowing')}
           >
-            <Icons.Mic size={18} color={activeMode === 'shadowing' ? '#ec4899' : '#64748b'} />
+            <Icons.Mic size={18} color={activeMode === 'shadowing' ? colors.pink500 : colors.slate500} />
           </TouchableOpacity>
         </View>
 
-        <View className="p-5">
+        <View style={styles.workspaceContent}>
           {activeMode === 'quiz' && (
             <ListeningQuiz 
               scenario={scenario}
@@ -274,11 +272,98 @@ export function ListeningWorkspace() {
       </View>
 
       <TouchableOpacity 
-        className="bg-slate-800 py-4 rounded-xl items-center shadow-sm"
+        style={styles.nextButton}
         onPress={loadNextScenario}
       >
-        <Text className="text-white font-bold">Next AI Scenario</Text>
+        <Text style={styles.nextButtonText}>Next AI Scenario</Text>
       </TouchableOpacity>
     </ScrollView>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+  },
+  contentContainer: {
+    padding: 20,
+    paddingBottom: 100,
+  },
+  dialogueText: {
+    color: colors.slate700,
+    fontSize: 14,
+    lineHeight: 22,
+  },
+  idiomHighlight: {
+    color: '#0e7490',
+    fontWeight: '700',
+    backgroundColor: '#cffafe',
+    textDecorationLine: 'underline',
+    textDecorationStyle: 'dashed',
+    textDecorationColor: '#06b6d4',
+  },
+  loadingContainer: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: 32,
+    marginTop: 24,
+    marginHorizontal: 20,
+    backgroundColor: colors.white,
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: colors.slate200,
+  },
+  loadingTitle: {
+    fontSize: 20,
+    fontWeight: '900',
+    color: colors.slate800,
+    marginTop: 16,
+    marginBottom: 8,
+  },
+  loadingSubtitle: {
+    color: colors.slate500,
+    textAlign: 'center',
+  },
+  workspaceCard: {
+    backgroundColor: colors.white,
+    borderRadius: 24,
+    borderWidth: 1,
+    borderColor: colors.slate200,
+    padding: 4,
+    marginBottom: 24,
+    ...shadow.sm,
+  },
+  tabContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: colors.slate50,
+    padding: 4,
+    borderRadius: 16,
+  },
+  tabButton: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 12,
+    borderRadius: 12,
+  },
+  tabButtonActive: {
+    backgroundColor: colors.white,
+    ...shadow.sm,
+  },
+  workspaceContent: {
+    padding: 20,
+  },
+  nextButton: {
+    backgroundColor: colors.slate800,
+    paddingVertical: 16,
+    borderRadius: 12,
+    alignItems: 'center',
+    ...shadow.sm,
+  },
+  nextButtonText: {
+    color: colors.white,
+    fontWeight: '700',
+  },
+});

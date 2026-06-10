@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
-import { View, Text, TouchableOpacity, ActivityIndicator, Dimensions } from 'react-native';
+import { View, Text, TouchableOpacity, ActivityIndicator, Dimensions, StyleSheet } from 'react-native';
 import * as Icons from 'lucide-react-native';
 import { useVocabularySession } from '../../hooks/useVocabularySession';
 import { Flashcard } from './Flashcard';
 import { useRouter } from 'expo-router';
+import { colors, shadow } from '../../utils/theme';
 
 const SESSION_SIZE = 10;
 const { width } = Dimensions.get('window');
@@ -54,18 +55,18 @@ export function FlashcardWorkspace() {
 
   if (loading) {
     return (
-      <View className="flex-1 items-center justify-center p-8">
-        <ActivityIndicator size="large" color="#3B82F6" />
-        <Text className="text-slate-500 font-medium mt-4">Loading vocabulary session...</Text>
+      <View style={styles.centerContainer}>
+        <ActivityIndicator size="large" color={colors.blue500} />
+        <Text style={styles.loadingText}>Loading vocabulary session...</Text>
       </View>
     );
   }
 
   if (error) {
     return (
-      <View className="flex-1 items-center justify-center p-8">
-        <Icons.AlertTriangle size={32} color="#EF4444" />
-        <Text className="text-red-500 font-medium mt-4 text-center">{error}</Text>
+      <View style={styles.centerContainer}>
+        <Icons.AlertTriangle size={32} color={colors.red500} />
+        <Text style={styles.errorText}>{error}</Text>
       </View>
     );
   }
@@ -78,42 +79,42 @@ export function FlashcardWorkspace() {
     const masteredPct = Math.round((masteredCount / sessionWords.length) * 100);
     
     return (
-      <View className="flex-1 items-center justify-center px-6">
-        <View className="w-20 h-20 bg-yellow-50 rounded-full items-center justify-center mb-6">
-          <Icons.Trophy size={40} color="#EAB308" />
+      <View style={styles.finishedContainer}>
+        <View style={styles.trophyCircle}>
+          <Icons.Trophy size={40} color={colors.yellow500} />
         </View>
-        <Text className="text-3xl font-black text-slate-800 mb-2">Session Complete</Text>
-        <Text className="text-slate-500 text-center mb-10 leading-relaxed">
+        <Text style={styles.finishedTitle}>Session Complete</Text>
+        <Text style={styles.finishedDesc}>
           You reviewed {sessionWords.length} FAANG-level technical terms.
         </Text>
 
-        <View className="flex-row justify-between w-full mb-10">
-          <View className="items-center bg-white p-4 rounded-2xl flex-1 mx-2 border border-slate-100 shadow-sm">
-            <Text className="text-3xl font-black text-emerald-600 mb-1">{masteredCount}</Text>
-            <Text className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Mastered</Text>
+        <View style={styles.statsRow}>
+          <View style={styles.statCard}>
+            <Text style={[styles.statValue, { color: colors.emerald600 }]}>{masteredCount}</Text>
+            <Text style={styles.statLabel}>Mastered</Text>
           </View>
-          <View className="items-center bg-white p-4 rounded-2xl flex-1 mx-2 border border-slate-100 shadow-sm">
-            <Text className="text-3xl font-black text-purple-600 mb-1">{masteredPct}%</Text>
-            <Text className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Score</Text>
+          <View style={styles.statCard}>
+            <Text style={[styles.statValue, { color: colors.purple500 }]}>{masteredPct}%</Text>
+            <Text style={styles.statLabel}>Score</Text>
           </View>
-          <View className="items-center bg-white p-4 rounded-2xl flex-1 mx-2 border border-slate-100 shadow-sm">
-            <Text className="text-3xl font-black text-red-600 mb-1">{reviewCount}</Text>
-            <Text className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Review</Text>
+          <View style={styles.statCard}>
+            <Text style={[styles.statValue, { color: colors.red600 }]}>{reviewCount}</Text>
+            <Text style={styles.statLabel}>Review</Text>
           </View>
         </View>
 
         <TouchableOpacity 
           onPress={handleRestart}
-          className="w-full bg-slate-900 py-4 rounded-2xl items-center shadow-md mb-4"
+          style={styles.restartBtn}
         >
-          <Text className="text-white font-bold text-lg">Start New Session</Text>
+          <Text style={styles.restartBtnText}>Start New Session</Text>
         </TouchableOpacity>
         
         <TouchableOpacity 
           onPress={() => router.replace('/dashboard')}
-          className="w-full bg-slate-100 py-4 rounded-2xl items-center"
+          style={styles.dashboardBtn}
         >
-          <Text className="text-slate-600 font-bold">Back to Dashboard</Text>
+          <Text style={styles.dashboardBtnText}>Back to Dashboard</Text>
         </TouchableOpacity>
       </View>
     );
@@ -122,28 +123,30 @@ export function FlashcardWorkspace() {
   const currentWord = sessionWords[currentIndex];
 
   return (
-    <View className="px-5 pt-4 pb-8">
+    <View style={styles.mainContainer}>
       {/* Progress */}
-      <View className="mb-4">
-        <View className="flex-row justify-between items-center mb-3">
-          <Text className="font-mono text-xs font-black text-purple-600 tracking-widest">
+      <View style={styles.progressSection}>
+        <View style={styles.progressHeader}>
+          <Text style={styles.progressCounter}>
             {currentIndex + 1} / {sessionWords.length}
           </Text>
-          <Text className="font-mono text-[10px] font-bold text-slate-400 uppercase">
+          <Text style={styles.difficultyLabel}>
             {currentWord.difficulty}
           </Text>
         </View>
-        <View className="h-1.5 bg-slate-200 rounded-full overflow-hidden mb-2">
+        <View style={styles.progressBarBg}>
           <View 
-            className="h-full bg-purple-500 rounded-full" 
-            style={{ width: `${(currentIndex / sessionWords.length) * 100}%` }}
+            style={[styles.progressBarFill, { width: `${(currentIndex / sessionWords.length) * 100}%` }]}
           />
         </View>
-        <View className="flex-row justify-between w-full px-1">
+        <View style={styles.dotRow}>
           {sessionWords.map((_, i) => (
             <View 
               key={i} 
-              className={`h-1 flex-1 mx-0.5 rounded-full ${i < currentIndex ? 'bg-purple-500' : i === currentIndex ? 'bg-purple-300' : 'bg-slate-200'}`}
+              style={[
+                styles.dot,
+                i < currentIndex ? styles.dotCompleted : i === currentIndex ? styles.dotCurrent : styles.dotPending,
+              ]}
             />
           ))}
         </View>
@@ -157,31 +160,266 @@ export function FlashcardWorkspace() {
       />
 
       {/* Action Buttons */}
-      <View className="mt-2 mb-4">
-        {isFlipped ? (
-          <View className="flex-row gap-3">
-            <TouchableOpacity 
-              onPress={() => handleNext('review')}
-              className="flex-1 flex-row items-center justify-center bg-red-50 border border-red-200 py-4 rounded-2xl"
-            >
-              <Icons.X size={20} color="#DC2626" />
-              <Text className="ml-2 font-bold text-red-700">Needs Review</Text>
-            </TouchableOpacity>
+      <View style={styles.actionsSection}>
+        <View style={styles.actionsRow}>
+          <TouchableOpacity 
+            disabled={!isFlipped}
+            onPress={() => handleNext('review')}
+            style={[
+              styles.actionBtn,
+              isFlipped ? styles.reviewBtnActive : styles.actionBtnDisabled,
+            ]}
+          >
+            <Icons.X size={20} color={isFlipped ? "#DC2626" : "#94A3B8"} />
+            <Text style={[styles.actionBtnText, isFlipped ? styles.reviewBtnText : styles.actionBtnTextDisabled]}>Needs Review</Text>
+          </TouchableOpacity>
 
-            <TouchableOpacity 
-              onPress={() => handleNext('got_it')}
-              className="flex-1 flex-row items-center justify-center bg-green-500 py-4 rounded-2xl shadow-sm"
-            >
-              <Icons.Check size={20} color="#ffffff" />
-              <Text className="ml-2 font-bold text-white">Got It</Text>
-            </TouchableOpacity>
-          </View>
-        ) : (
-          <View className="flex-row justify-center items-center py-4">
-            <Text className="text-slate-400 font-medium text-sm">Tap the card to reveal the definition</Text>
+          <TouchableOpacity 
+            disabled={!isFlipped}
+            onPress={() => handleNext('got_it')}
+            style={[
+              styles.actionBtn,
+              styles.gotItBtn,
+              isFlipped ? styles.gotItBtnActive : styles.gotItBtnDisabled,
+            ]}
+          >
+            <Icons.Check size={20} color={colors.white} />
+            <Text style={styles.gotItBtnText}>Got It</Text>
+          </TouchableOpacity>
+        </View>
+        
+        {!isFlipped && (
+          <View style={styles.tapHintRow}>
+            <Text style={styles.tapHintText}>Tap the card to reveal definition and unlock buttons</Text>
           </View>
         )}
       </View>
     </View>
   );
 }
+
+const styles = StyleSheet.create({
+  centerContainer: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: 32,
+  },
+  loadingText: {
+    color: colors.slate500,
+    fontWeight: '500',
+    marginTop: 16,
+  },
+  errorText: {
+    color: colors.red500,
+    fontWeight: '500',
+    marginTop: 16,
+    textAlign: 'center',
+  },
+  finishedContainer: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: 24,
+  },
+  trophyCircle: {
+    width: 80,
+    height: 80,
+    backgroundColor: '#fefce8',
+    borderRadius: 9999,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 24,
+  },
+  finishedTitle: {
+    fontSize: 30,
+    fontWeight: '900',
+    color: colors.slate800,
+    marginBottom: 8,
+  },
+  finishedDesc: {
+    color: colors.slate500,
+    textAlign: 'center',
+    marginBottom: 40,
+    lineHeight: 22,
+  },
+  statsRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    width: '100%',
+    marginBottom: 40,
+  },
+  statCard: {
+    alignItems: 'center',
+    backgroundColor: colors.white,
+    padding: 16,
+    borderRadius: 16,
+    flex: 1,
+    marginHorizontal: 8,
+    borderWidth: 1,
+    borderColor: colors.slate100,
+    ...shadow.sm,
+  },
+  statValue: {
+    fontSize: 30,
+    fontWeight: '900',
+    marginBottom: 4,
+  },
+  statLabel: {
+    fontSize: 10,
+    fontWeight: '700',
+    color: colors.slate400,
+    textTransform: 'uppercase',
+    letterSpacing: 2,
+  },
+  restartBtn: {
+    width: '100%',
+    backgroundColor: colors.slate900,
+    paddingVertical: 16,
+    borderRadius: 16,
+    alignItems: 'center',
+    ...shadow.md,
+    marginBottom: 16,
+  },
+  restartBtnText: {
+    color: colors.white,
+    fontWeight: '700',
+    fontSize: 18,
+  },
+  dashboardBtn: {
+    width: '100%',
+    backgroundColor: colors.slate100,
+    paddingVertical: 16,
+    borderRadius: 16,
+    alignItems: 'center',
+  },
+  dashboardBtnText: {
+    color: colors.slate600,
+    fontWeight: '700',
+  },
+  mainContainer: {
+    paddingHorizontal: 20,
+    paddingTop: 16,
+    paddingBottom: 32,
+  },
+  progressSection: {
+    marginBottom: 16,
+  },
+  progressHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 12,
+  },
+  progressCounter: {
+    fontFamily: 'monospace',
+    fontSize: 10,
+    fontWeight: '900',
+    color: colors.purple500,
+    letterSpacing: 4,
+  },
+  difficultyLabel: {
+    fontFamily: 'monospace',
+    fontSize: 10,
+    fontWeight: '700',
+    color: colors.slate400,
+    textTransform: 'uppercase',
+  },
+  progressBarBg: {
+    height: 6,
+    backgroundColor: colors.slate200,
+    borderRadius: 9999,
+    overflow: 'hidden',
+    marginBottom: 8,
+  },
+  progressBarFill: {
+    height: '100%',
+    backgroundColor: colors.purple500,
+    borderRadius: 9999,
+  },
+  dotRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    width: '100%',
+    paddingHorizontal: 4,
+  },
+  dot: {
+    height: 4,
+    flex: 1,
+    marginHorizontal: 2,
+    borderRadius: 9999,
+  },
+  dotCompleted: {
+    backgroundColor: colors.purple500,
+  },
+  dotCurrent: {
+    backgroundColor: '#d8b4fe',
+  },
+  dotPending: {
+    backgroundColor: colors.slate200,
+  },
+  actionsSection: {
+    marginTop: 8,
+    marginBottom: 16,
+  },
+  actionsRow: {
+    flexDirection: 'row',
+    gap: 12,
+  },
+  actionBtn: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 16,
+    borderRadius: 16,
+    borderWidth: 1,
+  },
+  reviewBtnActive: {
+    backgroundColor: '#fef2f2',
+    borderColor: '#fecaca',
+  },
+  actionBtnDisabled: {
+    backgroundColor: colors.slate50,
+    borderColor: colors.slate200,
+    opacity: 0.5,
+  },
+  actionBtnText: {
+    marginLeft: 8,
+    fontWeight: '700',
+  },
+  reviewBtnText: {
+    color: '#b91c1c',
+  },
+  actionBtnTextDisabled: {
+    color: colors.slate400,
+  },
+  gotItBtn: {
+    borderWidth: 0,
+    ...shadow.sm,
+  },
+  gotItBtnActive: {
+    backgroundColor: colors.green500,
+  },
+  gotItBtnDisabled: {
+    backgroundColor: colors.slate300,
+  },
+  gotItBtnText: {
+    marginLeft: 8,
+    fontWeight: '700',
+    color: colors.white,
+  },
+  tapHintRow: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginTop: 12,
+  },
+  tapHintText: {
+    color: colors.slate400,
+    fontWeight: '500',
+    fontSize: 11,
+    textTransform: 'uppercase',
+    letterSpacing: 2,
+  },
+});

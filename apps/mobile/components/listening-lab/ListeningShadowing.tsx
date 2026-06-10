@@ -1,7 +1,8 @@
 import React from 'react';
-import { View, Text, TouchableOpacity } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import * as Icons from 'lucide-react-native';
 import { ListeningScenario } from '../../hooks/useListeningSession';
+import { colors, shadow } from '../../utils/theme';
 
 interface Props {
   scenario: ListeningScenario;
@@ -16,26 +17,29 @@ export function ListeningShadowing({ scenario, isRecording, shadowScore, spokenT
 
   return (
     <View>
-      <Text className="text-lg font-black text-slate-800 mb-1">Listen and Repeat</Text>
-      <Text className="text-slate-500 mb-4">Read the exact sentence below into the microphone.</Text>
+      <Text style={styles.title}>Listen and Repeat</Text>
+      <Text style={styles.subtitle}>Read the exact sentence below into the microphone.</Text>
 
-      <View className="bg-pink-50 p-5 rounded-2xl border border-pink-100 mb-6">
-        <Text className="text-pink-900 font-medium text-lg text-center italic">"{(scenario.shadowing as any).targetText}"</Text>
+      <View style={styles.targetContainer}>
+        <Text style={styles.targetText}>"{(scenario.shadowing as any).targetText}"</Text>
       </View>
 
       <TouchableOpacity 
-        className={`w-16 h-16 rounded-full items-center justify-center self-center shadow-md mb-6 ${isRecording ? 'bg-rose-500' : 'bg-pink-500'}`}
+        style={[styles.recordButton, isRecording ? styles.recordingActive : styles.recordingInactive]}
         onPress={onToggleRecording}
       >
         {isRecording ? <Icons.Square size={24} color="white" /> : <Icons.Mic size={24} color="white" />}
       </TouchableOpacity>
 
       {shadowScore !== null && (
-        <View className="bg-slate-50 border border-slate-200 rounded-xl p-4 items-center">
-          <Text className={`font-black text-2xl ${shadowScore > 80 ? 'text-emerald-500' : shadowScore > 50 ? 'text-amber-500' : 'text-rose-500'}`}>
+        <View style={styles.resultContainer}>
+          <Text style={[
+            styles.scoreText,
+            shadowScore > 80 ? styles.scoreGood : shadowScore > 50 ? styles.scoreMedium : styles.scoreBad
+          ]}>
             {shadowScore}% Accuracy
           </Text>
-          <Text className="text-slate-500 text-sm mt-2 text-center">
+          <Text style={styles.spokenText}>
             You said: "{spokenText}"
           </Text>
         </View>
@@ -43,3 +47,74 @@ export function ListeningShadowing({ scenario, isRecording, shadowScore, spokenT
     </View>
   );
 }
+
+const styles = StyleSheet.create({
+  title: {
+    fontSize: 18,
+    fontWeight: '900',
+    color: colors.slate800,
+    marginBottom: 4,
+  },
+  subtitle: {
+    color: colors.slate500,
+    marginBottom: 16,
+  },
+  targetContainer: {
+    backgroundColor: '#fdf2f8',
+    padding: 20,
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: '#fce7f3',
+    marginBottom: 24,
+  },
+  targetText: {
+    color: '#831843',
+    fontWeight: '500',
+    fontSize: 18,
+    textAlign: 'center',
+    fontStyle: 'italic',
+  },
+  recordButton: {
+    width: 64,
+    height: 64,
+    borderRadius: 32,
+    alignItems: 'center',
+    justifyContent: 'center',
+    alignSelf: 'center',
+    marginBottom: 24,
+    ...shadow.md,
+  },
+  recordingActive: {
+    backgroundColor: colors.rose500,
+  },
+  recordingInactive: {
+    backgroundColor: '#ec4899',
+  },
+  resultContainer: {
+    backgroundColor: colors.slate50,
+    borderWidth: 1,
+    borderColor: colors.slate200,
+    borderRadius: 12,
+    padding: 16,
+    alignItems: 'center',
+  },
+  scoreText: {
+    fontWeight: '900',
+    fontSize: 24,
+  },
+  scoreGood: {
+    color: colors.emerald500,
+  },
+  scoreMedium: {
+    color: colors.amber500,
+  },
+  scoreBad: {
+    color: colors.rose500,
+  },
+  spokenText: {
+    color: colors.slate500,
+    fontSize: 14,
+    marginTop: 8,
+    textAlign: 'center',
+  },
+});

@@ -1,7 +1,8 @@
 import React from 'react';
-import { View, Text, TouchableOpacity, ActivityIndicator } from 'react-native';
+import { View, Text, TouchableOpacity, ActivityIndicator, StyleSheet } from 'react-native';
 import * as Icons from 'lucide-react-native';
 import { Word, PronunciationResult } from '../../hooks/usePronunciationSession';
+import { colors, shadow } from '../../utils/theme';
 
 interface AnalysisWorkspaceProps {
   supported: boolean;
@@ -30,10 +31,10 @@ export function AnalysisWorkspace({
 }: AnalysisWorkspaceProps) {
   if (!supported) {
     return (
-      <View className="flex-1 items-center justify-center p-8">
-        <Icons.AlertCircle size={48} color="#ef4444" />
-        <Text className="text-xl font-black text-slate-800 mt-4 mb-2 text-center">Environment Error</Text>
-        <Text className="text-slate-600 text-center leading-relaxed">
+      <View style={styles.unsupportedContainer}>
+        <Icons.AlertCircle size={48} color={colors.red500} />
+        <Text style={styles.unsupportedTitle}>Environment Error</Text>
+        <Text style={styles.unsupportedDesc}>
           Acoustic analysis requires Web Speech API or Expo Speech Recognition support. Please test in a supported environment or rebuild the dev client.
         </Text>
       </View>
@@ -42,96 +43,96 @@ export function AnalysisWorkspace({
 
   if (!currentWord) {
     return (
-      <View className="flex-1 items-center justify-center py-20">
-        <ActivityIndicator size="large" color="#3b82f6" />
-        <Text className="text-slate-500 mt-4 font-medium">Initializing Phonetic Engine...</Text>
+      <View style={styles.loadingContainer}>
+        <ActivityIndicator size="large" color={colors.blue500} />
+        <Text style={styles.loadingText}>Initializing Phonetic Engine...</Text>
       </View>
     );
   }
 
   return (
-    <View className="flex-1 p-5">
-      <View className="bg-white rounded-3xl p-6 border border-slate-200 shadow-sm">
+    <View style={styles.container}>
+      <View style={styles.card}>
         
         {/* Header */}
-        <View className="flex-row items-center justify-between mb-8">
-          <View className="bg-slate-100 px-3 py-1 rounded-full">
-            <Text className="text-xs font-bold text-slate-600">{currentWord.category} Analysis</Text>
+        <View style={styles.header}>
+          <View style={styles.categoryBadge}>
+            <Text style={styles.categoryText}>{currentWord.category} Analysis</Text>
           </View>
-          <View className="w-2 h-2 rounded-full bg-blue-500" />
+          <View style={styles.statusDot} />
         </View>
 
         {/* Word Display */}
-        <View className="items-center mb-10">
-          <Text className="text-5xl font-black text-slate-800 mb-2">{currentWord.word}</Text>
-          <Text className="text-lg font-mono text-slate-400 tracking-widest">/{currentWord.phonetic}/</Text>
+        <View style={styles.wordDisplay}>
+          <Text style={styles.wordText}>{currentWord.word}</Text>
+          <Text style={styles.phoneticText}>/{currentWord.phonetic}/</Text>
         </View>
 
         {/* Action Row */}
-        <View className="flex-row gap-3 mb-8">
+        <View style={styles.actionRow}>
           <TouchableOpacity 
             onPress={speakWord}
-            className="flex-1 flex-row items-center justify-center bg-slate-100 py-4 rounded-2xl"
+            style={styles.referenceBtn}
           >
-            <Icons.Volume2 size={20} color="#475569" />
-            <Text className="ml-2 font-bold text-slate-700">Reference</Text>
+            <Icons.Volume2 size={20} color={colors.slate600} />
+            <Text style={styles.referenceBtnText}>Reference</Text>
           </TouchableOpacity>
 
           <TouchableOpacity 
             onPress={listening ? stopListening : startListening}
-            className={`flex-1 flex-row items-center justify-center py-4 rounded-2xl ${listening ? 'bg-red-500' : 'bg-blue-600'}`}
+            style={[styles.recordBtn, listening ? styles.recordBtnActive : styles.recordBtnDefault]}
           >
-            {listening ? <Icons.Square size={20} color="#ffffff" /> : <Icons.Mic size={20} color="#ffffff" />}
-            <Text className="ml-2 font-bold text-white">{listening ? 'Stop' : 'Record'}</Text>
+            {listening ? <Icons.Square size={20} color={colors.white} /> : <Icons.Mic size={20} color={colors.white} />}
+            <Text style={styles.recordBtnText}>{listening ? 'Stop' : 'Record'}</Text>
           </TouchableOpacity>
         </View>
 
         {/* Transcript & Loader */}
         {Boolean(transcript) && !loading && (
-          <View className="bg-slate-50 p-4 rounded-2xl border border-slate-100 mb-4 items-center">
-            <Text className="text-[10px] font-bold text-slate-400 mb-1 tracking-wider">RECOGNIZED INPUT</Text>
-            <Text className="text-base font-medium text-slate-700">"{transcript}"</Text>
+          <View style={styles.transcriptBox}>
+            <Text style={styles.transcriptLabel}>RECOGNIZED INPUT</Text>
+            <Text style={styles.transcriptText}>"{transcript}"</Text>
           </View>
         )}
 
         {loading && (
-          <View className="items-center py-4">
-            <ActivityIndicator size="small" color="#3b82f6" />
-            <Text className="text-xs font-medium text-slate-500 mt-2">Analyzing Acoustic Signature...</Text>
+          <View style={styles.loaderBox}>
+            <ActivityIndicator size="small" color={colors.blue500} />
+            <Text style={styles.loaderText}>Analyzing Acoustic Signature...</Text>
           </View>
         )}
 
         {/* Result Report */}
         {result && (
-          <View className="mt-2">
-            <View className={`flex-row items-center justify-between p-4 rounded-2xl mb-4 ${result.is_correct ? 'bg-green-50' : 'bg-red-50'}`}>
-              <View className="flex-row items-center">
-                {result.is_correct ? <Icons.CheckCircle size={20} color="#16a34a" /> : <Icons.AlertCircle size={20} color="#dc2626" />}
-                <Text className={`ml-2 font-black ${result.is_correct ? 'text-green-700' : 'text-red-700'}`}>
+          <View style={styles.resultContainer}>
+            <View style={[styles.resultHeader, result.is_correct ? styles.resultHeaderPass : styles.resultHeaderFail]}>
+              <View style={styles.resultRow}>
+                {result.is_correct ? <Icons.CheckCircle size={20} color={colors.green600} /> : <Icons.AlertCircle size={20} color={colors.red600} />}
+                <Text style={[styles.resultLabel, result.is_correct ? styles.resultLabelPass : styles.resultLabelFail]}>
                   {result.is_correct ? 'ANALYSIS PASSED' : 'RETRY REQUIRED'}
                 </Text>
               </View>
-              <View className="items-end">
-                <Text className={`text-xl font-black ${result.is_correct ? 'text-green-700' : 'text-red-700'}`}>{result.accuracy_score}</Text>
-                <Text className={`text-[10px] font-bold ${result.is_correct ? 'text-green-600' : 'text-red-600'}`}>MATCH %</Text>
+              <View style={styles.resultScoreBox}>
+                <Text style={[styles.resultScore, result.is_correct ? styles.resultScorePass : styles.resultScoreFail]}>{result.accuracy_score}</Text>
+                <Text style={[styles.resultScoreLabel, result.is_correct ? styles.resultScoreLabelPass : styles.resultScoreLabelFail]}>MATCH %</Text>
               </View>
             </View>
 
-            <View className="bg-slate-50 p-4 rounded-2xl border border-slate-100 mb-3">
-              <Text className="text-[10px] font-black text-slate-400 tracking-wider mb-2">TECHNICAL FEEDBACK</Text>
-              <Text className="text-sm leading-relaxed text-slate-700">{result.feedback}</Text>
+            <View style={styles.feedbackBox}>
+              <Text style={styles.feedbackLabel}>TECHNICAL FEEDBACK</Text>
+              <Text style={styles.feedbackText}>{result.feedback}</Text>
             </View>
 
-            <View className="bg-blue-50 p-4 rounded-2xl border border-blue-100 mb-6">
-              <Text className="text-[10px] font-black text-blue-400 tracking-wider mb-2">CALIBRATION TIP</Text>
-              <Text className="text-sm leading-relaxed text-blue-800">{result.tip}</Text>
+            <View style={styles.tipBox}>
+              <Text style={styles.tipLabel}>CALIBRATION TIP</Text>
+              <Text style={styles.tipText}>{result.tip}</Text>
             </View>
 
             <TouchableOpacity 
               onPress={nextWord}
-              className="bg-slate-900 py-4 rounded-2xl items-center shadow-md"
+              style={styles.nextBtn}
             >
-              <Text className="text-white font-bold">Proceed to Next Word</Text>
+              <Text style={styles.nextBtnText}>Proceed to Next Word</Text>
             </TouchableOpacity>
           </View>
         )}
@@ -139,3 +140,261 @@ export function AnalysisWorkspace({
     </View>
   );
 }
+
+const styles = StyleSheet.create({
+  unsupportedContainer: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: 32,
+  },
+  unsupportedTitle: {
+    fontSize: 20,
+    fontWeight: '900',
+    color: colors.slate800,
+    marginTop: 16,
+    marginBottom: 8,
+    textAlign: 'center',
+  },
+  unsupportedDesc: {
+    color: colors.slate600,
+    textAlign: 'center',
+    lineHeight: 22,
+  },
+  loadingContainer: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 80,
+  },
+  loadingText: {
+    color: colors.slate500,
+    marginTop: 16,
+    fontWeight: '500',
+  },
+  container: {
+    flex: 1,
+    padding: 20,
+  },
+  card: {
+    backgroundColor: colors.white,
+    borderRadius: 24,
+    padding: 24,
+    borderWidth: 1,
+    borderColor: colors.slate200,
+    ...shadow.sm,
+  },
+  header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: 32,
+  },
+  categoryBadge: {
+    backgroundColor: colors.slate100,
+    paddingHorizontal: 12,
+    paddingVertical: 4,
+    borderRadius: 9999,
+  },
+  categoryText: {
+    fontSize: 10,
+    fontWeight: '700',
+    color: colors.slate600,
+  },
+  statusDot: {
+    width: 8,
+    height: 8,
+    borderRadius: 9999,
+    backgroundColor: colors.blue500,
+  },
+  wordDisplay: {
+    alignItems: 'center',
+    marginBottom: 40,
+  },
+  wordText: {
+    fontSize: 48,
+    fontWeight: '900',
+    color: colors.slate800,
+    marginBottom: 8,
+  },
+  phoneticText: {
+    fontSize: 18,
+    fontFamily: 'monospace',
+    color: colors.slate400,
+    letterSpacing: 4,
+  },
+  actionRow: {
+    flexDirection: 'row',
+    gap: 12,
+    marginBottom: 32,
+  },
+  referenceBtn: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: colors.slate100,
+    paddingVertical: 16,
+    borderRadius: 16,
+  },
+  referenceBtnText: {
+    marginLeft: 8,
+    fontWeight: '700',
+    color: colors.slate700,
+  },
+  recordBtn: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 16,
+    borderRadius: 16,
+  },
+  recordBtnActive: {
+    backgroundColor: colors.red500,
+  },
+  recordBtnDefault: {
+    backgroundColor: '#2563eb',
+  },
+  recordBtnText: {
+    marginLeft: 8,
+    fontWeight: '700',
+    color: colors.white,
+  },
+  transcriptBox: {
+    backgroundColor: colors.slate50,
+    padding: 16,
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: colors.slate100,
+    marginBottom: 16,
+    alignItems: 'center',
+  },
+  transcriptLabel: {
+    fontSize: 10,
+    fontWeight: '700',
+    color: colors.slate400,
+    marginBottom: 4,
+    letterSpacing: 2,
+  },
+  transcriptText: {
+    fontSize: 14,
+    fontWeight: '500',
+    color: colors.slate700,
+  },
+  loaderBox: {
+    alignItems: 'center',
+    paddingVertical: 16,
+  },
+  loaderText: {
+    fontSize: 10,
+    fontWeight: '500',
+    color: colors.slate500,
+    marginTop: 8,
+  },
+  resultContainer: {
+    marginTop: 8,
+  },
+  resultHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    padding: 16,
+    borderRadius: 16,
+    marginBottom: 16,
+  },
+  resultHeaderPass: {
+    backgroundColor: '#f0fdf4',
+  },
+  resultHeaderFail: {
+    backgroundColor: '#fef2f2',
+  },
+  resultRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  resultLabel: {
+    marginLeft: 8,
+    fontWeight: '900',
+  },
+  resultLabelPass: {
+    color: colors.green700,
+  },
+  resultLabelFail: {
+    color: '#b91c1c',
+  },
+  resultScoreBox: {
+    alignItems: 'flex-end',
+  },
+  resultScore: {
+    fontSize: 20,
+    fontWeight: '900',
+  },
+  resultScorePass: {
+    color: colors.green700,
+  },
+  resultScoreFail: {
+    color: '#b91c1c',
+  },
+  resultScoreLabel: {
+    fontSize: 10,
+    fontWeight: '700',
+  },
+  resultScoreLabelPass: {
+    color: colors.green600,
+  },
+  resultScoreLabelFail: {
+    color: colors.red600,
+  },
+  feedbackBox: {
+    backgroundColor: colors.slate50,
+    padding: 16,
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: colors.slate100,
+    marginBottom: 12,
+  },
+  feedbackLabel: {
+    fontSize: 10,
+    fontWeight: '900',
+    color: colors.slate400,
+    letterSpacing: 2,
+    marginBottom: 8,
+  },
+  feedbackText: {
+    fontSize: 12,
+    lineHeight: 20,
+    color: colors.slate700,
+  },
+  tipBox: {
+    backgroundColor: '#eff6ff',
+    padding: 16,
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: '#dbeafe',
+    marginBottom: 24,
+  },
+  tipLabel: {
+    fontSize: 10,
+    fontWeight: '900',
+    color: '#60a5fa',
+    letterSpacing: 2,
+    marginBottom: 8,
+  },
+  tipText: {
+    fontSize: 12,
+    lineHeight: 20,
+    color: '#1e40af',
+  },
+  nextBtn: {
+    backgroundColor: colors.slate900,
+    paddingVertical: 16,
+    borderRadius: 16,
+    alignItems: 'center',
+    ...shadow.md,
+  },
+  nextBtnText: {
+    color: colors.white,
+    fontWeight: '700',
+  },
+});

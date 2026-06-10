@@ -1,9 +1,10 @@
 import React from 'react';
-import { View, Text, TouchableOpacity } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { Image } from 'expo-image';
 import { useRouter } from 'expo-router';
 import * as Icons from 'lucide-react-native';
 import { ModuleItem } from '@fluenix/shared';
+import { colors } from '../utils/theme';
 
 interface ModuleCardProps {
   moduleData: ModuleItem;
@@ -15,10 +16,10 @@ export function ModuleCard({ moduleData }: ModuleCardProps) {
 
   if (!available) {
     return (
-      <View className="bg-white border-2 border-dashed border-slate-300 rounded-[24px] p-8 items-center justify-center opacity-60 mb-6 min-h-[200px]">
+      <View style={styles.unavailableContainer}>
         <Icons.Lock size={32} color="#94a3b8" />
-        <Text className="text-slate-500 font-bold text-[20px] mb-2 mt-4 tracking-tight">{title}</Text>
-        <Text className="text-slate-400 text-center font-medium leading-relaxed">{description}</Text>
+        <Text style={styles.unavailableTitle}>{title}</Text>
+        <Text style={styles.unavailableDesc}>{description}</Text>
       </View>
     );
   }
@@ -27,33 +28,17 @@ export function ModuleCard({ moduleData }: ModuleCardProps) {
     <TouchableOpacity 
       activeOpacity={0.85}
       onPress={() => router.push(href as never)}
-      className="mb-8"
+      style={styles.cardWrapper}
     >
-      <View className="relative w-full">
+      <View style={styles.relativeContainer}>
         {/* Asymmetric Colored Backdrop */}
         <View 
-          className="absolute rounded-[16px]" 
-          style={{ 
-            top: 24, 
-            left: 0, 
-            right: 32, 
-            bottom: 0, 
-            backgroundColor: `${color}30` 
-          }} 
+          style={[styles.backdrop, { backgroundColor: `${color}30` }]} 
         />
         
         {/* Image Container */}
         {image && (
-          <View 
-            className="w-[85%] ml-auto aspect-[1.15] rounded-[16px] bg-slate-200 overflow-hidden z-10"
-            style={{
-              shadowColor: '#000',
-              shadowOffset: { width: 0, height: 10 },
-              shadowOpacity: 0.1,
-              shadowRadius: 15,
-              elevation: 4
-            }}
-          >
+          <View style={styles.imageContainer}>
             <Image 
               source={image}
               style={{ width: '100%', height: '100%' }}
@@ -64,9 +49,9 @@ export function ModuleCard({ moduleData }: ModuleCardProps) {
         )}
         
         {/* Card Content Area */}
-        <View className="w-[85%] px-4 pt-5 pb-4 z-10 self-center">
-          <Text className="font-bold text-[20px] text-slate-800 text-center mb-1.5 tracking-tight">{title}</Text>
-          <Text className="text-slate-500 font-medium text-[13px] text-center leading-[1.6]" numberOfLines={2}>
+        <View style={styles.contentArea}>
+          <Text style={styles.cardTitle}>{title}</Text>
+          <Text style={styles.cardDescription} numberOfLines={2}>
             {description}
           </Text>
         </View>
@@ -74,18 +59,114 @@ export function ModuleCard({ moduleData }: ModuleCardProps) {
       
       {/* Premium CTA Button (Outside the backdrop) */}
       <View 
-        className="self-end py-2.5 px-6 rounded-lg z-10 mr-8 mt-2"
-        style={{ 
+        style={[styles.ctaButton, { 
           backgroundColor: color,
           shadowColor: color,
-          shadowOffset: { width: 0, height: 4 },
-          shadowOpacity: 0.4,
-          shadowRadius: 8,
-          elevation: 3
-        }}
+        }]}
       >
-        <Text className="text-white font-extrabold text-[13px] tracking-widest">ENTER MODULE</Text>
+        <Text style={styles.ctaText}>ENTER MODULE</Text>
       </View>
     </TouchableOpacity>
   );
 }
+
+const styles = StyleSheet.create({
+  unavailableContainer: {
+    backgroundColor: colors.white,
+    borderWidth: 2,
+    borderStyle: 'dashed',
+    borderColor: colors.slate300,
+    borderRadius: 24,
+    padding: 32,
+    alignItems: 'center',
+    justifyContent: 'center',
+    opacity: 0.6,
+    marginBottom: 24,
+    minHeight: 200,
+  },
+  unavailableTitle: {
+    color: colors.slate500,
+    fontWeight: '700',
+    fontSize: 20,
+    marginBottom: 8,
+    marginTop: 16,
+    letterSpacing: -0.5,
+  },
+  unavailableDesc: {
+    color: colors.slate400,
+    textAlign: 'center',
+    fontWeight: '500',
+    lineHeight: 22,
+  },
+  cardWrapper: {
+    marginBottom: 32,
+  },
+  relativeContainer: {
+    position: 'relative',
+    width: '100%',
+  },
+  backdrop: {
+    position: 'absolute',
+    borderRadius: 16,
+    top: 24,
+    left: 0,
+    right: 32,
+    bottom: 0,
+  },
+  imageContainer: {
+    width: '85%',
+    marginLeft: 'auto',
+    aspectRatio: 1.15,
+    borderRadius: 16,
+    backgroundColor: colors.slate200,
+    overflow: 'hidden',
+    zIndex: 10,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 10 },
+    shadowOpacity: 0.1,
+    shadowRadius: 15,
+    elevation: 4,
+  },
+  contentArea: {
+    width: '85%',
+    paddingHorizontal: 16,
+    paddingTop: 20,
+    paddingBottom: 16,
+    zIndex: 10,
+    alignSelf: 'center',
+  },
+  cardTitle: {
+    fontWeight: '700',
+    fontSize: 20,
+    color: colors.slate800,
+    textAlign: 'center',
+    marginBottom: 6,
+    letterSpacing: -0.5,
+  },
+  cardDescription: {
+    color: colors.slate500,
+    fontWeight: '500',
+    fontSize: 13,
+    textAlign: 'center',
+    lineHeight: 21,
+  },
+  ctaButton: {
+    alignSelf: 'flex-end',
+    paddingVertical: 10,
+    paddingHorizontal: 24,
+    borderRadius: 8,
+    zIndex: 10,
+    marginRight: 32,
+    marginTop: 8,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.4,
+    shadowRadius: 8,
+    elevation: 3,
+  },
+  ctaText: {
+    color: colors.white,
+    fontWeight: '800',
+    fontSize: 13,
+    letterSpacing: 4,
+  },
+});

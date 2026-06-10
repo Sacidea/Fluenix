@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { View, Text, Animated, StyleSheet } from 'react-native';
 import * as Network from 'expo-network';
 import * as Icons from 'lucide-react-native';
+import { colors, shadow } from '../utils/theme';
 
 export function OfflineWarning() {
   const [isConnected, setIsConnected] = useState<boolean | null>(true);
@@ -59,9 +60,9 @@ export function OfflineWarning() {
         }
       ]}
     >
-      <View className="flex-row items-center justify-center pt-12 pb-2 px-4 bg-rose-500 shadow-md z-50">
+      <View style={styles.banner}>
         <Icons.WifiOff size={16} color="white" />
-        <Text className="text-white font-bold text-sm ml-2">No Internet Connection. Some features may be unavailable.</Text>
+        <Text style={styles.bannerText}>No Internet Connection. Some features may be unavailable.</Text>
       </View>
     </Animated.View>
   );
@@ -74,5 +75,22 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     zIndex: 999,
-  }
+  },
+  banner: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingTop: 48,
+    paddingBottom: 8,
+    paddingHorizontal: 16,
+    backgroundColor: colors.rose500,
+    ...shadow.md,
+    zIndex: 50,
+  },
+  bannerText: {
+    color: colors.white,
+    fontWeight: '700',
+    fontSize: 12,
+    marginLeft: 8,
+  },
 });

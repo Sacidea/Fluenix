@@ -1,6 +1,7 @@
 import React from 'react';
-import { View, Text, Modal, TouchableOpacity, ScrollView, Platform } from 'react-native';
+import { View, Text, Modal, TouchableOpacity, ScrollView, Platform, StyleSheet } from 'react-native';
 import * as Icons from 'lucide-react-native';
+import { colors, shadow } from '../utils/theme';
 
 const labelMap: Record<string, string> = {
   'scenario': 'Scenario Simulation',
@@ -21,37 +22,37 @@ export function SessionDetailModal({ visible, session, onClose }: { visible: boo
 
   return (
     <Modal visible={visible} animationType="slide" presentationStyle="pageSheet" onRequestClose={onClose}>
-      <View className="flex-1 bg-slate-50">
+      <View style={styles.root}>
         {/* Header */}
-        <View className="pt-12 pb-4 px-6 flex-row items-center justify-between border-b border-slate-200 bg-white">
+        <View style={styles.header}>
           <View>
-            <Text className="text-[10px] font-extrabold uppercase tracking-widest text-indigo-600 mb-1">
+            <Text style={styles.headerTag}>
               Operational Record
             </Text>
-            <Text className="font-bold text-lg text-slate-800">
+            <Text style={styles.headerTitle}>
               {labelMap[session.type] || session.type}
             </Text>
           </View>
-          <TouchableOpacity onPress={onClose} className="w-10 h-10 bg-slate-100 rounded-full items-center justify-center">
+          <TouchableOpacity onPress={onClose} style={styles.closeButton}>
             <Icons.X size={20} color="#64748b" />
           </TouchableOpacity>
         </View>
 
-        <ScrollView className="flex-1 p-6" showsVerticalScrollIndicator={false}>
+        <ScrollView style={styles.scrollContent} showsVerticalScrollIndicator={false}>
           {/* Main Info */}
-          <View className="bg-white p-5 rounded-2xl border border-slate-200 mb-6 flex-row justify-between items-center">
+          <View style={styles.infoCard}>
             <View>
-              <Text className="text-slate-500 text-xs mb-1">Date</Text>
-              <Text className="font-bold text-slate-800">
+              <Text style={styles.infoLabel}>Date</Text>
+              <Text style={styles.infoValue}>
                 {new Date(session.createdAt).toLocaleDateString(undefined, { 
                   year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' 
                 })}
               </Text>
             </View>
             {typeof session.score === 'number' && (
-              <View className="items-end">
-                <Text className="text-slate-500 text-xs mb-1">Score</Text>
-                <Text className={`font-black text-2xl ${session.score >= 80 ? 'text-green-600' : 'text-indigo-600'}`}>
+              <View style={styles.scoreContainer}>
+                <Text style={styles.infoLabel}>Score</Text>
+                <Text style={[styles.scoreValue, session.score >= 80 ? styles.scoreGreen : styles.scorePrimary]}>
                   {Math.round(session.score)}
                 </Text>
               </View>
@@ -59,11 +60,11 @@ export function SessionDetailModal({ visible, session, onClose }: { visible: boo
           </View>
 
           {hasFeedback ? (
-            <View className="gap-6 mb-10">
+            <View style={styles.feedbackContainer}>
               {fb.overall && (
                 <View>
-                  <Text className="font-bold text-sm text-slate-800 uppercase tracking-widest mb-3">Overall Assessment</Text>
-                  <Text className="text-slate-600 leading-relaxed bg-white p-4 rounded-xl border border-slate-200">
+                  <Text style={styles.sectionTitleDefault}>Overall Assessment</Text>
+                  <Text style={styles.feedbackText}>
                     {fb.overall}
                   </Text>
                 </View>
@@ -71,12 +72,12 @@ export function SessionDetailModal({ visible, session, onClose }: { visible: boo
 
               {fb.strengths && fb.strengths.length > 0 && (
                 <View>
-                  <Text className="font-bold text-sm text-green-600 uppercase tracking-widest mb-3">Identified Strengths</Text>
-                  <View className="bg-white p-4 rounded-xl border border-slate-200 gap-2">
+                  <Text style={styles.sectionTitleGreen}>Identified Strengths</Text>
+                  <View style={styles.feedbackListCard}>
                     {fb.strengths.map((item: string, i: number) => (
-                      <View key={i} className="flex-row items-start gap-2">
-                        <Icons.CheckCircle2 size={16} color="#16a34a" className="mt-0.5" />
-                        <Text className="text-slate-600 flex-1">{item}</Text>
+                      <View key={i} style={styles.feedbackListItem}>
+                        <Icons.CheckCircle2 size={16} color="#16a34a" style={{ marginTop: 2 }} />
+                        <Text style={styles.feedbackItemText}>{item}</Text>
                       </View>
                     ))}
                   </View>
@@ -85,12 +86,12 @@ export function SessionDetailModal({ visible, session, onClose }: { visible: boo
 
               {fb.improvements && fb.improvements.length > 0 && (
                 <View>
-                  <Text className="font-bold text-sm text-amber-600 uppercase tracking-widest mb-3">Areas for Improvement</Text>
-                  <View className="bg-white p-4 rounded-xl border border-slate-200 gap-2">
+                  <Text style={styles.sectionTitleAmber}>Areas for Improvement</Text>
+                  <View style={styles.feedbackListCard}>
                     {fb.improvements.map((item: string, i: number) => (
-                      <View key={i} className="flex-row items-start gap-2">
-                        <Icons.AlertCircle size={16} color="#d97706" className="mt-0.5" />
-                        <Text className="text-slate-600 flex-1">{item}</Text>
+                      <View key={i} style={styles.feedbackListItem}>
+                        <Icons.AlertCircle size={16} color="#d97706" style={{ marginTop: 2 }} />
+                        <Text style={styles.feedbackItemText}>{item}</Text>
                       </View>
                     ))}
                   </View>
@@ -98,10 +99,10 @@ export function SessionDetailModal({ visible, session, onClose }: { visible: boo
               )}
             </View>
           ) : (
-            <View className="items-center justify-center py-10 bg-white rounded-2xl border border-slate-200">
-              <Icons.FileQuestion size={40} color="#cbd5e1" className="mb-4" />
-              <Text className="font-bold text-slate-600">No detailed feedback available</Text>
-              <Text className="text-slate-400 text-center mt-2">This session was recorded without AI analysis.</Text>
+            <View style={styles.noFeedbackContainer}>
+              <Icons.FileQuestion size={40} color="#cbd5e1" style={{ marginBottom: 16 }} />
+              <Text style={styles.noFeedbackTitle}>No detailed feedback available</Text>
+              <Text style={styles.noFeedbackDesc}>This session was recorded without AI analysis.</Text>
             </View>
           )}
         </ScrollView>
@@ -109,3 +110,151 @@ export function SessionDetailModal({ visible, session, onClose }: { visible: boo
     </Modal>
   );
 }
+
+const styles = StyleSheet.create({
+  root: {
+    flex: 1,
+    backgroundColor: colors.slate50,
+  },
+  header: {
+    paddingTop: 48,
+    paddingBottom: 16,
+    paddingHorizontal: 24,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    borderBottomWidth: 1,
+    borderBottomColor: colors.slate200,
+    backgroundColor: colors.white,
+  },
+  headerTag: {
+    fontSize: 10,
+    fontWeight: '800',
+    textTransform: 'uppercase',
+    letterSpacing: 4,
+    color: colors.primary,
+    marginBottom: 4,
+  },
+  headerTitle: {
+    fontWeight: '700',
+    fontSize: 18,
+    color: colors.slate800,
+  },
+  closeButton: {
+    width: 40,
+    height: 40,
+    backgroundColor: colors.slate100,
+    borderRadius: 9999,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  scrollContent: {
+    flex: 1,
+    padding: 24,
+  },
+  infoCard: {
+    backgroundColor: colors.white,
+    padding: 20,
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: colors.slate200,
+    marginBottom: 24,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  infoLabel: {
+    color: colors.slate500,
+    fontSize: 10,
+    marginBottom: 4,
+  },
+  infoValue: {
+    fontWeight: '700',
+    color: colors.slate800,
+  },
+  scoreContainer: {
+    alignItems: 'flex-end',
+  },
+  scoreValue: {
+    fontWeight: '900',
+    fontSize: 24,
+  },
+  scoreGreen: {
+    color: colors.green600,
+  },
+  scorePrimary: {
+    color: colors.primary,
+  },
+  feedbackContainer: {
+    gap: 24,
+    marginBottom: 40,
+  },
+  sectionTitleDefault: {
+    fontWeight: '700',
+    fontSize: 12,
+    color: colors.slate800,
+    textTransform: 'uppercase',
+    letterSpacing: 4,
+    marginBottom: 12,
+  },
+  sectionTitleGreen: {
+    fontWeight: '700',
+    fontSize: 12,
+    color: colors.green600,
+    textTransform: 'uppercase',
+    letterSpacing: 4,
+    marginBottom: 12,
+  },
+  sectionTitleAmber: {
+    fontWeight: '700',
+    fontSize: 12,
+    color: colors.amber600,
+    textTransform: 'uppercase',
+    letterSpacing: 4,
+    marginBottom: 12,
+  },
+  feedbackText: {
+    color: colors.slate600,
+    lineHeight: 22,
+    backgroundColor: colors.white,
+    padding: 16,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: colors.slate200,
+  },
+  feedbackListCard: {
+    backgroundColor: colors.white,
+    padding: 16,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: colors.slate200,
+    gap: 8,
+  },
+  feedbackListItem: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    gap: 8,
+  },
+  feedbackItemText: {
+    color: colors.slate600,
+    flex: 1,
+  },
+  noFeedbackContainer: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 40,
+    backgroundColor: colors.white,
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: colors.slate200,
+  },
+  noFeedbackTitle: {
+    fontWeight: '700',
+    color: colors.slate600,
+  },
+  noFeedbackDesc: {
+    color: colors.slate400,
+    textAlign: 'center',
+    marginTop: 8,
+  },
+});

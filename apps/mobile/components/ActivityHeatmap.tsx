@@ -1,5 +1,6 @@
 import React from 'react';
-import { View, Text, ScrollView } from 'react-native';
+import { View, Text, ScrollView, StyleSheet } from 'react-native';
+import { colors, shadow } from '../utils/theme';
 
 const dayKey = (d: Date) => d.toISOString().slice(0, 10);
 
@@ -45,34 +46,84 @@ export function ActivityHeatmap({ sessions }: { sessions: Session[] }) {
   };
 
   return (
-    <View className="bg-white rounded-2xl p-5 border border-slate-200 shadow-sm mb-4">
-      <Text className="font-bold text-slate-800 mb-4">Activity Heatmap</Text>
+    <View style={styles.container}>
+      <Text style={styles.title}>Activity Heatmap</Text>
       <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-        <View className="flex-row gap-1">
+        <View style={styles.gridRow}>
           {cols.map((col, colIdx) => (
-            <View key={colIdx} className="flex-col gap-1">
+            <View key={colIdx} style={styles.gridCol}>
               {col.map((cell, rowIdx) => (
                 <View 
                   key={rowIdx} 
-                  className="w-4 h-4 rounded-sm"
-                  style={{ backgroundColor: getColor(cell.count) }}
+                  style={[styles.cell, { backgroundColor: getColor(cell.count) }]}
                 />
               ))}
             </View>
           ))}
         </View>
       </ScrollView>
-      <View className="flex-row justify-end items-center gap-2 mt-4">
-        <Text className="text-[10px] text-slate-400 font-bold">Less</Text>
-        <View className="flex-row gap-1">
-          <View className="w-3 h-3 rounded-sm" style={{ backgroundColor: getColor(0) }} />
-          <View className="w-3 h-3 rounded-sm" style={{ backgroundColor: getColor(1) }} />
-          <View className="w-3 h-3 rounded-sm" style={{ backgroundColor: getColor(2) }} />
-          <View className="w-3 h-3 rounded-sm" style={{ backgroundColor: getColor(3) }} />
-          <View className="w-3 h-3 rounded-sm" style={{ backgroundColor: getColor(4) }} />
+      <View style={styles.legendRow}>
+        <Text style={styles.legendLabel}>Less</Text>
+        <View style={styles.legendSwatches}>
+          <View style={[styles.legendSwatch, { backgroundColor: getColor(0) }]} />
+          <View style={[styles.legendSwatch, { backgroundColor: getColor(1) }]} />
+          <View style={[styles.legendSwatch, { backgroundColor: getColor(2) }]} />
+          <View style={[styles.legendSwatch, { backgroundColor: getColor(3) }]} />
+          <View style={[styles.legendSwatch, { backgroundColor: getColor(4) }]} />
         </View>
-        <Text className="text-[10px] text-slate-400 font-bold">More</Text>
+        <Text style={styles.legendLabel}>More</Text>
       </View>
     </View>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    backgroundColor: colors.white,
+    borderRadius: 16,
+    padding: 20,
+    borderWidth: 1,
+    borderColor: colors.slate200,
+    ...shadow.sm,
+    marginBottom: 16,
+  },
+  title: {
+    fontWeight: '700',
+    color: colors.slate800,
+    marginBottom: 16,
+  },
+  gridRow: {
+    flexDirection: 'row',
+    gap: 4,
+  },
+  gridCol: {
+    flexDirection: 'column',
+    gap: 4,
+  },
+  cell: {
+    width: 16,
+    height: 16,
+    borderRadius: 2,
+  },
+  legendRow: {
+    flexDirection: 'row',
+    justifyContent: 'flex-end',
+    alignItems: 'center',
+    gap: 8,
+    marginTop: 16,
+  },
+  legendLabel: {
+    fontSize: 10,
+    color: colors.slate400,
+    fontWeight: '700',
+  },
+  legendSwatches: {
+    flexDirection: 'row',
+    gap: 4,
+  },
+  legendSwatch: {
+    width: 12,
+    height: 12,
+    borderRadius: 2,
+  },
+});

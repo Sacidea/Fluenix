@@ -1,7 +1,8 @@
 import React from 'react';
-import { View, Text, TouchableOpacity } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import * as Icons from 'lucide-react-native';
 import { ListeningScenario } from '../../hooks/useListeningSession';
+import { colors, shadow } from '../../utils/theme';
 
 type QuestionOption = {
   id: string;
@@ -26,66 +27,63 @@ export function ListeningQuiz({ scenario, currentQuestionIdx, selectedOptionId, 
 
   return (
     <View>
-      <View className="flex-row justify-between mb-4">
-        <Text className="text-lg font-black text-slate-800 flex-1 pr-4 leading-tight">{currentQuestion.text}</Text>
-        <Text className="font-bold text-cyan-600 text-xs mt-1">Q {currentQuestionIdx + 1}/{(scenario.questions as unknown[]).length}</Text>
+      <View style={styles.header}>
+        <Text style={styles.questionText}>{currentQuestion.text}</Text>
+        <Text style={styles.questionCount}>Q {currentQuestionIdx + 1}/{(scenario.questions as unknown[]).length}</Text>
       </View>
       
-      <View className="flex-col gap-3">
+      <View style={styles.optionsList}>
         {(currentQuestion.options as unknown[]).map((optUnknown: unknown) => {
           const opt = optUnknown as QuestionOption;
           const isSelected = selectedOptionId === opt.id;
-          let bgColor = 'bg-white';
-          let borderColor = 'border-slate-200';
-          let textColor = 'text-slate-600';
+          
+          let containerStyle: any = styles.optionContainer;
+          let textStyle: any = styles.optionText;
 
           if (isAnswered) {
             if (opt.isCorrect) {
-              bgColor = 'bg-emerald-50';
-              borderColor = 'border-emerald-500';
-              textColor = 'text-emerald-800';
+              containerStyle = styles.optionCorrect;
+              textStyle = styles.optionTextCorrect;
             } else if (isSelected) {
-              bgColor = 'bg-rose-50';
-              borderColor = 'border-rose-500';
-              textColor = 'text-rose-800';
+              containerStyle = styles.optionIncorrect;
+              textStyle = styles.optionTextIncorrect;
             }
           } else if (isSelected) {
-            borderColor = 'border-cyan-500';
-            bgColor = 'bg-cyan-50';
+            containerStyle = styles.optionSelected;
           }
 
           return (
             <TouchableOpacity
               key={opt.id}
-              className={`p-4 rounded-xl border-2 ${bgColor} ${borderColor}`}
+              style={[styles.optionBase, containerStyle]}
               onPress={() => onOptionSelect(opt.id)}
               disabled={isAnswered}
             >
-              <Text className={`font-bold ${textColor}`}>{opt.text}</Text>
+              <Text style={[styles.optionTextBase, textStyle]}>{opt.text}</Text>
             </TouchableOpacity>
           );
         })}
       </View>
 
       {isAnswered && (
-        <View className="mt-6">
+        <View style={styles.feedbackContainer}>
           {(currentQuestion.options as QuestionOption[]).find(o => o.id === selectedOptionId)?.isCorrect ? (
-            <View className="bg-emerald-50 border border-emerald-200 p-4 rounded-xl mb-4">
-              <View className="flex-row items-center gap-2 mb-1">
-                <Icons.CheckCircle2 size={18} color="#10b981" />
-                <Text className="font-bold text-emerald-800">Correct!</Text>
+            <View style={[styles.feedbackBox, styles.feedbackBoxCorrect]}>
+              <View style={styles.feedbackHeader}>
+                <Icons.CheckCircle2 size={18} color={colors.emerald500} />
+                <Text style={styles.feedbackTitleCorrect}>Correct!</Text>
               </View>
-              <Text className="text-slate-600 text-sm">
+              <Text style={styles.feedbackExplanation}>
                 {(currentQuestion.options as QuestionOption[]).find(o => o.id === selectedOptionId)?.explanation}
               </Text>
             </View>
           ) : (
-            <View className="bg-rose-50 border border-rose-200 p-4 rounded-xl mb-4">
-              <View className="flex-row items-center gap-2 mb-1">
-                <Icons.XCircle size={18} color="#e11d48" />
-                <Text className="font-bold text-rose-800">Incorrect</Text>
+            <View style={[styles.feedbackBox, styles.feedbackBoxIncorrect]}>
+              <View style={styles.feedbackHeader}>
+                <Icons.XCircle size={18} color={colors.rose500} />
+                <Text style={styles.feedbackTitleIncorrect}>Incorrect</Text>
               </View>
-              <Text className="text-slate-600 text-sm">
+              <Text style={styles.feedbackExplanation}>
                 {(currentQuestion.options as QuestionOption[]).find(o => o.id === selectedOptionId)?.explanation}
               </Text>
             </View>
@@ -93,10 +91,10 @@ export function ListeningQuiz({ scenario, currentQuestionIdx, selectedOptionId, 
 
           {currentQuestionIdx < (scenario.questions as unknown[]).length - 1 && (
             <TouchableOpacity 
-              className="bg-cyan-600 py-3.5 rounded-xl items-center shadow-sm"
+              style={styles.nextButton}
               onPress={onNextQuestion}
             >
-              <Text className="text-white font-bold">Next Question</Text>
+              <Text style={styles.nextButtonText}>Next Question</Text>
             </TouchableOpacity>
           )}
         </View>
@@ -104,3 +102,107 @@ export function ListeningQuiz({ scenario, currentQuestionIdx, selectedOptionId, 
     </View>
   );
 }
+
+const styles = StyleSheet.create({
+  header: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: 16,
+  },
+  questionText: {
+    fontSize: 18,
+    fontWeight: '900',
+    color: colors.slate800,
+    flex: 1,
+    paddingRight: 16,
+    lineHeight: 24,
+  },
+  questionCount: {
+    fontWeight: '700',
+    color: colors.cyan500,
+    fontSize: 12,
+    marginTop: 4,
+  },
+  optionsList: {
+    gap: 12,
+  },
+  optionBase: {
+    padding: 16,
+    borderRadius: 12,
+    borderWidth: 2,
+  },
+  optionContainer: {
+    backgroundColor: colors.white,
+    borderColor: colors.slate200,
+  },
+  optionSelected: {
+    backgroundColor: '#ecfeff',
+    borderColor: colors.cyan500,
+  },
+  optionCorrect: {
+    backgroundColor: '#ecfdf5',
+    borderColor: colors.emerald500,
+  },
+  optionIncorrect: {
+    backgroundColor: '#fff1f2',
+    borderColor: colors.rose500,
+  },
+  optionTextBase: {
+    fontWeight: '700',
+  },
+  optionText: {
+    color: colors.slate600,
+  },
+  optionTextCorrect: {
+    color: '#065f46',
+  },
+  optionTextIncorrect: {
+    color: '#9f1239',
+  },
+  feedbackContainer: {
+    marginTop: 24,
+  },
+  feedbackBox: {
+    padding: 16,
+    borderRadius: 12,
+    borderWidth: 1,
+    marginBottom: 16,
+  },
+  feedbackBoxCorrect: {
+    backgroundColor: '#ecfdf5',
+    borderColor: '#a7f3d0',
+  },
+  feedbackBoxIncorrect: {
+    backgroundColor: '#fff1f2',
+    borderColor: '#fecdd3',
+  },
+  feedbackHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    marginBottom: 4,
+  },
+  feedbackTitleCorrect: {
+    fontWeight: '700',
+    color: '#065f46',
+  },
+  feedbackTitleIncorrect: {
+    fontWeight: '700',
+    color: '#9f1239',
+  },
+  feedbackExplanation: {
+    color: colors.slate600,
+    fontSize: 14,
+  },
+  nextButton: {
+    backgroundColor: colors.cyan500,
+    paddingVertical: 14,
+    borderRadius: 12,
+    alignItems: 'center',
+    ...shadow.sm,
+  },
+  nextButtonText: {
+    color: colors.white,
+    fontWeight: '700',
+  },
+});

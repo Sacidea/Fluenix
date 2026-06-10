@@ -1,7 +1,6 @@
 import { Stack } from 'expo-router';
 import { ClerkProvider, ClerkLoaded } from '@clerk/clerk-expo';
 import { tokenCache } from '../utils/clerk';
-import '../global.css';
 
 // Catch any errors thrown by the Layout component.
 export { ErrorBoundary } from 'expo-router';
@@ -14,8 +13,11 @@ export default function RootLayout() {
   return (
     <ClerkProvider tokenCache={tokenCache} publishableKey={publishableKey}>
       <ClerkLoaded>
-        <Stack screenOptions={{ headerShown: false }}>
+        <Stack screenOptions={{ headerShown: false, animation: 'none' }}>
           <Stack.Screen name="index" options={{ title: 'Fluenix' }} />
+          <Stack.Screen name="sign-in" options={{ title: 'Sign In' }} />
+          <Stack.Screen name="sign-up" options={{ title: 'Sign Up' }} />
+          <Stack.Screen name="dashboard" options={{ title: 'Dashboard' }} />
         </Stack>
       </ClerkLoaded>
     </ClerkProvider>

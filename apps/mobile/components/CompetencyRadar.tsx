@@ -1,6 +1,7 @@
 import React from 'react';
-import { View, Text, Dimensions } from 'react-native';
+import { View, Text, Dimensions, StyleSheet } from 'react-native';
 import Svg, { Polygon, Line, Text as SvgText, Circle } from 'react-native-svg';
+import { colors, shadow } from '../utils/theme';
 
 const COMP_MAP = {
   scenario: { label: 'Scenario', index: 0 },
@@ -68,8 +69,8 @@ export function CompetencyRadar({ sessions }: { sessions: Session[] }) {
   const gridLevels = [0.2, 0.4, 0.6, 0.8, 1];
 
   return (
-    <View className="bg-white rounded-2xl p-5 border border-slate-200 shadow-sm items-center mb-4">
-      <Text className="font-bold text-slate-800 self-start mb-4">Competency Map</Text>
+    <View style={styles.container}>
+      <Text style={styles.title}>Competency Map</Text>
       <Svg width={size} height={size}>
         {/* Grids */}
         {gridLevels.map(level => {
@@ -115,3 +116,22 @@ export function CompetencyRadar({ sessions }: { sessions: Session[] }) {
     </View>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    backgroundColor: colors.white,
+    borderRadius: 16,
+    padding: 20,
+    borderWidth: 1,
+    borderColor: colors.slate200,
+    ...shadow.sm,
+    alignItems: 'center',
+    marginBottom: 16,
+  },
+  title: {
+    fontWeight: '700',
+    color: colors.slate800,
+    alignSelf: 'flex-start',
+    marginBottom: 16,
+  },
+});

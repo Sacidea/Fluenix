@@ -1,9 +1,11 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { View, Text, TouchableOpacity, ActivityIndicator, Alert, ScrollView, Platform } from 'react-native';
+import { View, Text, TouchableOpacity, ActivityIndicator, Alert, ScrollView, StyleSheet } from 'react-native';
 import * as Icons from 'lucide-react-native';
 import { useUser, useAuth } from '@clerk/clerk-expo';
 import axios from 'axios';
 import { useRouter } from 'expo-router';
+import { API_URL } from '../../utils/apiClient';
+import { colors, shadow } from '../../utils/theme';
 
 // Types matched from backend/web
 type ScenarioType = 'stack-trace' | 'documentation';
@@ -26,22 +28,16 @@ interface ErrorScenario {
 
 const ROUNDS_PER_SESSION = 3;
 
-const getApiUrl = () => {
-  if (Platform.OS === 'web') return 'http://localhost:3001';
-  return process.env.EXPO_PUBLIC_API_URL || 'http://10.0.2.2:3001';
-};
-const API_URL = getApiUrl();
-
 // Highlight renderer for Mobile
 function renderContentWithHighlights(content: string, highlights?: { word: string; tooltip: string }[]) {
-  if (!highlights || highlights.length === 0) return <Text className="text-slate-300 font-mono text-sm leading-relaxed">{content}</Text>;
+  if (!highlights || highlights.length === 0) return <Text style={styles.monoTextLight}>{content}</Text>;
 
   const words = highlights.map(h => h.word.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'));
   const regex = new RegExp("(" + words.join('|') + ")", 'g');
   const parts = content.split(regex);
 
   return (
-    <Text className="text-slate-300 font-mono text-sm leading-relaxed">
+    <Text style={styles.monoTextLight}>
       {parts.map((part, i) => {
         const highlight = highlights.find(h => h.word === part);
         if (highlight) {
@@ -49,13 +45,9 @@ function renderContentWithHighlights(content: string, highlights?: { word: strin
             <Text 
               key={i} 
               onPress={() => {
-                if (Platform.OS === 'web') {
-                  window.alert(`Highlight: ${highlight.tooltip}`);
-                } else {
-                  Alert.alert("Highlight", highlight.tooltip);
-                }
+                Alert.alert("Highlight", highlight.tooltip);
               }}
-              className="bg-purple-900/50 text-purple-200 font-bold px-1"
+              style={styles.highlightText}
             >
               {part}
             </Text>
@@ -132,17 +124,17 @@ export function ErrorWorkspace() {
   if (sessionCount >= ROUNDS_PER_SESSION) {
     const finalScore = Math.round((correctAnswers / ROUNDS_PER_SESSION) * 100);
     return (
-      <View className="flex-1 items-center justify-center p-6 bg-white rounded-2xl border border-slate-200 mt-6 mx-5 shadow-sm">
-        <View className="w-20 h-20 bg-emerald-50 rounded-full items-center justify-center mb-6">
+      <View style={[styles.completionContainer, shadow.sm]}>
+        <View style={styles.completionIcon}>
           <Icons.CheckCircle2 size={40} color="#10B981" />
         </View>
-        <Text className="text-2xl font-black text-slate-800 mb-2">Session Complete!</Text>
-        <Text className="text-slate-500 mb-8 text-center">
+        <Text style={styles.completionTitle}>Session Complete!</Text>
+        <Text style={styles.completionSubtitle}>
           You scored {finalScore}% ({correctAnswers}/{ROUNDS_PER_SESSION} correct).
         </Text>
         
         <TouchableOpacity 
-          className="w-full bg-slate-900 py-4 rounded-xl items-center mb-4"
+          style={styles.continueBtn}
           onPress={() => {
             saveSessionProgress(finalScore);
             setSessionCount(0);
@@ -154,17 +146,17 @@ export function ErrorWorkspace() {
             fetchScenario();
           }}
         >
-          <Text className="text-white font-bold">Save Progress & Continue</Text>
+          <Text style={styles.continueBtnText}>Save Progress & Continue</Text>
         </TouchableOpacity>
 
         <TouchableOpacity 
-          className="w-full bg-slate-100 py-4 rounded-xl items-center"
+          style={styles.dashboardBtn}
           onPress={() => {
             saveSessionProgress(finalScore);
             router.replace('/dashboard');
           }}
         >
-          <Text className="text-slate-600 font-bold">Return to Dashboard</Text>
+          <Text style={styles.dashboardBtnText}>Return to Dashboard</Text>
         </TouchableOpacity>
       </View>
     );
@@ -172,9 +164,9 @@ export function ErrorWorkspace() {
 
   if (loading || !scenario) {
     return (
-      <View className="flex-1 items-center justify-center p-8 mt-6 mx-5 bg-white rounded-2xl border border-slate-200">
+      <View style={styles.loadingContainer}>
         <ActivityIndicator size="large" color="#6366f1" />
-        <Text className="text-slate-500 font-medium mt-4 text-center">
+        <Text style={styles.loadingText}>
           Analyzing logs and generating dynamic scenario...
         </Text>
       </View>
@@ -204,123 +196,123 @@ export function ErrorWorkspace() {
   const selectedOption = scenario?.options?.find(o => o.id === selectedOptionId);
 
   return (
-    <View className="px-5 pt-4 pb-8">
+    <View style={styles.workspace}>
       {/* Progress */}
-      <View className="flex-row items-center justify-between mb-4">
-        <Text className="font-mono text-xs font-black text-indigo-600 tracking-widest uppercase">
+      <View style={styles.progressRow}>
+        <Text style={styles.progressRound}>
           Round {sessionCount + 1} of {ROUNDS_PER_SESSION}
         </Text>
-        <Text className="font-mono text-[10px] font-bold text-slate-400 uppercase tracking-widest bg-slate-100 px-2 py-1 rounded">
+        <Text style={styles.difficultyBadge}>
           {scenario.difficulty}
         </Text>
       </View>
 
       {/* Visual Content Block */}
       {scenario.type === 'stack-trace' ? (
-        <View className="bg-slate-900 rounded-2xl overflow-hidden mb-6 shadow-md border border-slate-800">
-          <View className="flex-row items-center justify-between px-4 py-3 bg-slate-800 border-b border-slate-700">
-            <View className="flex-row items-center gap-1.5">
-              <View className="w-3 h-3 rounded-full bg-red-500" />
-              <View className="w-3 h-3 rounded-full bg-yellow-500" />
-              <View className="w-3 h-3 rounded-full bg-green-500" />
-              <Text className="ml-2 font-mono text-[10px] text-slate-400 font-bold uppercase">{scenario.title}</Text>
+        <View style={[styles.stackTraceContainer, shadow.md]}>
+          <View style={styles.stackTraceHeader}>
+            <View style={styles.trafficLights}>
+              <View style={[styles.trafficDot, { backgroundColor: colors.red500 }]} />
+              <View style={[styles.trafficDot, { backgroundColor: colors.yellow500 }]} />
+              <View style={[styles.trafficDot, { backgroundColor: colors.green500 }]} />
+              <Text style={styles.stackTraceTitle}>{scenario.title}</Text>
             </View>
             {scenario.eli5 && (
-              <TouchableOpacity onPress={() => setShowEli5(!showEli5)} className="flex-row items-center bg-slate-700/50 px-2 py-1 rounded">
+              <TouchableOpacity onPress={() => setShowEli5(!showEli5)} style={styles.eli5Btn}>
                 <Icons.Wand2 size={12} color="#a78bfa" />
-                <Text className="ml-1 text-[10px] font-bold text-purple-300 uppercase">ELI5</Text>
+                <Text style={styles.eli5BtnText}>ELI5</Text>
               </TouchableOpacity>
             )}
           </View>
           
-          <View className="p-4 bg-slate-900">
+          <View style={styles.stackTraceBody}>
             {renderContentWithHighlights(scenario.content, scenario.highlights)}
           </View>
 
           {showEli5 && scenario.eli5 && (
-            <View className="p-4 bg-purple-900/30 border-t border-purple-500/20 flex-row items-start gap-3">
-              <View className="mt-0.5"><Icons.Wand2 size={16} color="#c084fc" /></View>
-              <Text className="flex-1 text-purple-200 text-sm leading-relaxed">{scenario.eli5}</Text>
+            <View style={styles.eli5Container}>
+              <View style={{ marginTop: 2 }}><Icons.Wand2 size={16} color="#c084fc" /></View>
+              <Text style={styles.eli5Text}>{scenario.eli5}</Text>
             </View>
           )}
         </View>
       ) : (
-        <View className="bg-slate-50 rounded-2xl overflow-hidden mb-6 shadow-sm border border-slate-200">
-          <View className="flex-row items-center justify-between px-4 py-3 bg-slate-100 border-b border-slate-200">
-            <Text className="font-mono text-[10px] text-sky-600 font-bold uppercase tracking-widest">Documentation Snapshot</Text>
+        <View style={[styles.docContainer, shadow.sm]}>
+          <View style={styles.docHeader}>
+            <Text style={styles.docHeaderText}>Documentation Snapshot</Text>
             {scenario.eli5 && (
-              <TouchableOpacity onPress={() => setShowEli5(!showEli5)} className="flex-row items-center bg-sky-100 px-2 py-1 rounded">
+              <TouchableOpacity onPress={() => setShowEli5(!showEli5)} style={styles.docEli5Btn}>
                 <Icons.Wand2 size={12} color="#0284c7" />
-                <Text className="ml-1 text-[10px] font-bold text-sky-700 uppercase">ELI5</Text>
+                <Text style={styles.docEli5BtnText}>ELI5</Text>
               </TouchableOpacity>
             )}
           </View>
           
-          <View className="p-4 bg-white">
-            <Text className="text-slate-700 font-mono text-sm leading-relaxed">
+          <View style={styles.docBody}>
+            <Text style={styles.docBodyText}>
               {renderContentWithHighlights(scenario.content, scenario.highlights)}
             </Text>
           </View>
 
           {showEli5 && scenario.eli5 && (
-            <View className="p-4 bg-sky-50 border-t border-sky-100 flex-row items-start gap-3">
-              <View className="mt-0.5"><Icons.Wand2 size={16} color="#0ea5e9" /></View>
-              <Text className="flex-1 text-sky-800 text-sm leading-relaxed">{scenario.eli5}</Text>
+            <View style={styles.docEli5Container}>
+              <View style={{ marginTop: 2 }}><Icons.Wand2 size={16} color="#0ea5e9" /></View>
+              <Text style={styles.docEli5Text}>{scenario.eli5}</Text>
             </View>
           )}
         </View>
       )}
 
       {/* Quiz Section */}
-      <View className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm mb-6">
-        <Text className="text-lg font-bold text-slate-800 mb-5 leading-relaxed">{scenario.question}</Text>
+      <View style={[styles.quizContainer, shadow.sm]}>
+        <Text style={styles.quizQuestion}>{scenario.question}</Text>
         
-        <View className="flex-col gap-3">
+        <View style={styles.quizOptions}>
           {(scenario?.options || []).map(opt => {
+            let optStyle: any = styles.optDefault;
+            let optTextStyle: any = styles.optTextDefault;
+
             const isSelected = selectedOptionId === opt.id;
-            let bgColor = 'bg-slate-50';
-            let borderColor = 'border-slate-200';
-            let textColor = 'text-slate-700';
 
             if (isAnswered) {
               if (opt.isCorrect) {
-                bgColor = 'bg-emerald-50';
-                borderColor = 'border-emerald-200';
-                textColor = 'text-emerald-800';
+                optStyle = styles.optCorrect;
+                optTextStyle = styles.optTextCorrect;
               } else if (isSelected) {
-                bgColor = 'bg-rose-50';
-                borderColor = 'border-rose-200';
-                textColor = 'text-rose-800';
+                optStyle = styles.optWrong;
+                optTextStyle = styles.optTextWrong;
               }
             } else if (isSelected) {
-              bgColor = 'bg-indigo-50';
-              borderColor = 'border-indigo-200';
-              textColor = 'text-indigo-800';
+              optStyle = styles.optSelected;
+              optTextStyle = styles.optTextSelected;
             }
 
             return (
               <TouchableOpacity
                 key={opt.id}
-                className={`p-4 rounded-xl border ${bgColor} ${borderColor}`}
+                style={[styles.optBase, optStyle]}
                 onPress={() => handleOptionClick(opt.id)}
                 disabled={isAnswered}
               >
-                <Text className={`font-medium ${textColor} leading-relaxed`}>{opt.text}</Text>
+                <Text style={[styles.optTextBase, optTextStyle]}>{opt.text}</Text>
               </TouchableOpacity>
             );
           })}
         </View>
 
         {isAnswered && selectedOption && (
-          <View className={`mt-5 p-4 rounded-xl border ${selectedOption.isCorrect ? 'bg-emerald-50 border-emerald-200' : 'bg-rose-50 border-rose-200'}`}>
-            <View className="flex-row items-center gap-2 mb-2">
+          <View style={[
+            styles.resultBox,
+            selectedOption.isCorrect ? styles.resultCorrect : styles.resultWrong,
+          ]}>
+            <View style={styles.resultHeaderRow}>
               {selectedOption.isCorrect ? (
-                <><Icons.CheckCircle2 size={18} color="#059669" /><Text className="font-bold text-emerald-800">Correct!</Text></>
+                <><Icons.CheckCircle2 size={18} color="#059669" /><Text style={styles.resultCorrectTitle}>Correct!</Text></>
               ) : (
-                <><Icons.XCircle size={18} color="#E11D48" /><Text className="font-bold text-rose-800">Incorrect</Text></>
+                <><Icons.XCircle size={18} color="#E11D48" /><Text style={styles.resultWrongTitle}>Incorrect</Text></>
               )}
             </View>
-            <Text className={selectedOption.isCorrect ? 'text-emerald-900 leading-relaxed' : 'text-rose-900 leading-relaxed'}>
+            <Text style={selectedOption.isCorrect ? styles.resultCorrectBody : styles.resultWrongBody}>
               {selectedOption.explanation}
             </Text>
           </View>
@@ -330,10 +322,10 @@ export function ErrorWorkspace() {
       {/* Next Button */}
       {isAnswered && (
         <TouchableOpacity 
-          className="bg-indigo-600 py-4 rounded-xl items-center shadow-md mb-8"
+          style={[styles.nextBtn, shadow.md]}
           onPress={handleNext}
         >
-          <Text className="text-white font-bold text-lg">
+          <Text style={styles.nextBtnText}>
             {sessionCount + 1 >= ROUNDS_PER_SESSION ? 'Finish Session' : 'Next Scenario'}
           </Text>
         </TouchableOpacity>
@@ -342,3 +334,368 @@ export function ErrorWorkspace() {
     </View>
   );
 }
+
+const styles = StyleSheet.create({
+  workspace: {
+    paddingHorizontal: 20,
+    paddingTop: 16,
+    paddingBottom: 32,
+  },
+  progressRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: 16,
+  },
+  progressRound: {
+    fontFamily: 'monospace',
+    fontSize: 10,
+    fontWeight: '900',
+    color: colors.primary,
+    letterSpacing: 4,
+    textTransform: 'uppercase',
+  },
+  difficultyBadge: {
+    fontFamily: 'monospace',
+    fontSize: 10,
+    fontWeight: '700',
+    color: colors.slate400,
+    textTransform: 'uppercase',
+    letterSpacing: 4,
+    backgroundColor: colors.slate100,
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 4,
+  },
+  // Stack trace
+  stackTraceContainer: {
+    backgroundColor: colors.slate900,
+    borderRadius: 16,
+    overflow: 'hidden',
+    marginBottom: 24,
+    borderWidth: 1,
+    borderColor: colors.slate800,
+  },
+  stackTraceHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    backgroundColor: colors.slate800,
+    borderBottomWidth: 1,
+    borderBottomColor: colors.slate700,
+  },
+  trafficLights: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+  },
+  trafficDot: {
+    width: 12,
+    height: 12,
+    borderRadius: 9999,
+  },
+  stackTraceTitle: {
+    marginLeft: 8,
+    fontFamily: 'monospace',
+    fontSize: 10,
+    color: colors.slate400,
+    fontWeight: '700',
+    textTransform: 'uppercase',
+  },
+  eli5Btn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: 'rgba(51,65,85,0.5)',
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 4,
+  },
+  eli5BtnText: {
+    marginLeft: 4,
+    fontSize: 10,
+    fontWeight: '700',
+    color: '#d8b4fe',
+    textTransform: 'uppercase',
+  },
+  stackTraceBody: {
+    padding: 16,
+    backgroundColor: colors.slate900,
+  },
+  monoTextLight: {
+    color: colors.slate300,
+    fontFamily: 'monospace',
+    fontSize: 12,
+    lineHeight: 20,
+  },
+  highlightText: {
+    backgroundColor: 'rgba(88,28,135,0.5)',
+    color: '#e9d5ff',
+    fontWeight: '700',
+    paddingHorizontal: 4,
+  },
+  eli5Container: {
+    padding: 16,
+    backgroundColor: 'rgba(88,28,135,0.3)',
+    borderTopWidth: 1,
+    borderTopColor: 'rgba(168,85,247,0.2)',
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    gap: 12,
+  },
+  eli5Text: {
+    flex: 1,
+    color: '#e9d5ff',
+    fontSize: 12,
+    lineHeight: 20,
+  },
+  // Documentation
+  docContainer: {
+    backgroundColor: colors.slate50,
+    borderRadius: 16,
+    overflow: 'hidden',
+    marginBottom: 24,
+    borderWidth: 1,
+    borderColor: colors.slate200,
+  },
+  docHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    backgroundColor: colors.slate100,
+    borderBottomWidth: 1,
+    borderBottomColor: colors.slate200,
+  },
+  docHeaderText: {
+    fontFamily: 'monospace',
+    fontSize: 10,
+    color: '#0284c7',
+    fontWeight: '700',
+    textTransform: 'uppercase',
+    letterSpacing: 4,
+  },
+  docEli5Btn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#e0f2fe',
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 4,
+  },
+  docEli5BtnText: {
+    marginLeft: 4,
+    fontSize: 10,
+    fontWeight: '700',
+    color: '#0369a1',
+    textTransform: 'uppercase',
+  },
+  docBody: {
+    padding: 16,
+    backgroundColor: colors.white,
+  },
+  docBodyText: {
+    color: colors.slate700,
+    fontFamily: 'monospace',
+    fontSize: 12,
+    lineHeight: 20,
+  },
+  docEli5Container: {
+    padding: 16,
+    backgroundColor: '#f0f9ff',
+    borderTopWidth: 1,
+    borderTopColor: '#e0f2fe',
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    gap: 12,
+  },
+  docEli5Text: {
+    flex: 1,
+    color: '#075985',
+    fontSize: 12,
+    lineHeight: 20,
+  },
+  // Quiz
+  quizContainer: {
+    backgroundColor: colors.white,
+    padding: 20,
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: colors.slate200,
+    marginBottom: 24,
+  },
+  quizQuestion: {
+    fontSize: 18,
+    fontWeight: '700',
+    color: colors.slate800,
+    marginBottom: 20,
+    lineHeight: 26,
+  },
+  quizOptions: {
+    flexDirection: 'column',
+    gap: 12,
+  },
+  optBase: {
+    padding: 16,
+    borderRadius: 12,
+    borderWidth: 1,
+  },
+  optDefault: {
+    backgroundColor: colors.slate50,
+    borderColor: colors.slate200,
+  },
+  optCorrect: {
+    backgroundColor: '#ecfdf5',
+    borderColor: '#a7f3d0',
+  },
+  optWrong: {
+    backgroundColor: '#fff1f2',
+    borderColor: '#fecdd3',
+  },
+  optSelected: {
+    backgroundColor: colors.primaryBg,
+    borderColor: '#c7d2fe',
+  },
+  optTextBase: {
+    fontWeight: '500',
+    lineHeight: 22,
+  },
+  optTextDefault: {
+    color: colors.slate700,
+  },
+  optTextCorrect: {
+    color: '#065f46',
+  },
+  optTextWrong: {
+    color: '#9f1239',
+  },
+  optTextSelected: {
+    color: '#3730a3',
+  },
+  resultBox: {
+    marginTop: 20,
+    padding: 16,
+    borderRadius: 12,
+    borderWidth: 1,
+  },
+  resultCorrect: {
+    backgroundColor: '#ecfdf5',
+    borderColor: '#a7f3d0',
+  },
+  resultWrong: {
+    backgroundColor: '#fff1f2',
+    borderColor: '#fecdd3',
+  },
+  resultHeaderRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    marginBottom: 8,
+  },
+  resultCorrectTitle: {
+    fontWeight: '700',
+    color: '#065f46',
+  },
+  resultWrongTitle: {
+    fontWeight: '700',
+    color: '#9f1239',
+  },
+  resultCorrectBody: {
+    color: '#064e3b',
+    lineHeight: 22,
+  },
+  resultWrongBody: {
+    color: '#881337',
+    lineHeight: 22,
+  },
+  // Next button
+  nextBtn: {
+    backgroundColor: colors.primary,
+    paddingVertical: 16,
+    borderRadius: 12,
+    alignItems: 'center',
+    marginBottom: 32,
+  },
+  nextBtnText: {
+    color: colors.white,
+    fontWeight: '700',
+    fontSize: 18,
+  },
+  // Completion
+  completionContainer: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: 24,
+    backgroundColor: colors.white,
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: colors.slate200,
+    marginTop: 24,
+    marginHorizontal: 20,
+  },
+  completionIcon: {
+    width: 80,
+    height: 80,
+    backgroundColor: '#ecfdf5',
+    borderRadius: 9999,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 24,
+  },
+  completionTitle: {
+    fontSize: 24,
+    fontWeight: '900',
+    color: colors.slate800,
+    marginBottom: 8,
+  },
+  completionSubtitle: {
+    color: colors.slate500,
+    marginBottom: 32,
+    textAlign: 'center',
+  },
+  continueBtn: {
+    width: '100%',
+    backgroundColor: colors.slate900,
+    paddingVertical: 16,
+    borderRadius: 12,
+    alignItems: 'center',
+    marginBottom: 16,
+  },
+  continueBtnText: {
+    color: colors.white,
+    fontWeight: '700',
+  },
+  dashboardBtn: {
+    width: '100%',
+    backgroundColor: colors.slate100,
+    paddingVertical: 16,
+    borderRadius: 12,
+    alignItems: 'center',
+  },
+  dashboardBtnText: {
+    color: colors.slate600,
+    fontWeight: '700',
+  },
+  // Loading
+  loadingContainer: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: 32,
+    marginTop: 24,
+    marginHorizontal: 20,
+    backgroundColor: colors.white,
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: colors.slate200,
+  },
+  loadingText: {
+    color: colors.slate500,
+    fontWeight: '500',
+    marginTop: 16,
+    textAlign: 'center',
+  },
+});

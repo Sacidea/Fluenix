@@ -3,10 +3,7 @@ import { Platform } from 'react-native';
 import { useAuth, useUser } from '@clerk/clerk-expo';
 import * as Speech from 'expo-speech';
 import { apiClient, aiClient } from '../utils/apiClient';
-
-// import { ExpoSpeechRecognitionModule, useSpeechRecognitionEvent } from 'expo-speech-recognition';
-const ExpoSpeechRecognitionModule = { start: async (_opts?: any) => {}, stop: async () => {} };
-const useSpeechRecognitionEvent = (event: string, callback: any) => {};
+import { ExpoSpeechRecognitionModule, useSpeechRecognitionEvent } from 'expo-speech-recognition';
 
 export type Word = {
   id: string;
@@ -86,6 +83,21 @@ export function usePronunciationSession() {
       await apiClient.post(`/api/pronunciation/master`, { wordId }, {
         headers: token ? { Authorization: `Bearer ${token}` } : {}
       });
+      
+      // Save session to backend
+      if (user?.id) {
+        const masteredWord = words.find(w => w.id === wordId);
+        await apiClient.post('/api/sessions', {
+          userId: user.id,
+          type: 'pronunciation',
+          scenario: masteredWord?.category || 'General',
+          duration: 30, // mock duration
+          score: 100
+        }, {
+          headers: token ? { Authorization: `Bearer ${token}` } : {}
+        });
+      }
+      
       // We don't remove it from the local list immediately so the user can still see their score.
       // It will be filtered out on the next full page reload.
     } catch (e: unknown) {

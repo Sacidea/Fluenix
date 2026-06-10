@@ -1,43 +1,44 @@
 import React, { useState } from 'react';
-import { View, Text, ScrollView, TouchableOpacity } from 'react-native';
+import { View, Text, ScrollView, StyleSheet, TouchableOpacity } from 'react-native';
 import * as Icons from 'lucide-react-native';
 import { starReadingData } from '@fluenix/shared';
 import { ReadingQuiz } from './ReadingQuiz';
+import { colors, shadow } from '../../utils/theme';
 
 // A simple custom markdown renderer for the mobile reading component
 function SimpleMarkdown({ content }: { content: string }) {
   const lines = content.split('\n');
   
   return (
-    <View className="gap-2">
+    <View style={styles.markdownContainer}>
       {lines.map((line, index) => {
         const trimmed = line.trim();
-        if (!trimmed) return <View key={index} className="h-2" />;
+        if (!trimmed) return <View key={index} style={styles.spacer} />;
         
         if (trimmed.startsWith('# ')) {
-          return <Text key={index} className="text-2xl font-black text-slate-800 font-serif mt-4 mb-2">{trimmed.substring(2)}</Text>;
+          return <Text key={index} style={styles.heading1}>{trimmed.substring(2)}</Text>;
         }
         if (trimmed.startsWith('## ')) {
-          return <Text key={index} className="text-xl font-bold text-slate-800 mt-3 mb-1">{trimmed.substring(3)}</Text>;
+          return <Text key={index} style={styles.heading2}>{trimmed.substring(3)}</Text>;
         }
         if (trimmed.startsWith('* ')) {
           return (
-            <View key={index} className="flex-row items-start pr-4 mb-1">
-              <Text className="text-slate-600 mr-2">•</Text>
-              <Text className="text-slate-600 text-base leading-relaxed flex-1">{renderBoldParts(trimmed.substring(2))}</Text>
+            <View key={index} style={styles.bulletRow}>
+              <Text style={styles.bulletDot}>•</Text>
+              <Text style={styles.bulletText}>{renderBoldParts(trimmed.substring(2))}</Text>
             </View>
           );
         }
         if (trimmed.match(/^[0-9]+\./)) {
            return (
-            <View key={index} className="flex-row items-start pr-4 mb-1">
-              <Text className="text-slate-600 font-bold mr-2">{trimmed.split('.')[0]}.</Text>
-              <Text className="text-slate-600 text-base leading-relaxed flex-1">{renderBoldParts(trimmed.substring(trimmed.indexOf('.') + 1).trim())}</Text>
+            <View key={index} style={styles.bulletRow}>
+              <Text style={styles.numberedBullet}>{trimmed.split('.')[0]}.</Text>
+              <Text style={styles.bulletText}>{renderBoldParts(trimmed.substring(trimmed.indexOf('.') + 1).trim())}</Text>
             </View>
           );
         }
         
-        return <Text key={index} className="text-slate-600 text-base leading-relaxed mb-2">{renderBoldParts(trimmed)}</Text>;
+        return <Text key={index} style={styles.paragraph}>{renderBoldParts(trimmed)}</Text>;
       })}
     </View>
   );
@@ -48,7 +49,7 @@ function renderBoldParts(text: string) {
   const parts = text.split(/(\*\*.*?\*\*)/g);
   return parts.map((part, i) => {
     if (part.startsWith('**') && part.endsWith('**')) {
-      return <Text key={i} className="font-bold text-slate-800">{part.slice(2, -2)}</Text>;
+      return <Text key={i} style={styles.boldSlate800}>{part.slice(2, -2)}</Text>;
     }
     return <Text key={i}>{part}</Text>;
   });
@@ -63,14 +64,14 @@ export function BehavioralReading() {
 
   if (activeChapter) {
     return (
-      <ScrollView style={{ flex: 1 }} className="bg-slate-50" contentContainerClassName="px-4 py-6 pb-12">
+      <ScrollView style={styles.scrollView} contentContainerStyle={styles.chapterScrollContent}>
         <View>
           <TouchableOpacity 
-            className="flex-row items-center mb-6 py-2"
+            style={styles.backButton}
             onPress={() => setSelectedChapterId(null)}
           >
             <Icons.ChevronLeft size={24} color="#3b82f6" />
-            <Text className="text-blue-500 font-bold ml-1 text-base">Back to Chapters</Text>
+            <Text style={styles.backButtonText}>Back to Chapters</Text>
           </TouchableOpacity>
 
           <SimpleMarkdown content={activeChapter.content} />
@@ -86,29 +87,29 @@ export function BehavioralReading() {
   }
 
   return (
-    <ScrollView style={{ flex: 1 }} className="bg-slate-50" contentContainerClassName="px-4 pt-6 pb-12">
-      <View className="mb-6 flex-row items-center gap-3">
+    <ScrollView style={styles.scrollView} contentContainerStyle={styles.listScrollContent}>
+      <View style={styles.headerRow}>
         <Icons.BookText size={28} color="#8b5cf6" />
-        <Text className="text-2xl font-black text-slate-800 font-serif">Reading Practice</Text>
+        <Text style={styles.headerTitle}>Reading Practice</Text>
       </View>
-      <Text className="text-slate-600 mb-8 leading-relaxed">
+      <Text style={styles.introText}>
         Select a chapter to read about the STAR method and test your knowledge with interactive quizzes.
       </Text>
 
-      <View className="gap-3 pb-12">
+      <View style={styles.chapterList}>
         {chapters.map((chapter) => (
           <TouchableOpacity 
             key={chapter.id}
-            className="bg-white rounded-2xl border border-slate-200 p-5 flex-row items-center justify-between shadow-sm"
+            style={[styles.chapterCard, shadow.sm]}
             onPress={() => setSelectedChapterId(chapter.id)}
           >
-            <View className="flex-1 mr-4">
-              <Text className="text-base font-bold text-slate-800 mb-1">{chapter.title}</Text>
-              <Text className="text-sm text-slate-500 line-clamp-1" numberOfLines={1}>
+            <View style={styles.chapterTextContainer}>
+              <Text style={styles.chapterTitle}>{chapter.title}</Text>
+              <Text style={styles.chapterPreview} numberOfLines={1}>
                 {chapter.content.substring(0, 80).replace(/[#*]/g, '').trim()}...
               </Text>
             </View>
-            <View className="w-10 h-10 bg-purple-50 rounded-full items-center justify-center">
+            <View style={styles.chapterIcon}>
               <Icons.ChevronRight size={20} color="#8b5cf6" />
             </View>
           </TouchableOpacity>
@@ -117,3 +118,138 @@ export function BehavioralReading() {
     </ScrollView>
   );
 }
+
+const styles = StyleSheet.create({
+  scrollView: {
+    flex: 1,
+    backgroundColor: colors.slate50,
+  },
+  chapterScrollContent: {
+    paddingHorizontal: 16,
+    paddingVertical: 24,
+    paddingBottom: 48,
+  },
+  listScrollContent: {
+    paddingHorizontal: 16,
+    paddingTop: 24,
+    paddingBottom: 48,
+  },
+  headerRow: {
+    marginBottom: 24,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+  },
+  headerTitle: {
+    fontSize: 24,
+    fontWeight: '900',
+    color: colors.slate800,
+    fontFamily: 'serif',
+  },
+  introText: {
+    color: colors.slate600,
+    marginBottom: 32,
+    lineHeight: 26,
+  },
+  chapterList: {
+    gap: 12,
+    paddingBottom: 48,
+  },
+  chapterCard: {
+    backgroundColor: colors.white,
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: colors.slate200,
+    padding: 20,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  chapterTextContainer: {
+    flex: 1,
+    marginRight: 16,
+  },
+  chapterTitle: {
+    fontSize: 14,
+    fontWeight: '700',
+    color: colors.slate800,
+    marginBottom: 4,
+  },
+  chapterPreview: {
+    fontSize: 12,
+    color: colors.slate500,
+  },
+  chapterIcon: {
+    width: 40,
+    height: 40,
+    backgroundColor: '#faf5ff',
+    borderRadius: 9999,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  backButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 24,
+    paddingVertical: 8,
+  },
+  backButtonText: {
+    color: '#3b82f6',
+    fontWeight: '700',
+    marginLeft: 4,
+    fontSize: 14,
+  },
+  // SimpleMarkdown styles
+  markdownContainer: {
+    gap: 8,
+  },
+  spacer: {
+    height: 8,
+  },
+  heading1: {
+    fontSize: 24,
+    fontWeight: '900',
+    color: colors.slate800,
+    fontFamily: 'serif',
+    marginTop: 16,
+    marginBottom: 8,
+  },
+  heading2: {
+    fontSize: 20,
+    fontWeight: '700',
+    color: colors.slate800,
+    marginTop: 12,
+    marginBottom: 4,
+  },
+  bulletRow: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    paddingRight: 16,
+    marginBottom: 4,
+  },
+  bulletDot: {
+    color: colors.slate600,
+    marginRight: 8,
+  },
+  numberedBullet: {
+    color: colors.slate600,
+    fontWeight: '700',
+    marginRight: 8,
+  },
+  bulletText: {
+    color: colors.slate600,
+    fontSize: 14,
+    lineHeight: 26,
+    flex: 1,
+  },
+  paragraph: {
+    color: colors.slate600,
+    fontSize: 14,
+    lineHeight: 26,
+    marginBottom: 8,
+  },
+  boldSlate800: {
+    fontWeight: '700',
+    color: colors.slate800,
+  },
+});
