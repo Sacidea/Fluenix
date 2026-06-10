@@ -38,7 +38,7 @@ export default function DashboardScreen() {
 
   useEffect(() => {
     if (isLoaded && !isSignedIn) {
-      router.replace('/sign-in');
+      // router.replace('/sign-in'); // Disabled for Bypass Auth test
     }
   }, [isLoaded, isSignedIn]);
 

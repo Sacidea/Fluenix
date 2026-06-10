@@ -3,7 +3,9 @@ import { View, Text, TouchableOpacity, ActivityIndicator, ScrollView, Alert } fr
 import { useListeningSession } from '../../hooks/useListeningSession';
 import * as Icons from 'lucide-react-native';
 import * as Speech from 'expo-speech';
-import { ExpoSpeechRecognitionModule, useSpeechRecognitionEvent } from 'expo-speech-recognition';
+// import { ExpoSpeechRecognitionModule, useSpeechRecognitionEvent } from 'expo-speech-recognition';
+const ExpoSpeechRecognitionModule = { start: async (_opts?: any) => {}, stop: async () => {} };
+const useSpeechRecognitionEvent = (event: string, callback: any) => {};
 
 import { usePermissions } from '../../hooks/usePermissions';
 

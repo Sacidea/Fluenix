@@ -66,8 +66,9 @@
           "microphonePermission": "Allow Fluenix to access the microphone for voice analysis and speaking exercises."
         }
       ],
-      "@sentry/react-native",
-      "expo-image"
+      "expo-image",
+      "expo-status-bar",
+      "expo-web-browser"
     ],
     "extra": {
       "router": {},

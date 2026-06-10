@@ -4,7 +4,9 @@ import { useAuth, useUser } from '@clerk/clerk-expo';
 import * as Speech from 'expo-speech';
 import { apiClient, aiClient } from '../utils/apiClient';
 
-import { ExpoSpeechRecognitionModule, useSpeechRecognitionEvent } from 'expo-speech-recognition';
+// import { ExpoSpeechRecognitionModule, useSpeechRecognitionEvent } from 'expo-speech-recognition';
+const ExpoSpeechRecognitionModule = { start: async (_opts?: any) => {}, stop: async () => {} };
+const useSpeechRecognitionEvent = (event: string, callback: any) => {};
 
 export type Word = {
   id: string;

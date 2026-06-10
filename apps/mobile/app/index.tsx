@@ -58,7 +58,7 @@ export default function IndexScreen() {
           </TouchableOpacity>
           <TouchableOpacity 
             className="w-full py-3 rounded-xl items-center mb-4 bg-red-500"
-            onPress={() => router.push('/scenario')}
+            onPress={() => router.push('/dashboard')}
           >
             <Text className="text-white font-bold text-lg">Bypass Auth (Test)</Text>
           </TouchableOpacity>

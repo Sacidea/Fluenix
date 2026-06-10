@@ -2,21 +2,21 @@ const { getDefaultConfig } = require("expo/metro-config");
 const { withNativeWind } = require("nativewind/metro");
 const path = require("path");
 
-const workspaceRoot = path.resolve(__dirname, '../..');
 const projectRoot = __dirname;
+const workspaceRoot = path.resolve(projectRoot, "../..");
 
 const config = getDefaultConfig(projectRoot);
 
-// 1. Watch all files within the monorepo
+// Ensure Metro watches the monorepo root so it can resolve symlinks to packages/shared
 config.watchFolders = [workspaceRoot];
 
-// 2. Let Metro know where to resolve packages and in what order
+// Let Metro know where to resolve packages and in what order
 config.resolver.nodeModulesPaths = [
-  path.resolve(projectRoot, 'node_modules'),
-  path.resolve(workspaceRoot, 'node_modules'),
+  path.resolve(projectRoot, "node_modules"),
+  path.resolve(workspaceRoot, "node_modules"),
 ];
 
-// 3. Force Metro to resolve (sub)dependencies only from the `nodeModulesPaths`
-config.resolver.disableHierarchicalLookup = true;
+// Disable package exports to fix @babel/runtime v7.26.0 breaking Metro resolution
+config.resolver.unstable_enablePackageExports = false;
 
 module.exports = withNativeWind(config, { input: "./global.css" });
