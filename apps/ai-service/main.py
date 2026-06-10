@@ -76,7 +76,7 @@ def scenario_chat(data: dict):
         if context:
             system_prompt += f"\n\n[SCENARIO CONTEXT: {context}. You must strictly adhere to this exact context. Initiate the conversation by addressing this scenario directly.]"
         
-        def stream_generator():
+        def sse_generator():
             with client.messages.stream(
                 model="claude-sonnet-4-6",
                 max_tokens=4096,
@@ -89,18 +89,27 @@ def scenario_chat(data: dict):
                 messages=messages
             ) as stream:
                 for text in stream.text_stream:
-                    yield text
+                    # Format as Server-Sent Event (SSE) chunk
+                    yield f"data: {text}\n\n"
 
         # Check if client explicitly requested a stream via query or body
         # For backwards compatibility, if stream: true is passed, use StreamingResponse
         if data.get("stream", False):
-            return StreamingResponse(stream_generator(), media_type="text/event-stream")
+            return StreamingResponse(sse_generator(), media_type="text/event-stream")
         else:
             # Non-streaming fallback
-            full_text = ""
-            for text in stream_generator():
-                full_text += text
-            return {"reply": full_text}
+            response = client.messages.create(
+                model="claude-sonnet-4-6",
+                max_tokens=4096,
+                system=[{
+                    "type": "text",
+                    "text": system_prompt,
+                    "cache_control": {"type": "ephemeral"}
+                }],
+                extra_headers={"anthropic-beta": "prompt-caching-2024-07-31"},
+                messages=messages
+            )
+            return {"reply": response.content[0].text}
 
     except Exception as e:
         traceback.print_exc()
