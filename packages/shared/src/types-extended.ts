@@ -25,7 +25,7 @@ export interface ListeningScenario {
   level: string;
   title: string;
   context: string;
-  dialogue: unknown[];
+  dialogue: { speaker: string, gender?: string, text: string, translation?: string, startTime?: number, endTime?: number }[];
   questions: unknown[];
   dictation: unknown;
   shadowing: unknown;

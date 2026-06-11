@@ -1,6 +1,8 @@
 export interface DialogueLine {
   speaker: string
+  gender?: string
   text: string
+  translation?: string
   // Optional hint for idioms or jargon used in this line
   idiomHighlight?: { word: string; meaning: string }
 }

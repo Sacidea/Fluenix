@@ -12,7 +12,7 @@ export interface ListeningScenario {
   level: string
   title: string
   context: string
-  dialogue: { speaker: string, text: string, translation: string, startTime?: number, endTime?: number }[]
+  dialogue: { speaker: string, gender?: string, text: string, translation: string, startTime?: number, endTime?: number }[]
   questions: { id: string, text: string, options: { id: string, text: string, isCorrect: boolean, explanation: string }[], correctAnswer: string, explanation: string }[]
   dictation: { audioUrl?: string, correctText: string, answers: string[], textWithBlanks: string }
   shadowing: { audioUrl?: string, text: string, translation: string, targetText: string }
