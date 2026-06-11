@@ -248,9 +248,13 @@ export function ListeningWorkspace() {
               isAnswered={isAnswered}
               onOptionSelect={handleOptionClick}
               onNextQuestion={() => {
-                setCurrentQuestionIdx(p => p + 1);
-                setSelectedOptionId(null);
-                setIsAnswered(false);
+                if (currentQuestionIdx < (scenario.questions as unknown[]).length - 1) {
+                  setCurrentQuestionIdx(p => p + 1);
+                  setSelectedOptionId(null);
+                  setIsAnswered(false);
+                } else {
+                  loadNextScenario();
+                }
               }}
             />
           )}

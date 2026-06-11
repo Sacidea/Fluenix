@@ -89,14 +89,14 @@ export function ListeningQuiz({ scenario, currentQuestionIdx, selectedOptionId, 
             </View>
           )}
 
-          {currentQuestionIdx < (scenario.questions as unknown[]).length - 1 && (
-            <TouchableOpacity 
-              style={styles.nextButton}
-              onPress={onNextQuestion}
-            >
-              <Text style={styles.nextButtonText}>Next Question</Text>
-            </TouchableOpacity>
-          )}
+          <TouchableOpacity 
+            style={[styles.nextButton, currentQuestionIdx === (scenario.questions as unknown[]).length - 1 && { backgroundColor: '#0891b2' }]}
+            onPress={onNextQuestion}
+          >
+            <Text style={styles.nextButtonText}>
+              {currentQuestionIdx < (scenario.questions as unknown[]).length - 1 ? 'Next Question' : 'Start Next AI Scenario'}
+            </Text>
+          </TouchableOpacity>
         </View>
       )}
     </View>
