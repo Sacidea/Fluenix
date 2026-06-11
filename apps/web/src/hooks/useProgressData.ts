@@ -1,13 +1,8 @@
 import { useState, useCallback, useEffect } from 'react'
 import { apiClient } from '@/lib/apiClient'
 import { useAuth } from '@clerk/nextjs'
-
-export type Stats = {
-    totalSessions: number
-    averageScore: number
-    streak: number
-    lastSession: string | null
-}
+import type { DashboardStats } from '@fluenix/shared'
+import { API_ROUTES } from '@fluenix/shared'
 
 export type Session = {
     id: string
@@ -21,7 +16,7 @@ export type Session = {
 
 export function useProgressData(userId?: string) {
     const { getToken } = useAuth()
-    const [stats, setStats] = useState<Stats | null>(null)
+    const [stats, setStats] = useState<DashboardStats | null>(null)
     const [sessions, setSessions] = useState<Session[]>([])
     const [loading, setLoading] = useState(true)
     const [error, setError] = useState(false)
@@ -35,8 +30,8 @@ export function useProgressData(userId?: string) {
             if (!token) return // Wait for Clerk to initialize
             const headers = { Authorization: `Bearer ${token}` }
             const [statsRes, sessionsRes] = await Promise.all([
-                apiClient.get(`/api/sessions/stats/${userId}`, { headers }),
-                apiClient.get(`/api/sessions/user/${userId}`, { headers })
+                apiClient.get(`${API_ROUTES.SESSIONS}/stats/${userId}`, { headers }),
+                apiClient.get(`${API_ROUTES.SESSIONS}/user/${userId}`, { headers })
             ])
             setStats(statsRes.data)
             setSessions(sessionsRes.data)

@@ -15,15 +15,12 @@ import { colors, shadow } from '../../utils/theme';
 // Dummy API functions for mobile, normally you would share these or use a mobile-friendly fetch
 async function getDashboardStats(userId: string, token: string | null) {
   try {
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 2000); // 2 saniye içinde yanıt gelmezse iptal et (Backend kapalıysa beklemesin)
-    
-    const res = await apiClient.get(`/api/sessions/stats/${userId}`, {
+    const res = await apiClient.get(`/api/sessions/stats/${userId}?full=true`, {
       headers: token ? { Authorization: `Bearer ${token}` } : undefined,
-      signal: controller.signal
     });
-    clearTimeout(timeoutId);
-    return res.data;
+    const data = res.data;
+    // Return stats from the full response (progress page format)
+    return data.stats || data;
   } catch {
     return { totalSessions: 0, averageScore: 0, streak: 0 };
   }

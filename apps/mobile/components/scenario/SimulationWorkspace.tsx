@@ -1,8 +1,19 @@
-import React, { useRef } from 'react';
+import React, { useRef, useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, ScrollView, KeyboardAvoidingView, Platform, ActivityIndicator, StyleSheet } from 'react-native';
 import * as Icons from 'lucide-react-native';
 import { Message } from '@fluenix/shared';
 import { colors, shadow } from '../../utils/theme';
+
+let ExpoSpeechRecognitionModule: any = null;
+let useSpeechRecognitionEvent: any = (_event: string, _handler: any) => {};
+
+try {
+  const speechRecognition = require('expo-speech-recognition');
+  ExpoSpeechRecognitionModule = speechRecognition.ExpoSpeechRecognitionModule;
+  useSpeechRecognitionEvent = speechRecognition.useSpeechRecognitionEvent;
+} catch (e) {
+  // Speech recognition not available
+}
 
 interface Props {
   durationStr: string;
@@ -24,11 +35,56 @@ export function SimulationWorkspace({
   endAndAnalyzeSession,
 }: Props) {
   const scrollViewRef = useRef<ScrollView>(null);
+  const [isRecording, setIsRecording] = useState(false);
+
+  // Speech recognition event handlers
+  useSpeechRecognitionEvent('result', (e: any) => {
+    if (e.results && e.results.length > 0) {
+      const finalResult = e.results.find((r: any) => r.isFinal);
+      const heard = finalResult ? finalResult.transcript : e.results[0].transcript;
+      setInput(heard);
+      if (finalResult) {
+        setIsRecording(false);
+        ExpoSpeechRecognitionModule?.stop();
+      }
+    }
+  });
+
+  useSpeechRecognitionEvent('end', () => setIsRecording(false));
+  useSpeechRecognitionEvent('error', () => setIsRecording(false));
+
+  const toggleRecording = async () => {
+    if (!ExpoSpeechRecognitionModule) {
+      console.warn('Speech recognition not available on this device');
+      return;
+    }
+    
+    try {
+      if (isRecording) {
+        await ExpoSpeechRecognitionModule.stop();
+        setIsRecording(false);
+      } else {
+        setInput('');
+        await ExpoSpeechRecognitionModule.start({
+          lang: 'en-US',
+          interimResults: true,
+          maxAlternatives: 1,
+        });
+        setIsRecording(true);
+      }
+    } catch (e) {
+      console.error('Speech recognition error:', e);
+      setIsRecording(false);
+    }
+  };
+
+  const voiceAvailable = !!ExpoSpeechRecognitionModule;
 
   return (
     <KeyboardAvoidingView 
       style={styles.container} 
-      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 20}
     >
       <View style={styles.topBar}>
         <View style={styles.timerRow}>
@@ -70,18 +126,33 @@ export function SimulationWorkspace({
       </ScrollView>
 
       <View style={styles.inputArea}>
-        <View style={styles.hintRow}>
-           <Icons.Info size={14} color={colors.slate400} />
-           <Text style={styles.hintText}>Use your keyboard's mic icon to speak.</Text>
-        </View>
+        {isRecording && (
+          <View style={styles.recordingIndicator}>
+            <View style={styles.recordingDot} />
+            <Text style={styles.recordingText}>Listening...</Text>
+          </View>
+        )}
         <View style={styles.inputRow}>
+          {voiceAvailable && (
+            <TouchableOpacity 
+              style={[styles.micBtn, isRecording && styles.micBtnActive]}
+              onPress={toggleRecording}
+              disabled={loading}
+            >
+              {isRecording ? (
+                <Icons.MicOff size={20} color={colors.white} />
+              ) : (
+                <Icons.Mic size={20} color={colors.slate500} />
+              )}
+            </TouchableOpacity>
+          )}
           <TextInput
             style={styles.textInput}
-            placeholder="Type your response..."
+            placeholder={isRecording ? "Listening..." : "Type or speak your response..."}
             value={input}
             onChangeText={setInput}
             onSubmitEditing={() => sendMessage()}
-            editable={!loading}
+            editable={!loading && !isRecording}
             multiline
             maxLength={500}
           />
@@ -202,24 +273,45 @@ const styles = StyleSheet.create({
     backgroundColor: colors.white,
     borderTopWidth: 1,
     borderTopColor: colors.slate200,
-    paddingBottom: 32,
-    paddingTop: 16,
+    paddingBottom: 60,
+    paddingTop: 12,
   },
-  hintRow: {
+  recordingIndicator: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 8,
     marginBottom: 8,
     paddingHorizontal: 8,
   },
-  hintText: {
-    fontSize: 10,
-    color: colors.slate400,
+  recordingDot: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    backgroundColor: colors.red500,
+  },
+  recordingText: {
+    fontSize: 12,
+    color: colors.red500,
+    fontWeight: '600',
   },
   inputRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 12,
+    gap: 8,
+  },
+  micBtn: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: colors.slate100,
+    borderWidth: 1,
+    borderColor: colors.slate200,
+  },
+  micBtnActive: {
+    backgroundColor: colors.red500,
+    borderColor: colors.red500,
   },
   textInput: {
     flex: 1,

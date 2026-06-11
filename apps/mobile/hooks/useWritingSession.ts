@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useAuth, useUser } from '@clerk/clerk-expo';
 import { WritingExerciseId, writingExercises, WritingMission } from '@fluenix/shared';
+import { parseAIResponse, createSessionPayload, API_ROUTES, AI_ROUTES } from '@fluenix/shared';
 import { apiClient, aiClient } from '../utils/apiClient';
 
 export function useWritingSession() {
@@ -29,7 +30,7 @@ export function useWritingSession() {
     try {
       const token = await getToken();
       const res = await apiClient.post(
-        `/api/writing/next`,
+        API_ROUTES.WRITING_NEXT,
         { level, category },
         { headers: { Authorization: `Bearer ${token}` } }
       );
@@ -66,7 +67,7 @@ export function useWritingSession() {
     try {
       const token = await getToken();
       
-      const res = await aiClient.post(`/writing/analyze`, {
+      const res = await aiClient.post(AI_ROUTES.WRITING_ANALYZE, {
         exercise: exerciseId,
         text: userText,
         context: activeMission.context,
@@ -77,19 +78,19 @@ export function useWritingSession() {
       });
 
       const raw = res.data.feedback;
-      const clean = raw.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
-      const parsed = typeof clean === 'string' ? JSON.parse(clean) : clean;
+      const parsed = parseAIResponse<Record<string, unknown>>(raw);
       setFeedback(parsed);
 
       if (user) {
-        await apiClient.post(`/api/sessions`, {
+        const sessionPayload = createSessionPayload({
           userId: user.id,
           type: 'writing',
           scenario: activeMission.title,
           duration: 0,
-          score: parsed.overall_score ?? null,
-          feedback: parsed 
-        }, {
+          score: (parsed as any).overall_score ?? 0,
+          feedback: parsed
+        });
+        await apiClient.post(API_ROUTES.SESSIONS, sessionPayload, {
           headers: token ? { Authorization: `Bearer ${token}` } : undefined
         });
       }

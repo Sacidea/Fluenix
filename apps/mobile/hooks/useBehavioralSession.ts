@@ -1,27 +1,8 @@
 import { useState, useEffect } from 'react';
 import { useAuth, useUser } from '@clerk/clerk-expo';
+import type { BehavioralQuestion, StarFeedback } from '@fluenix/shared';
+import { parseAIResponse, API_ROUTES, AI_ROUTES } from '@fluenix/shared';
 import { apiClient, aiClient } from '../utils/apiClient';
-
-export interface BehavioralQuestion {
-  id: string;
-  category: string;
-  context: string;
-  question: string;
-}
-
-export type StarFeedback = {
-  overall_score: number;
-  leadership_alignment: number;
-  english_quality: number;
-  strengths: string[];
-  improvements: string[];
-  detailed_analysis: {
-    situation: string;
-    task: string;
-    action: string;
-    result: string;
-  };
-};
 
 
 
@@ -54,7 +35,7 @@ export function useBehavioralSession() {
       const token = await getToken();
       
       const res = await apiClient.post(
-        `/api/behavioral/next`,
+        API_ROUTES.BEHAVIORAL_NEXT,
         { level },
         { headers: { Authorization: `Bearer ${token}` } }
       );
@@ -88,7 +69,7 @@ export function useBehavioralSession() {
 
     try {
       const token = await getToken();
-      const res = await aiClient.post(`/behavioral/analyze`, {
+      const res = await aiClient.post(AI_ROUTES.BEHAVIORAL_ANALYZE, {
         question: activeQuestion.question,
         category: activeQuestion.category,
         context: activeQuestion.context,
@@ -104,13 +85,13 @@ export function useBehavioralSession() {
       });
       
       const rawFeedback = res.data.analysis;
-      const parsed = JSON.parse(rawFeedback.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim()) as StarFeedback;
+      const parsed = parseAIResponse<StarFeedback>(rawFeedback);
       setFeedback(parsed);
       
       // Save session to backend
       try {
         if (user?.id) {
-          await apiClient.post('/api/sessions', {
+          await apiClient.post(API_ROUTES.SESSIONS, {
             userId: user.id,
             type: 'behavioral',
             scenario: activeQuestion.category,

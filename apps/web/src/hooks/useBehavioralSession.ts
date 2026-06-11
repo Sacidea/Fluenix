@@ -3,27 +3,8 @@ import axios from 'axios'
 import { apiClient, aiClient } from '@/lib/apiClient'
 import { useAuth } from '@clerk/nextjs'
 import { useLevel } from '@/context/LevelContext'
-
-export interface BehavioralQuestion {
-  id: string
-  category: string
-  context: string
-  question: string
-}
-
-export type StarFeedback = {
-  overall_score: number
-  leadership_alignment: number
-  english_quality: number
-  strengths: string[]
-  improvements: string[]
-  detailed_analysis: {
-    situation: string
-    task: string
-    action: string
-    result: string
-  }
-}
+import type { BehavioralQuestion, StarFeedback } from '@fluenix/shared'
+import { parseAIResponse, API_ROUTES, AI_ROUTES } from '@fluenix/shared'
 
 export function useBehavioralSession() {
   const { getToken } = useAuth()
@@ -55,7 +36,7 @@ export function useBehavioralSession() {
       console.log("API URL:", process.env.NEXT_PUBLIC_API_URL)
       
       const res = await apiClient.post(
-        '/api/behavioral/next',
+        API_ROUTES.BEHAVIORAL_NEXT,
         { level },
         { headers: { Authorization: `Bearer ${token}` } }
       )
@@ -96,7 +77,7 @@ export function useBehavioralSession() {
 
     try {
       const token = await getToken()
-      const res = await aiClient.post('/behavioral/analyze', {
+      const res = await aiClient.post(AI_ROUTES.BEHAVIORAL_ANALYZE, {
         question: activeQuestion.question,
         category: activeQuestion.category,
         context: activeQuestion.context,
@@ -112,7 +93,7 @@ export function useBehavioralSession() {
       })
       
       const rawFeedback = res.data.analysis
-      const parsed = JSON.parse(rawFeedback.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim()) as StarFeedback
+      const parsed = parseAIResponse<StarFeedback>(rawFeedback)
       setFeedback(parsed)
       
     } catch (err) {

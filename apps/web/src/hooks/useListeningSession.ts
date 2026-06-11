@@ -4,7 +4,9 @@ import { useState, useEffect } from 'react'
 import { apiClient } from '@/lib/apiClient'
 import { useAuth, useUser } from '@clerk/nextjs'
 import { useLevel } from '@/context/LevelContext'
+import { API_ROUTES } from '@fluenix/shared'
 
+// TODO: Local ListeningScenario has more specific sub-types than shared ListeningScenario (which uses unknown[])
 export interface ListeningScenario {
   id: string
   level: string
@@ -31,7 +33,7 @@ export function useListeningSession() {
     try {
       const token = await getToken()
       const res = await apiClient.post(
-        '/api/listening/next',
+        API_ROUTES.LISTENING_NEXT,
         { level },
         { headers: { Authorization: `Bearer ${token}` } }
       )

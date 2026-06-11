@@ -3,6 +3,7 @@ import { apiClient } from '@/lib/apiClient'
 import axios from 'axios'
 import { useAuth, useUser } from '@clerk/nextjs'
 import { VocabWord } from '@/data/vocabulary'
+import { createSessionPayload, API_ROUTES } from '@fluenix/shared'
 
 export function useVocabularySession(sessionSize: number = 10) {
   const { getToken } = useAuth()
@@ -17,7 +18,7 @@ export function useVocabularySession(sessionSize: number = 10) {
     setError(null)
     try {
       const token = await getToken()
-      const url = `/api/vocabulary/session?count=${sessionSize}`
+      const url = `${API_ROUTES.VOCABULARY_SESSION}?count=${sessionSize}`
       const res = await apiClient.get(url, {
         headers: { Authorization: `Bearer ${token}` }
       })
@@ -48,7 +49,7 @@ export function useVocabularySession(sessionSize: number = 10) {
       const allWordIds = [...masteredWords, ...needsReviewWords]
       if (allWordIds.length > 0) {
         await apiClient.post(
-          '/api/vocabulary/complete',
+          API_ROUTES.VOCABULARY_COMPLETE,
           {
             userId: user.id,
             wordIds: allWordIds
@@ -60,8 +61,8 @@ export function useVocabularySession(sessionSize: number = 10) {
       // 2. Save session stats
       const score = Math.round((masteredWords.length / sessionSize) * 100)
       await apiClient.post(
-        '/api/sessions',
-        {
+        API_ROUTES.SESSIONS,
+        createSessionPayload({
           userId: user.id,
           type: 'vocabulary',
           scenario: 'Flashcard Review',
@@ -71,7 +72,7 @@ export function useVocabularySession(sessionSize: number = 10) {
             mastered: masteredWords.length,
             needsReview: needsReviewWords.length
           }
-        },
+        }),
         { headers: { Authorization: `Bearer ${token}` } }
       )
     } catch (err: unknown) {

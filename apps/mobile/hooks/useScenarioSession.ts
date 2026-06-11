@@ -3,6 +3,7 @@ import { Alert, Platform } from 'react-native';
 import { useAuth, useUser } from '@clerk/clerk-expo';
 import * as Speech from 'expo-speech';
 import { Message, ScenarioType, ScenarioMission, scenarios } from '@fluenix/shared';
+import { parseAIResponse, createSessionPayload, formatDuration, API_ROUTES, AI_ROUTES } from '@fluenix/shared';
 import { apiClient, aiClient } from '../utils/apiClient';
 
 export function useScenarioSession() {
@@ -28,9 +29,7 @@ export function useScenarioSession() {
     if (!started || !startTime) return;
     const interval = setInterval(() => {
       const diff = Math.floor((new Date().getTime() - startTime.getTime()) / 1000);
-      const m = String(Math.floor(diff / 60)).padStart(2, '0');
-      const s = String(diff % 60).padStart(2, '0');
-      setDurationStr(`${m}:${s}`);
+      setDurationStr(formatDuration(diff));
     }, 1000);
     return () => clearInterval(interval);
   }, [started, startTime]);
@@ -75,7 +74,7 @@ export function useScenarioSession() {
       const token = await getToken();
       
       const missionRes = await apiClient.post(
-        `/api/scenario/next`,
+        API_ROUTES.SCENARIO_NEXT,
         { category: scenario, level },
         { headers: { Authorization: `Bearer ${token}` } }
       );
@@ -86,9 +85,10 @@ export function useScenarioSession() {
         missionContent = missionRes.data.data.content;
       }
       
-      const initialMessages: Message[] = [{ role: 'user', content: 'Begin terminal session.' }];
+      const scenarioLabel = scenarios.find(s => s.id === scenario)?.label || 'Scenario';
+      const initialMessages: Message[] = [{ role: 'user', content: `Begin ${scenarioLabel} simulation.` }];
       
-      const res = await aiClient.post('/scenario/chat', {
+      const res = await aiClient.post(AI_ROUTES.SCENARIO_CHAT, {
         scenario,
         level,
         context: missionContent,
@@ -124,7 +124,7 @@ export function useScenarioSession() {
     try {
       const token = await getToken();
       
-      const res = await aiClient.post('/scenario/chat', {
+      const res = await aiClient.post(AI_ROUTES.SCENARIO_CHAT, {
         scenario,
         level,
         context: activeMission?.content || '',
@@ -165,7 +165,7 @@ export function useScenarioSession() {
     Speech.stop();
     try {
       const token = await getToken();
-      const res = await aiClient.post(`/scenario/analyze`, {
+      const res = await aiClient.post(AI_ROUTES.SCENARIO_ANALYZE, {
         scenario,
         level,
         messages
@@ -174,50 +174,57 @@ export function useScenarioSession() {
       });
       
       const raw = res.data.analysis;
-      const match = raw.match(/\{[\s\S]*\}/);
-      const clean = match ? match[0] : raw.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
-      
       let parsedAnalysis;
       try {
-        parsedAnalysis = JSON.parse(clean);
+        parsedAnalysis = parseAIResponse<Record<string, unknown>>(raw);
       } catch (e) {
-        parsedAnalysis = {
-          overall_score: 0,
-          fluency_score: 0,
-          vocabulary_score: 0,
-          technical_accuracy: 0,
-          strengths: [],
-          improvements: ["Not enough data."],
-          overall_feedback: "Error parsing analysis."
-        };
+        // Fallback: try to extract JSON object with regex
+        const match = raw.match(/\{[\s\S]*\}/);
+        try {
+          parsedAnalysis = match ? JSON.parse(match[0]) : null;
+        } catch {
+          parsedAnalysis = null;
+        }
+        if (!parsedAnalysis) {
+          parsedAnalysis = {
+            overall_score: 0,
+            fluency_score: 0,
+            vocabulary_score: 0,
+            technical_accuracy: 0,
+            strengths: [],
+            improvements: ["Not enough data."],
+            overall_feedback: "Error parsing analysis."
+          };
+        }
       }
 
       if (user) {
         const diffSeconds = startTime ? Math.floor((new Date().getTime() - startTime.getTime()) / 1000) : 0;
+        const sessionPayload = createSessionPayload({
+          userId: user.id,
+          type: 'scenario',
+          scenario: scenario,
+          duration: diffSeconds,
+          score: parsedAnalysis.overall_score || 0,
+          feedback: {
+            fluency: parsedAnalysis.fluency_score,
+            vocabulary: parsedAnalysis.vocabulary_score,
+            technical: parsedAnalysis.technical_accuracy,
+            strengths: parsedAnalysis.strengths,
+            improvements: parsedAnalysis.improvements,
+            overall: parsedAnalysis.overall_feedback,
+            context: activeMission?.content || ''
+          }
+        });
         await apiClient.post(
-          `/api/sessions`,
-          {
-            userId: user.id,
-            type: 'scenario',
-            scenario: scenario,
-            duration: diffSeconds,
-            score: parsedAnalysis.overall_score || 0,
-            feedback: {
-              fluency: parsedAnalysis.fluency_score,
-              vocabulary: parsedAnalysis.vocabulary_score,
-              technical: parsedAnalysis.technical_accuracy,
-              strengths: parsedAnalysis.strengths,
-              improvements: parsedAnalysis.improvements,
-              overall: parsedAnalysis.overall_feedback,
-              context: activeMission?.content || ''
-            }
-          },
+          API_ROUTES.SESSIONS,
+          sessionPayload,
           { headers: { Authorization: `Bearer ${token}` } }
         );
 
         if (activeMission?.id) {
           await apiClient.post(
-            `/api/scenario/complete`,
+            API_ROUTES.SCENARIO_COMPLETE,
             { userId: user.id, missionId: activeMission.id },
             { headers: { Authorization: `Bearer ${token}` } }
           );

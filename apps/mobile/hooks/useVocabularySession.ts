@@ -1,18 +1,10 @@
 import { useState, useEffect } from 'react';
 import { Platform } from 'react-native';
 import { useAuth, useUser } from '@clerk/clerk-expo';
+import type { VocabWord } from '@fluenix/shared';
+import { API_ROUTES } from '@fluenix/shared';
 import { apiClient } from '../utils/apiClient';
-
-export type VocabWord = {
-  id: string;
-  word: string;
-  difficulty: string;
-  type: string;
-  definition: string;
-  phonetic: string;
-  turkishMeaning: string;
-  contextSentence: string;
-};
+import { offlineStorage } from '../utils/offlineStorage';
 
 
 
@@ -29,14 +21,21 @@ export function useVocabularySession(sessionSize: number = 10) {
     setError(null);
     try {
       const token = await getToken();
-      const res = await apiClient.get(`/api/vocabulary/session?count=${sessionSize}`, {
+      const res = await apiClient.get(`${API_ROUTES.VOCABULARY_SESSION}?count=${sessionSize}`, {
         headers: token ? { Authorization: `Bearer ${token}` } : {}
       });
       setSessionWords(res.data);
+      await offlineStorage.cacheVocabulary(res.data);
     } catch (err: unknown) {
       console.error('Failed to fetch vocabulary session:', err);
-      const errorMessage = err instanceof Error ? err.message : 'Error fetching words';
-      setError(errorMessage);
+      // Offline fallback: try to load cached vocabulary
+      const cached = await offlineStorage.getCachedVocabulary();
+      if (cached) {
+        setSessionWords(cached as VocabWord[]);
+      } else {
+        const errorMessage = err instanceof Error ? err.message : 'Error fetching words';
+        setError(errorMessage);
+      }
     } finally {
       setLoading(false);
     }
@@ -55,7 +54,7 @@ export function useVocabularySession(sessionSize: number = 10) {
       
       if (allWordIds.length > 0) {
         await apiClient.post(
-          `/api/vocabulary/complete`,
+          API_ROUTES.VOCABULARY_COMPLETE,
           {
             userId: user.id,
             wordIds: allWordIds
@@ -66,7 +65,7 @@ export function useVocabularySession(sessionSize: number = 10) {
 
       const score = Math.round((masteredWords.length / sessionSize) * 100);
       await apiClient.post(
-        `/api/sessions`,
+        API_ROUTES.SESSIONS,
         {
           userId: user.id,
           type: 'vocabulary',

@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { View, Text, TouchableOpacity, ScrollView, TextInput, Modal, StyleSheet } from 'react-native';
 import * as Icons from 'lucide-react-native';
-import { Word } from '../../hooks/usePronunciationSession';
+import type { Word } from '@fluenix/shared';
 import { colors, shadow } from '../../utils/theme';
 
 interface WordIndexSidebarProps {

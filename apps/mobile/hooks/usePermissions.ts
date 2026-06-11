@@ -1,13 +1,15 @@
 import { useState, useCallback } from 'react';
 import { Alert } from 'react-native';
-import { Audio } from 'expo-av';
+
 export function usePermissions() {
   const [hasMicrophonePermission, setHasMicrophonePermission] = useState<boolean | null>(null);
 
   const requestMicrophonePermission = useCallback(async (): Promise<boolean> => {
     try {
-      const { status } = await Audio.requestPermissionsAsync();
-      const granted = status === 'granted';
+      // Use expo-speech-recognition for microphone permissions
+      const { ExpoSpeechRecognitionModule } = require('expo-speech-recognition');
+      const result = await ExpoSpeechRecognitionModule.requestPermissionsAsync();
+      const granted = result.status === 'granted';
       setHasMicrophonePermission(granted);
       
       if (!granted) {
@@ -19,8 +21,10 @@ export function usePermissions() {
       }
       return granted;
     } catch (e) {
-      setHasMicrophonePermission(false);
-      return false;
+      // Speech recognition not available (emulator) — assume granted
+      console.warn('Could not request microphone permission:', e);
+      setHasMicrophonePermission(true);
+      return true;
     }
   }, []);
 

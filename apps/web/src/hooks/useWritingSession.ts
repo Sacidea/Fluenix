@@ -6,6 +6,7 @@ import { useAuth, useUser } from '@clerk/nextjs'
 import { apiClient, aiClient } from '@/lib/apiClient'
 import { useLevel } from '@/context/LevelContext'
 import { WritingExerciseId, writingExercises } from '@fluenix/shared'
+import { parseAIResponse, createSessionPayload, API_ROUTES, AI_ROUTES } from '@fluenix/shared'
 
 export interface WritingMission {
   id: string
@@ -52,7 +53,7 @@ export function useWritingSession() {
       console.log("Token:", token)
       console.log("Level:", level)
       const res = await apiClient.post(
-        '/api/writing/next',
+        API_ROUTES.WRITING_NEXT,
         { level, category },
         { headers: { Authorization: `Bearer ${token}` } }
       )
@@ -93,7 +94,7 @@ export function useWritingSession() {
     try {
       const token = await getToken()
       // 1. Analyze with AI
-      const res = await aiClient.post('/writing/analyze', {
+      const res = await aiClient.post(AI_ROUTES.WRITING_ANALYZE, {
         exercise: exerciseId,
         text: userText,
         context: activeMission.context,
@@ -104,20 +105,19 @@ export function useWritingSession() {
       })
 
       const raw = res.data.feedback
-      const clean = raw.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim()
-      const parsed = (typeof clean === 'string' ? JSON.parse(clean) : clean) as WritingFeedback
+      const parsed = parseAIResponse<WritingFeedback>(raw)
       setFeedback(parsed)
 
       // 2. Save Session to Backend
       if (user) {
-        await apiClient.post('/api/sessions', {
+        await apiClient.post(API_ROUTES.SESSIONS, createSessionPayload({
           userId: user.id,
           type: 'writing',
           scenario: activeMission.title, // Store the specific mission title
           duration: 0,
-          score: parsed.overall_score ?? null,
+          score: parsed.overall_score ?? 0,
           feedback: parsed // Store the full feedback json
-        }, {
+        }), {
           headers: token ? { Authorization: `Bearer ${token}` } : undefined
         })
       }

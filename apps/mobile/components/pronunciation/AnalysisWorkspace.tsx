@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, Text, TouchableOpacity, ActivityIndicator, StyleSheet } from 'react-native';
 import * as Icons from 'lucide-react-native';
-import { Word, PronunciationResult } from '../../hooks/usePronunciationSession';
+import type { Word, PronunciationResult } from '@fluenix/shared';
 import { colors, shadow } from '../../utils/theme';
 
 interface AnalysisWorkspaceProps {

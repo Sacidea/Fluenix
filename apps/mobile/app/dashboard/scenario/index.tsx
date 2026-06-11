@@ -16,6 +16,7 @@ export default function ScenarioPage() {
     loading, started, durationStr,
     startScenario, sendMessage, endAndAnalyzeSession,
     analysisResult, setAnalysisResult,
+    activeScenario,
   } = useScenarioSession();
 
   return (
@@ -33,7 +34,7 @@ export default function ScenarioPage() {
             <Text style={styles.backButtonText}>Dashboard</Text>
           </TouchableOpacity>
           <View style={styles.headerRight}>
-            <Text style={styles.headerSubtitle}>Simulation Environment</Text>
+            <Text style={styles.headerSubtitle}>{activeScenario?.label?.toUpperCase() || 'SIMULATION'}</Text>
             <Text style={styles.headerTitle}>Scenario Cockpit</Text>
           </View>
         </View>

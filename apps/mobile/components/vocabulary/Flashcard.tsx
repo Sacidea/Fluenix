@@ -2,7 +2,7 @@ import React, { useEffect, useRef } from 'react';
 import { View, Text, TouchableOpacity, Animated, StyleSheet, Pressable } from 'react-native';
 import * as Icons from 'lucide-react-native';
 import * as Speech from 'expo-speech';
-import { VocabWord } from '../../hooks/useVocabularySession';
+import type { VocabWord } from '@fluenix/shared';
 import { colors, shadow } from '../../utils/theme';
 
 interface FlashcardProps {

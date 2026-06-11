@@ -1,20 +1,9 @@
 import { useState, useEffect, useCallback } from 'react';
 import { Platform } from 'react-native';
 import { useAuth, useUser } from '@clerk/clerk-expo';
+import type { ListeningScenario } from '@fluenix/shared';
+import { API_ROUTES } from '@fluenix/shared';
 import { apiClient } from '../utils/apiClient';
-
-
-
-export interface ListeningScenario {
-  id: string;
-  level: string;
-  title: string;
-  context: string;
-  dialogue: unknown[];
-  questions: unknown[];
-  dictation: unknown;
-  shadowing: unknown;
-}
 
 export function useListeningSession() {
   const { user, isLoaded } = useUser();
@@ -32,7 +21,7 @@ export function useListeningSession() {
       const level = (user.publicMetadata.level as string) || 'B2';
       const token = await getToken();
       const res = await apiClient.post(
-        `/api/listening/next`,
+        API_ROUTES.LISTENING_NEXT,
         { level },
         { headers: token ? { Authorization: `Bearer ${token}` } : {} }
       );

@@ -1,6 +1,6 @@
 import React from 'react';
 import { View, Text, TouchableOpacity, TextInput, StyleSheet } from 'react-native';
-import { ListeningScenario } from '../../hooks/useListeningSession';
+import type { ListeningScenario } from '@fluenix/shared';
 import { colors, shadow } from '../../utils/theme';
 
 interface Props {

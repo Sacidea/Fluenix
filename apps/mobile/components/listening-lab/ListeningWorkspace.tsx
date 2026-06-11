@@ -3,7 +3,18 @@ import { View, Text, TouchableOpacity, ActivityIndicator, ScrollView, Alert, Sty
 import { useListeningSession } from '../../hooks/useListeningSession';
 import * as Icons from 'lucide-react-native';
 import * as Speech from 'expo-speech';
-import { ExpoSpeechRecognitionModule, useSpeechRecognitionEvent } from 'expo-speech-recognition';
+let ExpoSpeechRecognitionModule: any = { start: async () => {}, stop: async () => {} };
+let useSpeechRecognitionEvent: any = (_event: string, _handler: any) => {};
+
+try {
+  const speechRecognition = require('expo-speech-recognition');
+  if (speechRecognition?.ExpoSpeechRecognitionModule) {
+    ExpoSpeechRecognitionModule = speechRecognition.ExpoSpeechRecognitionModule;
+    useSpeechRecognitionEvent = speechRecognition.useSpeechRecognitionEvent;
+  }
+} catch (e) {
+  console.warn('expo-speech-recognition not available in ListeningWorkspace');
+}
 import { colors, shadow } from '../../utils/theme';
 
 import { usePermissions } from '../../hooks/usePermissions';
@@ -72,7 +83,7 @@ export function ListeningWorkspace() {
   const [spokenText, setSpokenText] = useState('');
   const [shadowScore, setShadowScore] = useState<number | null>(null);
 
-  useSpeechRecognitionEvent('result', (e) => {
+  useSpeechRecognitionEvent('result', (e: any) => {
     if (e.results && e.results.length > 0) {
       const text = e.results[0].transcript;
       setSpokenText(text);
@@ -80,7 +91,7 @@ export function ListeningWorkspace() {
     }
   });
 
-  useSpeechRecognitionEvent('error', (e) => {
+  useSpeechRecognitionEvent('error', (e: any) => {
     console.log('Speech error:', e.error);
     setIsRecording(false);
     handleVoiceError(e.error);
@@ -92,7 +103,7 @@ export function ListeningWorkspace() {
     Speech.stop();
     return () => {
       Speech.stop();
-      ExpoSpeechRecognitionModule.stop();
+      ExpoSpeechRecognitionModule?.stop();
     };
   }, []);
 
@@ -161,7 +172,7 @@ export function ListeningWorkspace() {
   const toggleRecording = async () => {
     try {
       if (isRecording) {
-        await ExpoSpeechRecognitionModule.stop();
+        await ExpoSpeechRecognitionModule?.stop();
         setIsRecording(false);
       } else {
         const hasPerm = await requestMicrophonePermission();
@@ -171,7 +182,7 @@ export function ListeningWorkspace() {
         setIsPlaying(false);
         setSpokenText('');
         setShadowScore(null);
-        await ExpoSpeechRecognitionModule.start({ lang: 'en-US', interimResults: true });
+        await ExpoSpeechRecognitionModule?.start({ lang: 'en-US', interimResults: true });
         setIsRecording(true);
       }
     } catch (e) {

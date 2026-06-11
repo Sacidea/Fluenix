@@ -8,21 +8,21 @@ const scenarios = [
   // ==========================================
   {
     title: 'Morning Standup: Auth Blocker',
-    context: 'A daily standup meeting between a Junior Developer (Alex) and a Tech Lead (Sam).',
+    context: 'A daily standup meeting between a Junior Developer (Alex, Indian accent) and a Tech Lead (Sam, British accent).',
     level: 'B1',
     dialogue: [
-      { speaker: 'Sam', text: "Alright team, let's get started. Alex, what's your status?" },
+      { speaker: 'Sam', accent: 'british', text: "Alright team, let's get started. Alex, what's your status?" },
       { 
-        speaker: 'Alex', 
+        speaker: 'Alex', accent: 'indian',
         text: "Yesterday I picked up the OAuth integration ticket. I'm currently blocked because the staging environment is down. I spent a few hours yak shaving trying to fix the local Docker container instead.",
         idiomHighlight: { word: 'yak shaving', meaning: 'Doing a series of small, seemingly unrelated tasks to solve a larger problem (usually a waste of time).' }
       },
       { 
-        speaker: 'Sam', 
+        speaker: 'Sam', accent: 'british',
         text: "Got it. Let's punt the Docker issue to the DevOps channel. For now, just mock the auth response locally so you can keep building the UI.",
         idiomHighlight: { word: 'punt', meaning: 'To postpone or pass a task to someone else.' }
       },
-      { speaker: 'Alex', text: "Makes sense. I'll do that and hopefully open a PR by EOD." }
+      { speaker: 'Alex', accent: 'indian', text: "Makes sense. I'll do that and hopefully open a PR by EOD." }
     ],
     questions: [
       {
@@ -129,18 +129,18 @@ const scenarios = [
   // ==========================================
   {
     title: 'Code Review: Bikeshedding',
-    context: 'Two engineers discussing a Pull Request on Slack.',
+    context: 'Two engineers discussing a Pull Request on Slack — one Australian, one American.',
     level: 'B2',
     dialogue: [
-      { speaker: 'Dev A', text: "Hey, I left a few comments on your PR for the new payment gateway." },
-      { speaker: 'Dev B', text: "Thanks. I saw the comment about renaming the 'txn_id' variable to 'transactionId'. Isn't that just bikeshedding? The logic works perfectly fine." ,
+      { speaker: 'Dev A', accent: 'australian', text: "Hey, I left a few comments on your PR for the new payment gateway." },
+      { speaker: 'Dev B', accent: 'american', text: "Thanks. I saw the comment about renaming the 'txn_id' variable to 'transactionId'. Isn't that just bikeshedding? The logic works perfectly fine." ,
         idiomHighlight: { word: 'bikeshedding', meaning: 'Arguing over trivial details (like what color to paint a bike shed) while ignoring the core, important architecture.' }
       },
-      { speaker: 'Dev A', text: "Normally I'd agree, but our new linting rules are super strict. Let's just bite the bullet and fix it now before it becomes tech debt.",
+      { speaker: 'Dev A', accent: 'australian', text: "Normally I'd agree, but our new linting rules are super strict. Let's just bite the bullet and fix it now before it becomes tech debt.",
         idiomHighlight: { word: 'bite the bullet', meaning: 'To force yourself to do something difficult or unpleasant that you have been avoiding.' }
       },
-      { speaker: 'Dev B', text: "Fair enough. LGTM otherwise?" },
-      { speaker: 'Dev A', text: "Yeah, LGTM. Ping me when you push the rename and I'll approve." }
+      { speaker: 'Dev B', accent: 'american', text: "Fair enough. LGTM otherwise?" },
+      { speaker: 'Dev A', accent: 'australian', text: "Yeah, LGTM. Ping me when you push the rename and I'll approve." }
     ],
     questions: [
       {
@@ -246,16 +246,16 @@ const scenarios = [
   // ==========================================
   {
     title: 'Incident Call: Nuke it',
-    context: 'A high-stress incident response call during a database outage.',
+    context: 'A high-stress incident response call during a database outage — between a Nigerian DevOps engineer and a German backend developer.',
     level: 'C1',
     dialogue: [
-      { speaker: 'Ops', text: "The primary DB CPU is pegged at 100%. Queries are timing out across the board." },
-      { speaker: 'Backend', text: "It's that rogue migration script we deployed. It's locking the users table." },
-      { speaker: 'Ops', text: "Can we rollback the deployment?" },
-      { speaker: 'Backend', text: "No, the schema already mutated. We need to just nuke the blocked queries from the pg_stat_activity view and scale up the read replicas immediately.",
+      { speaker: 'Ops', accent: 'nigerian', text: "The primary DB CPU is pegged at 100%. Queries are timing out across the board." },
+      { speaker: 'Backend', accent: 'german', text: "It's that rogue migration script we deployed. It's locking the users table." },
+      { speaker: 'Ops', accent: 'nigerian', text: "Can we rollback the deployment?" },
+      { speaker: 'Backend', accent: 'german', text: "No, the schema already mutated. We need to just nuke the blocked queries from the pg_stat_activity view and scale up the read replicas immediately.",
         idiomHighlight: { word: 'nuke', meaning: 'To forcefully delete or terminate something (like killing a process or dropping a table).' }
       },
-      { speaker: 'Ops', text: "Copy that. Nuking the queries now. Let's touch base in 5 minutes to see if latency drops." }
+      { speaker: 'Ops', accent: 'nigerian', text: "Copy that. Nuking the queries now. Let's touch base in 5 minutes to see if latency drops." }
     ],
     questions: [
       {
@@ -289,16 +289,16 @@ const scenarios = [
   },
   {
     title: 'System Design: Scaling Bottlenecks',
-    context: 'Architects discussing the new microservices architecture.',
+    context: 'A Japanese architect and a Brazilian staff engineer discussing microservices architecture.',
     level: 'C1',
     dialogue: [
-      { speaker: 'Architect', text: "If we route all image processing through the main API gateway, it's going to become a massive bottleneck.",
+      { speaker: 'Architect', accent: 'japanese', text: "If we route all image processing through the main API gateway, it's going to become a massive bottleneck.",
         idiomHighlight: { word: 'bottleneck', meaning: 'A point of congestion in a system that slows down the overall performance.' }
       },
-      { speaker: 'Staff Eng', text: "Agreed. It's also a single point of failure. If the gateway goes down, the entire application crashes.",
+      { speaker: 'Staff Eng', accent: 'brazilian', text: "Agreed. It's also a single point of failure. If the gateway goes down, the entire application crashes.",
         idiomHighlight: { word: 'single point of failure', meaning: 'A part of a system that, if it fails, will stop the entire system from working.' }
       },
-      { speaker: 'Architect', text: "Exactly. We should decouple the image service and use a pub/sub queue like Kafka to handle the load asynchronously." }
+      { speaker: 'Architect', accent: 'japanese', text: "Exactly. We should decouple the image service and use a pub/sub queue like Kafka to handle the load asynchronously." }
     ],
     questions: [
       {

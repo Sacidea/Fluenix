@@ -2,11 +2,11 @@
 
 import React from 'react'
 import * as Icons from 'lucide-react'
-import { Stats } from '../hooks/useProgressData'
+import type { DashboardStats } from '@fluenix/shared'
 import { SessionsIcon, AccuracyIcon, StreakIcon, ActivityIcon } from './icons/PremiumIcons'
 
 interface StatsCardsProps {
-    stats: Stats | null
+    stats: DashboardStats | null
 }
 
 export function StatsCards({ stats }: StatsCardsProps) {
@@ -21,7 +21,7 @@ export function StatsCards({ stats }: StatsCardsProps) {
         { iconComp: SessionsIcon, value: totalSessions, label: 'Operational Sessions', color: '#3B82F6' },
         { iconComp: AccuracyIcon, value: stats?.averageScore ? `${Math.round(stats.averageScore)}%` : '—', label: 'Technical Accuracy', color: '#22C55E' },
         { iconComp: StreakIcon, value: stats?.streak ?? 0, label: 'Consistency Streak', color: '#FFC107' },
-        { iconComp: ActivityIcon, value: stats?.lastSession ? new Date(stats.lastSession).toLocaleDateString('en-US', { day: '2-digit', month: 'short' }) : '—', label: 'Last Activity', color: '#F43F5E' },
+        { iconComp: ActivityIcon, value: stats?.lastSession ? new Date(stats.lastSession as string).toLocaleDateString('en-US', { day: '2-digit', month: 'short' }) : '—', label: 'Last Activity', color: '#F43F5E' },
     ]
 
     return (

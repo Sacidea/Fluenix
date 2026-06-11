@@ -2,22 +2,21 @@ import { useState, useEffect, useRef } from 'react';
 import { Platform } from 'react-native';
 import { useAuth, useUser } from '@clerk/clerk-expo';
 import * as Speech from 'expo-speech';
+import type { Word, PronunciationResult } from '@fluenix/shared';
+import { parseAIResponse, API_ROUTES, AI_ROUTES } from '@fluenix/shared';
 import { apiClient, aiClient } from '../utils/apiClient';
-import { ExpoSpeechRecognitionModule, useSpeechRecognitionEvent } from 'expo-speech-recognition';
+import { offlineStorage } from '../utils/offlineStorage';
 
-export type Word = {
-  id: string;
-  word: string;
-  category: string;
-  phonetic: string;
-};
+let ExpoSpeechRecognitionModule: any = null;
+let useSpeechRecognitionEvent: any = (_event: string, _handler: any) => {};
 
-export type PronunciationResult = {
-  accuracy_score: number;
-  is_correct: boolean;
-  feedback: string;
-  tip: string;
-};
+try {
+  const speechRecognition = require('expo-speech-recognition');
+  ExpoSpeechRecognitionModule = speechRecognition.ExpoSpeechRecognitionModule;
+  useSpeechRecognitionEvent = speechRecognition.useSpeechRecognitionEvent;
+} catch (e) {
+  console.warn('expo-speech-recognition not available, voice features disabled');
+}
 
 
 
@@ -43,12 +42,18 @@ export function usePronunciationSession() {
     const fetchWords = async () => {
       try {
         const token = await getToken();
-        const res = await apiClient.get(`/api/pronunciation/words`, {
+        const res = await apiClient.get(API_ROUTES.PRONUNCIATION_WORDS, {
           headers: token ? { Authorization: `Bearer ${token}` } : {}
         });
         setWords(res.data);
+        await offlineStorage.cacheWords(res.data);
       } catch (e: unknown) {
         console.error("Failed to fetch words", e);
+        // Offline fallback: try to load cached words
+        const cached = await offlineStorage.getCachedWords();
+        if (cached) {
+          setWords(cached as Word[]);
+        }
       }
     };
 
@@ -64,14 +69,15 @@ export function usePronunciationSession() {
   const generateWords = async (topic: string) => {
     try {
       const token = await getToken();
-      await apiClient.post(`/api/pronunciation/generate`, { topic }, {
+      await apiClient.post(API_ROUTES.PRONUNCIATION_GENERATE, { topic }, {
         headers: token ? { Authorization: `Bearer ${token}` } : {}
       });
       // Fetch words again to update list
-      const res = await apiClient.get(`/api/pronunciation/words`, {
+      const res = await apiClient.get(API_ROUTES.PRONUNCIATION_WORDS, {
         headers: token ? { Authorization: `Bearer ${token}` } : {}
       });
       setWords(res.data);
+      await offlineStorage.cacheWords(res.data);
     } catch (e: unknown) {
       console.error("Failed to generate words", e);
     }
@@ -80,14 +86,14 @@ export function usePronunciationSession() {
   const markWordAsMastered = async (wordId: string) => {
     try {
       const token = await getToken();
-      await apiClient.post(`/api/pronunciation/master`, { wordId }, {
+      await apiClient.post(API_ROUTES.PRONUNCIATION_MASTER, { wordId }, {
         headers: token ? { Authorization: `Bearer ${token}` } : {}
       });
       
       // Save session to backend
       if (user?.id) {
         const masteredWord = words.find(w => w.id === wordId);
-        await apiClient.post('/api/sessions', {
+        await apiClient.post(API_ROUTES.SESSIONS, {
           userId: user.id,
           type: 'pronunciation',
           scenario: masteredWord?.category || 'General',
@@ -123,11 +129,11 @@ export function usePronunciationSession() {
   // Setup Native Voice Listeners
   useSpeechRecognitionEvent('start', () => setListening(true));
   useSpeechRecognitionEvent('end', () => setListening(false));
-  useSpeechRecognitionEvent('error', (e) => {
+  useSpeechRecognitionEvent('error', (e: any) => {
     console.error("Voice error", e.error);
     setListening(false);
   });
-  useSpeechRecognitionEvent('result', (e) => {
+  useSpeechRecognitionEvent('result', (e: any) => {
     if (e.results && e.results.length > 0) {
       // Get the most confident final transcript
       const finalResult = e.results.find((r: any) => r.isFinal);
@@ -136,13 +142,17 @@ export function usePronunciationSession() {
       setTranscript(heard);
       if (finalResult || !(e as any).isSpeechDetected) {
         setListening(false);
-        ExpoSpeechRecognitionModule.stop();
+        ExpoSpeechRecognitionModule?.stop();
         analyzeResult(heard);
       }
     }
   });
 
   const startListening = async () => {
+    if (!ExpoSpeechRecognitionModule) {
+      console.warn('Speech recognition not available');
+      return;
+    }
     try {
       setTranscript('');
       await ExpoSpeechRecognitionModule.start({
@@ -158,7 +168,9 @@ export function usePronunciationSession() {
   };
 
   const stopListening = async () => {
-    await ExpoSpeechRecognitionModule.stop();
+    if (ExpoSpeechRecognitionModule) {
+      await ExpoSpeechRecognitionModule.stop();
+    }
     setListening(false);
   };
 
@@ -169,14 +181,14 @@ export function usePronunciationSession() {
     try {
       const token = await getToken();
       // 1. Get AI Analysis
-      const res = await aiClient.post(`/pronunciation/analyze`, {
+      const res = await aiClient.post(AI_ROUTES.PRONUNCIATION_ANALYZE, {
         transcript: heard,
         target_word: words[currentIndex].word,
         level: userLevel
       }, {
         headers: { Authorization: `Bearer ${token}` }
       });
-      const parsedResult = JSON.parse(res.data.candidates[0].content.parts[0].text);
+      const parsedResult = parseAIResponse<PronunciationResult>(res.data.candidates[0].content.parts[0].text);
       setResult(parsedResult);
       
       // Auto-master if they passed

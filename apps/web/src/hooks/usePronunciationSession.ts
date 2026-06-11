@@ -3,20 +3,8 @@ import { apiClient, aiClient } from '@/lib/apiClient'
 import axios from 'axios'
 import { useLevel } from '@/context/LevelContext'
 import { useAuth, useUser } from '@clerk/nextjs'
-
-export type Word = {
-  id: string
-  word: string
-  category: string
-  phonetic: string
-}
-
-export type PronunciationResult = {
-  accuracy_score: number
-  is_correct: boolean
-  feedback: string
-  tip: string
-}
+import type { Word, PronunciationResult } from '@fluenix/shared'
+import { parseAIResponse, createSessionPayload, API_ROUTES, AI_ROUTES } from '@fluenix/shared'
 
 export function usePronunciationSession() {
   const { level: userLevel } = useLevel()
@@ -42,7 +30,7 @@ export function usePronunciationSession() {
     const fetchWords = async () => {
       try {
         const token = await getToken()
-        const res = await apiClient.get('/api/pronunciation/words', {
+        const res = await apiClient.get(API_ROUTES.PRONUNCIATION_WORDS, {
           headers: { Authorization: `Bearer ${token}` }
         })
         setWords(res.data)
@@ -114,7 +102,7 @@ export function usePronunciationSession() {
     try {
       const token = await getToken()
       // 1. Get AI Analysis
-      const res = await aiClient.post('/pronunciation/analyze', {
+      const res = await aiClient.post(AI_ROUTES.PRONUNCIATION_ANALYZE, {
         transcript: heard,
         target_word: words[currentIndex].word,
         level: userLevel
@@ -122,15 +110,14 @@ export function usePronunciationSession() {
         headers: { Authorization: `Bearer ${token}` }
       })
       const raw = res.data.result
-      const clean = raw.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim()
-      const parsedResult = JSON.parse(clean)
+      const parsedResult = parseAIResponse<PronunciationResult>(raw)
       setResult(parsedResult)
 
       // 2. Save Session to Backend (if user is logged in)
       if (user) {
         await apiClient.post(
-          '/api/sessions',
-          {
+          API_ROUTES.SESSIONS,
+          createSessionPayload({
             userId: user.id,
             type: 'pronunciation',
             scenario: words[currentIndex].word, // Storing target word as scenario
@@ -141,7 +128,7 @@ export function usePronunciationSession() {
               tip: parsedResult.tip,
               heard_transcript: heard 
             }
-          },
+          }),
           {
             headers: { Authorization: `Bearer ${token}` }
           }

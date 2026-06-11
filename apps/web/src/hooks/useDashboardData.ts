@@ -1,13 +1,8 @@
 import { useState, useCallback, useEffect } from 'react'
 import { apiClient } from '@/lib/apiClient'
 import { useAuth } from '@clerk/nextjs'
-
-export type DashboardStats = {
-    totalSessions: number
-    averageScore: number
-    streak: number
-    lastSession: string | null
-}
+import type { DashboardStats } from '@fluenix/shared'
+import { API_ROUTES } from '@fluenix/shared'
 
 export function useDashboardData(userId?: string) {
     const { getToken } = useAuth()
@@ -20,7 +15,7 @@ export function useDashboardData(userId?: string) {
         try {
             const token = await getToken()
             if (!token) return // Wait for Clerk to initialize
-            const res = await apiClient.get(`/api/sessions/stats/${userId}`, {
+            const res = await apiClient.get(`${API_ROUTES.SESSIONS}/stats/${userId}`, {
                 headers: { Authorization: `Bearer ${token}` }
             })
             setStats(res.data)

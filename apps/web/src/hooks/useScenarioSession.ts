@@ -6,16 +6,8 @@ import { useLevel } from '@/context/LevelContext'
 import { useScenarioAudio } from './useScenarioAudio'
 
 import { Message, ScenarioType, scenarios, ScenarioMission } from '@fluenix/shared'
-
-export interface ScenarioAnalysisResult {
-  overall_score: number
-  fluency_score: number
-  vocabulary_score: number
-  technical_accuracy: number
-  strengths: string[]
-  improvements: string[]
-  overall_feedback: string
-}
+import type { ScenarioAnalysisResult } from '@fluenix/shared'
+import { parseAIResponse, createSessionPayload, formatDuration, API_ROUTES, AI_ROUTES } from '@fluenix/shared'
 
 export function useScenarioSession() {
   const { user } = useUser()
@@ -59,9 +51,7 @@ export function useScenarioSession() {
     if (!started || !startTime) return
     const interval = setInterval(() => {
       const diff = Math.floor((new Date().getTime() - startTime.getTime()) / 1000)
-      const m = String(Math.floor(diff / 60)).padStart(2, '0')
-      const s = String(diff % 60).padStart(2, '0')
-      setDurationStr(`${m}:${s}`)
+      setDurationStr(formatDuration(diff))
     }, 1000)
     return () => clearInterval(interval)
   }, [started, startTime])
@@ -78,7 +68,7 @@ export function useScenarioSession() {
     try {
       const token = await getToken()
       const missionRes = await apiClient.post(
-        '/api/scenario/next',
+        API_ROUTES.SCENARIO_NEXT,
         { category: scenario, level },
         { headers: { Authorization: `Bearer ${token}` } }
       )
@@ -91,7 +81,7 @@ export function useScenarioSession() {
         throw new Error('Failed to load mission')
       }
 
-      const res = await aiClient.post('/scenario/chat', {
+      const res = await aiClient.post(AI_ROUTES.SCENARIO_CHAT, {
         scenario,
         level,
         context: missionContent,
@@ -130,7 +120,7 @@ export function useScenarioSession() {
     setLoading(true)
     try {
       const token = await getToken()
-      const res = await aiClient.post('/scenario/chat', {
+      const res = await aiClient.post(AI_ROUTES.SCENARIO_CHAT, {
         scenario,
         level,
         context: activeMission?.content || '',
@@ -179,7 +169,7 @@ export function useScenarioSession() {
     window.speechSynthesis.cancel()
     try {
       const token = await getToken()
-      const res = await aiClient.post('/scenario/analyze', {
+      const res = await aiClient.post(AI_ROUTES.SCENARIO_ANALYZE, {
         scenario,
         level,
         messages
@@ -187,12 +177,10 @@ export function useScenarioSession() {
         headers: { Authorization: `Bearer ${token}` }
       })
       const raw = res.data.analysis
-      const match = raw.match(/\{[\s\S]*\}/)
-      const clean = match ? match[0] : raw.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim()
       
       let parsedAnalysis;
       try {
-        parsedAnalysis = JSON.parse(clean)
+        parsedAnalysis = parseAIResponse<ScenarioAnalysisResult>(raw)
       } catch (parseError) {
         console.error("JSON Parse Error:", parseError, "Raw text:", raw)
         // Fallback analysis object so the app doesn't crash
@@ -212,8 +200,8 @@ export function useScenarioSession() {
         const diffSeconds = startTime ? Math.floor((new Date().getTime() - startTime.getTime()) / 1000) : 0
 
         await apiClient.post(
-          '/api/sessions',
-          {
+          API_ROUTES.SESSIONS,
+          createSessionPayload({
             userId: user.id,
             type: 'scenario',
             scenario: scenario,
@@ -228,7 +216,7 @@ export function useScenarioSession() {
               overall: parsedAnalysis.overall_feedback,
               context: activeMission?.content || ''
             }
-          },
+          }),
           {
             headers: { Authorization: `Bearer ${token}` }
           }
@@ -236,7 +224,7 @@ export function useScenarioSession() {
 
         if (activeMission?.id) {
           await apiClient.post(
-            '/api/scenario/complete',
+            API_ROUTES.SCENARIO_COMPLETE,
             {
               userId: user.id,
               missionId: activeMission.id
