@@ -15,11 +15,10 @@ import { colors, shadow } from '../../utils/theme';
 // Dummy API functions for mobile, normally you would share these or use a mobile-friendly fetch
 async function getDashboardStats(userId: string, token: string | null) {
   try {
-    const res = await apiClient.get(`/api/sessions/stats/${userId}?full=true`, {
+    const res = await apiClient.get(`/api/sessions/stats/${userId}`, {
       headers: token ? { Authorization: `Bearer ${token}` } : undefined,
     });
     const data = res.data;
-    // Return stats from the full response (progress page format)
     return data.stats || data;
   } catch {
     return { totalSessions: 0, averageScore: 0, streak: 0 };
