@@ -497,8 +497,8 @@ Return ONLY a JSON object matching this exact schema (do not wrap in markdown):
   "title": "Short title (e.g. System Design Interview)",
   "context": "Context of the audio (e.g. An interviewer is asking about scaling databases)",
   "dialogue": [
-    {{ "speaker": "Interviewer", "text": "Can you explain how you would shard a relational database?" }},
-    {{ "speaker": "Candidate", "text": "Sure, sharding involves..." }}
+    {{ "speaker": "Interviewer", "gender": "male", "text": "Can you explain how you would shard a relational database?" }},
+    {{ "speaker": "Candidate", "gender": "female", "text": "Sure, sharding involves..." }}
   ],
   "questions": [
     {{

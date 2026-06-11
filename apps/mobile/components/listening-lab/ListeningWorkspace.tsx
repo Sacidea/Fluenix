@@ -143,13 +143,29 @@ export function ListeningWorkspace() {
 
     setIsPlaying(true);
     
+    const voices = await Speech.getAvailableVoicesAsync();
+    const englishVoices = voices.filter(v => v.language.startsWith('en'));
+    
+    const femaleKeywords = ['female', 'woman', 'girl', 'zira', 'samantha', 'victoria', 'karen', 'moira', 'tessa', 'ava', 'susan', 'hazel', 'fiona', 'aria', 'jenny', 'amy', 'olivia', 'emma'];
+    const maleKeywords = ['male', 'man', 'boy', 'david', 'mark', 'james', 'daniel', 'george', 'alex', 'fred', 'christopher', 'guy', 'aaron', 'brian', 'andrew', 'ryan', 'steffan'];
+    
+    const fPool = englishVoices.filter(v => femaleKeywords.some(k => v.name.toLowerCase().includes(k)));
+    const mPool = englishVoices.filter(v => maleKeywords.some(k => v.name.toLowerCase().includes(k)));
+    
+    const femalePool = fPool.length > 0 ? fPool : englishVoices;
+    const malePool = mPool.length > 0 ? mPool : englishVoices;
+    
     for (let i = 0; i < (scenario.dialogue as unknown[]).length; i++) {
       const line = (scenario.dialogue as any)[i];
-      const pitch = (line.speaker?.length || 0) % 2 === 0 ? 1 : 1.1;
+      const gender = line.gender || 'male';
+      const targetPool = gender === 'female' ? femalePool : malePool;
+      const poolToUse = targetPool.length > 0 ? targetPool : voices;
+      const voiceIdx = (line.speaker?.length || 0) % (poolToUse.length || 1);
+      const selectedVoice = poolToUse[voiceIdx]?.identifier;
       
       Speech.speak(line.text, {
         language: 'en-US',
-        pitch,
+        voice: selectedVoice,
         rate: 0.9,
         onDone: () => {
           if (i === (scenario.dialogue as unknown[]).length - 1) {

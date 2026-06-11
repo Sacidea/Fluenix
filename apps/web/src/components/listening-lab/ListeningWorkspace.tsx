@@ -132,18 +132,34 @@ export function ListeningWorkspace() {
     setIsPlaying(true)
     let utteranceIndex = 0
 
-    // Pre-compute speaker → voice mapping so it's consistent
+    // Split into female and male pools based on name keywords
     const voices = synthRef.current?.getVoices() || []
     const englishVoices = voices.filter(v => v.lang.startsWith('en'))
-    const pool = englishVoices.length > 0 ? englishVoices : voices
+    
+    const femaleKeywords = ['female', 'woman', 'girl', 'zira', 'samantha', 'victoria', 'karen', 'moira', 'tessa', 'ava', 'susan', 'hazel', 'fiona', 'aria', 'jenny', 'amy', 'olivia', 'emma']
+    const maleKeywords = ['male', 'man', 'boy', 'david', 'mark', 'james', 'daniel', 'george', 'alex', 'fred', 'christopher', 'guy', 'aaron', 'brian', 'andrew', 'ryan', 'steffan']
+    
+    const femalePool = englishVoices.filter(v => femaleKeywords.some(k => v.name.toLowerCase().includes(k)))
+    const malePool = englishVoices.filter(v => maleKeywords.some(k => v.name.toLowerCase().includes(k)))
+    
+    // Fallback to all english voices if pools are empty
+    const fPool = femalePool.length > 0 ? femalePool : englishVoices
+    const mPool = malePool.length > 0 ? malePool : englishVoices
 
     const uniqueSpeakers = Array.from(new Set(scenario.dialogue.map((l: any) => l.speaker)))
     const speakerVoiceMap = new Map<string, SpeechSynthesisVoice | null>()
 
     uniqueSpeakers.forEach((speaker: unknown) => {
       const speakerStr = String(speaker)
-      const voiceIdx = (speakerStr.length || 0) % (pool.length || 1)
-      speakerVoiceMap.set(speakerStr, pool[voiceIdx] || null)
+      // find the gender from the scenario dialogue
+      const dialogueLine = scenario.dialogue.find((l: any) => l.speaker === speakerStr)
+      const gender = dialogueLine?.gender || 'male'
+      
+      const targetPool = gender === 'female' ? fPool : mPool
+      const poolToUse = targetPool.length > 0 ? targetPool : voices
+      
+      const voiceIdx = (speakerStr.length || 0) % (poolToUse.length || 1)
+      speakerVoiceMap.set(speakerStr, poolToUse[voiceIdx] || null)
     })
     
     const playNext = () => {
