@@ -432,14 +432,6 @@ export function ListeningWorkspace() {
           </div>
         )}
 
-        <button 
-          className="l-btn-next" 
-          onClick={loadNextScenario}
-          style={{ marginTop: '32px', background: '#0891b2' }}
-        >
-          Next AI Scenario
-        </button>
-
       </div>
 
     </div>

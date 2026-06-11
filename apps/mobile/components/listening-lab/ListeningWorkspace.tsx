@@ -301,13 +301,6 @@ export function ListeningWorkspace() {
           )}
         </View>
       </View>
-
-      <TouchableOpacity 
-        style={styles.nextButton}
-        onPress={loadNextScenario}
-      >
-        <Text style={styles.nextButtonText}>Next AI Scenario</Text>
-      </TouchableOpacity>
     </ScrollView>
   );
 }
