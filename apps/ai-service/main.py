@@ -510,12 +510,16 @@ Return ONLY a JSON object matching this exact schema (do not wrap in markdown):
       ]
     }}
   ],
-  "dictation": [
-    "A challenging technical sentence from the dialogue to dictate."
-  ],
-  "shadowing": [
-    "A key phrase to practice speaking."
-  ]
+  "dictation": {
+    "correctText": "A challenging technical sentence from the dialogue.",
+    "textWithBlanks": "A challenging ____ sentence from the ____.",
+    "answers": ["technical", "dialogue"]
+  },
+  "shadowing": {
+    "text": "The entire sentence for context.",
+    "translation": "The translation of the sentence.",
+    "targetText": "The key phrase to practice speaking."
+  }
 }}"""
 
         import json
