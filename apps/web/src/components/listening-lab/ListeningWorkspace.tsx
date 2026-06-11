@@ -119,28 +119,7 @@ export function ListeningWorkspace() {
     )
   }
 
-  // --- Accent & Gender-aware voice helpers ---
-  // Accent → BCP-47 locale prefix mapping
-  const ACCENT_LOCALE_MAP: Record<string, string[]> = {
-    'american':    ['en-US'],
-    'british':     ['en-GB'],
-    'australian':  ['en-AU'],
-    'indian':      ['en-IN', 'hi-IN'],
-    'irish':       ['en-IE'],
-    'scottish':    ['en-GB'],   // Scottish voices often tagged as en-GB
-    'south african': ['en-ZA'],
-    'nigerian':    ['en-NG', 'en-GB'],
-    'canadian':    ['en-CA', 'en-US'],
-    'singaporean': ['en-SG'],
-    'german':      ['de-DE'],   // Fallback: German-accented English
-    'french':      ['fr-FR'],
-    'japanese':    ['ja-JP'],
-    'chinese':     ['zh-CN'],
-    'korean':      ['ko-KR'],
-    'brazilian':   ['pt-BR'],
-    'russian':     ['ru-RU'],
-  }
-
+  // --- Gender-aware voice helpers ---
   const FEMALE_NAMES = new Set([
     'sarah','emma','emily','olivia','sophia','ava','mia','isabella','charlotte',
     'amelia','harper','ella','elizabeth','sofia','avery','scarlett','victoria',
@@ -148,7 +127,6 @@ export function ListeningWorkspace() {
     'lucy','maria','kate','jane','rachel','karen','lisa','susan','laura','nancy',
     'helen','jennifer','diana','linda','mary','amy','eva','elena','priya','mei',
     'yuki','keiko','fatima','aisha','nina','rosa','lena','zoe','nora','maya',
-    'ananya','sunita','deepa','lakshmi','aiko','chen','wei','yuna','suki',
   ])
   const MALE_NAMES = new Set([
     'mike','james','john','robert','david','william','michael','richard','joseph',
@@ -156,11 +134,10 @@ export function ListeningWorkspace() {
     'kevin','alex','jason','ryan','eric','nick','sam','ben','jake','tom',
     'jack','luke','adam','ian','leo','max','ray','carl','frank','george',
     'peter','raj','ahmed','carlos','marco','kai','ravi','omar','yusuf','ivan',
-    'vikram','arjun','sanjay','kenji','taro','hiroshi','wei','jin','dev','ops',
   ])
 
   const guessGender = (name: string): 'female' | 'male' | 'unknown' => {
-    const lower = name.toLowerCase().trim().split(/\s+/)[0]
+    const lower = name.toLowerCase().trim().split(/\s+/)[0] // first name only
     if (FEMALE_NAMES.has(lower)) return 'female'
     if (MALE_NAMES.has(lower)) return 'male'
     return 'unknown'
@@ -169,60 +146,34 @@ export function ListeningWorkspace() {
   const pickVoice = (
     voices: SpeechSynthesisVoice[],
     gender: 'female' | 'male' | 'unknown',
-    accent: string | undefined,
     fallbackIndex: number
-  ): { voice: SpeechSynthesisVoice | null; pitch: number; rate: number } => {
-    const allEnglish = voices.filter(v => v.lang.startsWith('en'))
-    const premium = allEnglish.filter(v => !v.name.toLowerCase().includes('us english'))
-    const englishPool = premium.length > 1 ? premium : allEnglish
+  ): { voice: SpeechSynthesisVoice | null; pitch: number } => {
+    const englishVoices = voices.filter(v => v.lang.startsWith('en'))
+    const premiumVoices = englishVoices.filter(v => !v.name.toLowerCase().includes('us english'))
+    const pool = premiumVoices.length > 1 ? premiumVoices : englishVoices
 
-    // 1. Try accent-specific voice first
-    if (accent) {
-      const locales = ACCENT_LOCALE_MAP[accent.toLowerCase()] || []
-      for (const locale of locales) {
-        const accentVoices = voices.filter(v => v.lang.startsWith(locale.split('-')[0]))
-        const exactMatch = accentVoices.filter(v => v.lang === locale)
-        const pool = exactMatch.length > 0 ? exactMatch : accentVoices
-        
-        if (pool.length > 0) {
-          // Try to match gender within accent pool
-          const femaleKw = ['female', 'woman', 'zira', 'hazel', 'samantha', 'fiona', 'moira', 'tessa', 'victoria']
-          const maleKw = ['male', 'man', 'david', 'james', 'daniel', 'george', 'fred', 'ralph']
-          
-          if (gender === 'female') {
-            const f = pool.find(v => femaleKw.some(k => v.name.toLowerCase().includes(k)))
-            if (f) return { voice: f, pitch: 1.05, rate: 1.0 }
-            return { voice: pool[0], pitch: 1.1, rate: 1.0 }
-          }
-          if (gender === 'male') {
-            const m = pool.find(v => maleKw.some(k => v.name.toLowerCase().includes(k)))
-            if (m) return { voice: m, pitch: 0.95, rate: 1.0 }
-            return { voice: pool[pool.length > 1 ? 1 : 0], pitch: 0.9, rate: 1.0 }
-          }
-          return { voice: pool[0], pitch: 1.0, rate: 1.0 }
-        }
-      }
-    }
+    if (pool.length === 0) return { voice: null, pitch: 1.0 }
 
-    // 2. Fallback: English voices with gender + pitch differentiation
-    if (englishPool.length === 0) return { voice: null, pitch: 1.0, rate: 1.1 }
-
+    // Try to find a voice matching the gender by name keywords
     const femaleKeywords = ['female', 'woman', 'girl', 'zira', 'hazel', 'susan', 'samantha', 'karen', 'fiona', 'moira', 'tessa', 'victoria']
     const maleKeywords = ['male', 'man', 'boy', 'david', 'mark', 'james', 'daniel', 'thomas', 'george', 'alex', 'fred', 'ralph']
 
     if (gender === 'female') {
-      const femaleVoice = englishPool.find(v => femaleKeywords.some(k => v.name.toLowerCase().includes(k)))
-      if (femaleVoice) return { voice: femaleVoice, pitch: 1.1, rate: 1.1 }
-      return { voice: englishPool[fallbackIndex % englishPool.length], pitch: 1.15, rate: 1.1 }
+      const femaleVoice = pool.find(v => femaleKeywords.some(k => v.name.toLowerCase().includes(k)))
+      if (femaleVoice) return { voice: femaleVoice, pitch: 1.1 }
+      // Fallback: use even-indexed voice with higher pitch
+      return { voice: pool[fallbackIndex % pool.length], pitch: 1.15 }
     }
 
     if (gender === 'male') {
-      const maleVoice = englishPool.find(v => maleKeywords.some(k => v.name.toLowerCase().includes(k)))
-      if (maleVoice) return { voice: maleVoice, pitch: 0.95, rate: 1.1 }
-      return { voice: englishPool[(fallbackIndex + 1) % englishPool.length], pitch: 0.9, rate: 1.1 }
+      const maleVoice = pool.find(v => maleKeywords.some(k => v.name.toLowerCase().includes(k)))
+      if (maleVoice) return { voice: maleVoice, pitch: 0.95 }
+      // Fallback: use odd-indexed voice with lower pitch
+      return { voice: pool[(fallbackIndex + 1) % pool.length], pitch: 0.9 }
     }
 
-    return { voice: englishPool[fallbackIndex % englishPool.length], pitch: 1.0, rate: 1.1 }
+    // Unknown gender: just round-robin
+    return { voice: pool[fallbackIndex % pool.length], pitch: 1.0 }
   }
 
   // --- Audio Player Logic ---
@@ -238,17 +189,14 @@ export function ListeningWorkspace() {
     setIsPlaying(true)
     let utteranceIndex = 0
 
-    // Pre-compute speaker → voice+pitch+rate mapping so it's consistent
+    // Pre-compute speaker → voice+pitch mapping so it's consistent
     const voices = synthRef.current?.getVoices() || []
     const uniqueSpeakers = Array.from(new Set(scenario.dialogue.map((l: any) => l.speaker)))
-    const speakerVoiceMap = new Map<string, { voice: SpeechSynthesisVoice | null; pitch: number; rate: number }>()
+    const speakerVoiceMap = new Map<string, { voice: SpeechSynthesisVoice | null; pitch: number }>()
 
     uniqueSpeakers.forEach((speaker, idx) => {
       const gender = guessGender(speaker)
-      // Find this speaker's accent from the first dialogue line they appear in
-      const speakerLine = scenario.dialogue.find((l: any) => l.speaker === speaker)
-      const accent = speakerLine?.accent || speakerLine?.nationality
-      speakerVoiceMap.set(speaker, pickVoice(voices, gender, accent, idx))
+      speakerVoiceMap.set(speaker, pickVoice(voices, gender, idx))
     })
     
     const playNext = () => {
@@ -265,7 +213,7 @@ export function ListeningWorkspace() {
         utterance.voice = voiceConfig.voice
       }
       utterance.pitch = voiceConfig?.pitch ?? 1.0
-      utterance.rate = voiceConfig?.rate ?? 1.1
+      utterance.rate = 1.1
 
       utterance.onend = () => {
         utteranceIndex++
