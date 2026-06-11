@@ -57,12 +57,13 @@ router.post('/next', requireAuth, async (req: any, res: any) => {
     // Async Background Buffer Generator
     setImmediate(async () => {
       try {
-        const poolCount = await prisma.grammarExercise.count({ where: { level: uLevel } })
-        const userSeenCount = await prisma.userSeenGrammar.count({ where: { userId } }) // Approximation
-        // Just always generate 1 more if we fetched from cache, to slowly grow the pool over time
-        // Wait, if we ALWAYS generate, the DB will explode.
-        // Let's generate if (poolCount - userSeenCount) < 10
-        if (poolCount - userSeenCount < 10) {
+        const unseenCount = await prisma.grammarExercise.count({
+          where: {
+            level: uLevel,
+            seenBy: { none: { userId } }
+          }
+        })
+        if (unseenCount < 10) {
           console.log(`[GrammarLab] Buffer low (<10). Generating backup in background...`)
           const aiUrl = `${process.env.AI_SERVICE_URL || 'http://localhost:8000'}/grammar/generate`
           const aiResponse = await fetch(aiUrl, {

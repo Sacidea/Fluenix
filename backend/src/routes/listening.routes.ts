@@ -80,10 +80,14 @@ router.post('/next', requireAuth, async (req: any, res: any) => {
     // 4. Async Background Buffer Generator
     setImmediate(async () => {
       try {
-        const poolCount = await prisma.listeningScenario.count({ where: { level } })
-        const userSeenCount = await prisma.userSeenListening.count({ where: { userId } }) // Approximation
+        const unseenCount = await prisma.listeningScenario.count({
+          where: {
+            level,
+            seenBy: { none: { userId } }
+          }
+        })
         
-        if (poolCount - userSeenCount < 5) {
+        if (unseenCount < 5) {
           console.log(`[ListeningLab] Buffer low (<5). Generating backup in background...`)
           const aiUrl = `${process.env.AI_SERVICE_URL || 'http://localhost:8000'}/listening/generate`
           const aiResponse = await fetch(aiUrl, {

@@ -77,10 +77,15 @@ router.post('/scenario', requireAuth, async (req: any, res: any) => {
     // 4. Async Background Buffer Generator
     setImmediate(async () => {
       try {
-        const poolCount = await prisma.errorScenario.count({ where: { role, level } })
-        const userSeenCount = await prisma.userSeenError.count({ where: { userId } }) // Approximation
+        const unseenCount = await prisma.errorScenario.count({
+          where: {
+            role,
+            level,
+            seenBy: { none: { userId } }
+          }
+        })
         
-        if (poolCount - userSeenCount < 10) {
+        if (unseenCount < 10) {
           console.log(`[ErrorDecoder] Buffer low (<10). Generating backup in background...`)
           const aiUrl = `${process.env.AI_SERVICE_URL || 'http://localhost:8000'}/error-decoder/generate`
           const aiResponse = await fetch(aiUrl, {

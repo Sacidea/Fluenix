@@ -79,10 +79,15 @@ router.post('/next', requireAuth, async (req: any, res: any) => {
     // 4. Async Background Buffer Generator
     setImmediate(async () => {
       try {
-        const poolCount = await prisma.writingMission.count({ where: { level, category } })
-        const userSeenCount = await prisma.userSeenWriting.count({ where: { userId } }) // Approximation
+        const unseenCount = await prisma.writingMission.count({
+          where: {
+            level,
+            category,
+            seenBy: { none: { userId } }
+          }
+        })
         
-        if (poolCount - userSeenCount < 5) {
+        if (unseenCount < 5) {
           console.log(`[WritingLab] Buffer low (<5) for ${category}. Generating backup in background...`)
           const aiUrl = `${process.env.AI_SERVICE_URL || 'http://localhost:8000'}/writing/generate`
           const aiResponse = await fetch(aiUrl, {

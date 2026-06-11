@@ -78,10 +78,14 @@ router.post('/next', requireAuth, async (req: any, res: any) => {
     // 4. Async Background Buffer Generator
     setImmediate(async () => {
       try {
-        const poolCount = await prisma.behavioralQuestion.count({ where: { level } })
-        const userSeenCount = await prisma.userSeenBehavioral.count({ where: { userId } }) // Approximation
+        const unseenCount = await prisma.behavioralQuestion.count({
+          where: {
+            level,
+            seenBy: { none: { userId } }
+          }
+        })
         
-        if (poolCount - userSeenCount < 10) {
+        if (unseenCount < 10) {
           console.log(`[BehavioralLab] Buffer low (<10). Generating backup in background...`)
           const aiUrl = `${process.env.AI_SERVICE_URL || 'http://localhost:8000'}/behavioral/generate`
           const aiResponse = await fetch(aiUrl, {
