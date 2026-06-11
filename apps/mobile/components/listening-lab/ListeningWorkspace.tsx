@@ -155,13 +155,30 @@ export function ListeningWorkspace() {
     const femalePool = fPool.length > 0 ? fPool : englishVoices;
     const malePool = mPool.length > 0 ? mPool : englishVoices;
     
+    const speakerVoiceMap: Record<string, string> = {};
+    let femaleVoiceIdx = 0;
+    let maleVoiceIdx = 0;
+
     for (let i = 0; i < (scenario.dialogue as unknown[]).length; i++) {
       const line = (scenario.dialogue as any)[i];
       const gender = (line.gender || 'male').toLowerCase();
-      const targetPool = gender === 'female' ? femalePool : malePool;
-      const poolToUse = targetPool.length > 0 ? targetPool : voices;
-      const voiceIdx = (line.speaker?.length || 0) % (poolToUse.length || 1);
-      const selectedVoice = poolToUse[voiceIdx]?.identifier;
+      const speakerName = line.speaker || `Speaker_${i}`;
+
+      if (!speakerVoiceMap[speakerName]) {
+        const targetPool = gender === 'female' ? femalePool : malePool;
+        const poolToUse = targetPool.length > 0 ? targetPool : voices;
+        if (poolToUse.length > 0) {
+          if (gender === 'female') {
+            speakerVoiceMap[speakerName] = poolToUse[femaleVoiceIdx % poolToUse.length].identifier;
+            femaleVoiceIdx++;
+          } else {
+            speakerVoiceMap[speakerName] = poolToUse[maleVoiceIdx % poolToUse.length].identifier;
+            maleVoiceIdx++;
+          }
+        }
+      }
+      
+      const selectedVoice = speakerVoiceMap[speakerName];
       
       Speech.speak(line.text, {
         language: 'en-US',
