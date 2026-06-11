@@ -119,63 +119,6 @@ export function ListeningWorkspace() {
     )
   }
 
-  // --- Gender-aware voice helpers ---
-  const FEMALE_NAMES = new Set([
-    'sarah','emma','emily','olivia','sophia','ava','mia','isabella','charlotte',
-    'amelia','harper','ella','elizabeth','sofia','avery','scarlett','victoria',
-    'grace','chloe','lily','hannah','natalie','jessica','anna','alice','claire',
-    'lucy','maria','kate','jane','rachel','karen','lisa','susan','laura','nancy',
-    'helen','jennifer','diana','linda','mary','amy','eva','elena','priya','mei',
-    'yuki','keiko','fatima','aisha','nina','rosa','lena','zoe','nora','maya',
-  ])
-  const MALE_NAMES = new Set([
-    'mike','james','john','robert','david','william','michael','richard','joseph',
-    'thomas','chris','daniel','matt','paul','mark','andrew','steven','brian',
-    'kevin','alex','jason','ryan','eric','nick','sam','ben','jake','tom',
-    'jack','luke','adam','ian','leo','max','ray','carl','frank','george',
-    'peter','raj','ahmed','carlos','marco','kai','ravi','omar','yusuf','ivan',
-  ])
-
-  const guessGender = (name: string): 'female' | 'male' | 'unknown' => {
-    const lower = name.toLowerCase().trim().split(/\s+/)[0] // first name only
-    if (FEMALE_NAMES.has(lower)) return 'female'
-    if (MALE_NAMES.has(lower)) return 'male'
-    return 'unknown'
-  }
-
-  const pickVoice = (
-    voices: SpeechSynthesisVoice[],
-    gender: 'female' | 'male' | 'unknown',
-    fallbackIndex: number
-  ): { voice: SpeechSynthesisVoice | null; pitch: number } => {
-    const englishVoices = voices.filter(v => v.lang.startsWith('en'))
-    const premiumVoices = englishVoices.filter(v => !v.name.toLowerCase().includes('us english'))
-    const pool = premiumVoices.length > 1 ? premiumVoices : englishVoices
-
-    if (pool.length === 0) return { voice: null, pitch: 1.0 }
-
-    // Try to find a voice matching the gender by name keywords
-    const femaleKeywords = ['female', 'woman', 'girl', 'zira', 'hazel', 'susan', 'samantha', 'karen', 'fiona', 'moira', 'tessa', 'victoria']
-    const maleKeywords = ['male', 'man', 'boy', 'david', 'mark', 'james', 'daniel', 'thomas', 'george', 'alex', 'fred', 'ralph']
-
-    if (gender === 'female') {
-      const femaleVoice = pool.find(v => femaleKeywords.some(k => v.name.toLowerCase().includes(k)))
-      if (femaleVoice) return { voice: femaleVoice, pitch: 1.1 }
-      // Fallback: use even-indexed voice with higher pitch
-      return { voice: pool[fallbackIndex % pool.length], pitch: 1.15 }
-    }
-
-    if (gender === 'male') {
-      const maleVoice = pool.find(v => maleKeywords.some(k => v.name.toLowerCase().includes(k)))
-      if (maleVoice) return { voice: maleVoice, pitch: 0.95 }
-      // Fallback: use odd-indexed voice with lower pitch
-      return { voice: pool[(fallbackIndex + 1) % pool.length], pitch: 0.9 }
-    }
-
-    // Unknown gender: just round-robin
-    return { voice: pool[fallbackIndex % pool.length], pitch: 1.0 }
-  }
-
   // --- Audio Player Logic ---
   const handlePlayPause = () => {
     if (!synthRef.current) return
@@ -189,14 +132,18 @@ export function ListeningWorkspace() {
     setIsPlaying(true)
     let utteranceIndex = 0
 
-    // Pre-compute speaker → voice+pitch mapping so it's consistent
+    // Pre-compute speaker → voice mapping so it's consistent
     const voices = synthRef.current?.getVoices() || []
-    const uniqueSpeakers = Array.from(new Set(scenario.dialogue.map((l: any) => l.speaker)))
-    const speakerVoiceMap = new Map<string, { voice: SpeechSynthesisVoice | null; pitch: number }>()
+    const englishVoices = voices.filter(v => v.lang.startsWith('en'))
+    const pool = englishVoices.length > 0 ? englishVoices : voices
 
-    uniqueSpeakers.forEach((speaker, idx) => {
-      const gender = guessGender(speaker)
-      speakerVoiceMap.set(speaker, pickVoice(voices, gender, idx))
+    const uniqueSpeakers = Array.from(new Set(scenario.dialogue.map((l: any) => l.speaker)))
+    const speakerVoiceMap = new Map<string, SpeechSynthesisVoice | null>()
+
+    uniqueSpeakers.forEach((speaker: unknown) => {
+      const speakerStr = String(speaker)
+      const voiceIdx = (speakerStr.length || 0) % (pool.length || 1)
+      speakerVoiceMap.set(speakerStr, pool[voiceIdx] || null)
     })
     
     const playNext = () => {
@@ -208,11 +155,10 @@ export function ListeningWorkspace() {
       const line = scenario.dialogue[utteranceIndex]
       const utterance = new SpeechSynthesisUtterance(line.text)
       
-      const voiceConfig = speakerVoiceMap.get(line.speaker)
-      if (voiceConfig?.voice) {
-        utterance.voice = voiceConfig.voice
+      const voice = speakerVoiceMap.get(line.speaker)
+      if (voice) {
+        utterance.voice = voice
       }
-      utterance.pitch = voiceConfig?.pitch ?? 1.0
       utterance.rate = 1.1
 
       utterance.onend = () => {
@@ -416,12 +362,12 @@ export function ListeningWorkspace() {
                     setSelectedOptionId(null)
                     setIsAnswered(false)
                   } else {
-                    // All questions done
+                    loadNextScenario()
                   }
                 }}
-                style={{ marginTop: '24px', display: currentQuestionIdx < scenario.questions.length - 1 ? 'flex' : 'none' }}
+                style={{ marginTop: '24px', display: 'flex', background: currentQuestionIdx < scenario.questions.length - 1 ? '#3b82f6' : '#0891b2' }}
               >
-                Next Question
+                {currentQuestionIdx < scenario.questions.length - 1 ? 'Next Question' : 'Start Next AI Scenario'}
               </button>
             )}
           </div>

@@ -43,6 +43,27 @@ SCENARIO_PROMPTS = {
     Maintain a formal peer-review tone with zero emotional padding."""
 }
 
+LISTENING_SCENARIOS = [
+    "Technical: System design trade-offs - Monolith vs microservices decision, two senior engineers debating",
+    "Technical: Code review session - PR feedback, 'this won't scale' debate, clean code vs pragmatism",
+    "Technical: Incident post-mortem - Production outage, 5-why analysis, blameless retrospective",
+    "Technical: API design review - REST vs GraphQL, versioning strategy, breaking changes",
+    "Technical: ML model deployment - Latency, model drift, A/B testing, rollback plan",
+    "Collaboration: Sprint planning - Story point negotiation, scope creep, 'this is a 13-pointer' debate",
+    "Collaboration: Cross-team dependency sync - Platform team and feature team discussing handoff dates",
+    "Collaboration: Stakeholder update - Engineering lead explaining technical risk to a non-technical VP",
+    "Collaboration: Scope negotiation - Engineer explaining to PM why 2 weeks of work won't fit into 1 week",
+    "Collaboration: Performance feedback conversation - Manager giving a software engineer growth areas",
+    "Leadership: Quarterly roadmap alignment - VP Eng explaining how to balance technical debt with OKRs",
+    "Leadership: Hiring debrief - Bar raiser meeting, 'strong hire vs. no hire' calibration",
+    "Leadership: Promotion calibration - Manager advocacy for a Staff engineer, 'scope vs. impact' debate",
+    "Leadership: 1:1 coaching session - Senior engineer coaching a mid-level engineer on career pathing",
+    "Interview: Phone screen - Behavioral questions + light system design intro",
+    "Interview: Behavioral interview (STAR) - 'Tell me about a time you disagreed with your team' question",
+    "Interview: System design interview - Design a URL shortener / rate limiter (FAANG style)",
+    "Interview: Offer negotiation call - Recruiter discussing leveling and comp package with candidate"
+]
+
 def get_level_steering(level: str):
     """Provides invisible steering instructions based on CEFR level."""
     steering = f"\n\n[INVISIBLE STEERING: The candidate has a CEFR {level} level. "
@@ -460,10 +481,15 @@ Return ONLY a JSON object matching this exact schema (do not wrap in markdown):
 @app.post("/listening/generate")
 def generate_listening_scenario(data: dict):
     try:
+        import random
         level = data.get("level", "B2")
+        topic = random.choice(LISTENING_SCENARIOS)
         
         system_prompt = f"""You are a FAANG Senior Staff Engineer designing a listening comprehension exercise.
-Generate a highly realistic technical conversation or monologue tailored to a Software Engineer.
+Generate a highly realistic technical conversation or monologue tailored to a Software Engineer based on the following specific scenario:
+
+SCENARIO: {topic}
+
 Their English proficiency is expected to be CEFR {level}.
 
 Return ONLY a JSON object matching this exact schema (do not wrap in markdown):
