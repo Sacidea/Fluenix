@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useMemo, useEffect, useState } from 'react'
+import React, { useMemo } from 'react'
 import * as Icons from 'lucide-react'
 import { ModuleCard } from '@/components/ModuleCard'
 import { modulesData } from '@/data/modules'
@@ -10,7 +10,6 @@ import { CompetencyMatrix } from './CompetencyMatrix'
 import { WelcomeArea } from './WelcomeArea'
 import { GamificationWidget } from './GamificationWidget'
 import { SessionsIcon, AccuracyIcon, StreakIcon, ActivityIcon } from '../icons/PremiumIcons'
-import { useAuth } from '@clerk/nextjs'
 
 interface Session {
   id: string
@@ -21,44 +20,12 @@ interface Session {
   feedback?: unknown
 }
 interface Props {
-  user: { firstName?: string | null, id?: string, [key: string]: unknown } | null
+  user: { firstName?: string | null, [key: string]: unknown } | null
+  stats: { totalSessions?: number, streak?: number, averageScore?: number, lastSession?: string | null } | null
+  sessions: Session[]
 }
 
-export default function DashboardClient({ user }: Props) {
-  const { getToken } = useAuth()
-  const [stats, setStats] = useState<{ totalSessions?: number, streak?: number, averageScore?: number, lastSession?: string | null } | null>(null)
-  const [sessions, setSessions] = useState<Session[]>([])
-  const [loading, setLoading] = useState(true)
-
-  useEffect(() => {
-    async function loadData() {
-      if (!user?.id) {
-        setLoading(false)
-        return
-      }
-      try {
-        const token = await getToken()
-        const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'
-        
-        const [statsRes, sessionsRes] = await Promise.all([
-          fetch(`${apiUrl}/api/sessions/stats/${user.id}`, {
-            headers: token ? { Authorization: `Bearer ${token}` } : undefined
-          }).then(res => res.ok ? res.json() : null).catch(() => null),
-          fetch(`${apiUrl}/api/sessions/user/${user.id}`, {
-            headers: token ? { Authorization: `Bearer ${token}` } : undefined
-          }).then(res => res.ok ? res.json() : []).catch(() => [])
-        ])
-        
-        setStats(statsRes || { totalSessions: 0, averageScore: 0, streak: 0 })
-        setSessions(sessionsRes || [])
-      } catch (err) {
-        console.error(err)
-      } finally {
-        setLoading(false)
-      }
-    }
-    loadData()
-  }, [user?.id, getToken])
+export default function DashboardClient({ user, stats, sessions }: Props) {
   const statsConfig = useMemo(() => [
     { id: 'sessions', iconComp: SessionsIcon, value: stats?.totalSessions ?? 0, label: 'Total Sessions' },
     { id: 'streak', iconComp: StreakIcon, value: stats?.streak ?? 0, label: 'Day Streak' },
@@ -112,18 +79,12 @@ export default function DashboardClient({ user }: Props) {
           <aside className="layout-right">
             <div className="stats-col">
               {/* GAMIFICATION WIDGET */}
-              {loading ? (
-                <div className="gamification-card" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: 120 }}>
-                  <span style={{ fontSize: 13, color: '#94a3b8', fontWeight: 600 }}>Syncing analytics...</span>
-                </div>
-              ) : (
-                <GamificationWidget 
-                  totalSessions={stats?.totalSessions ?? 0}
-                  currentWeeklyCount={currentWeeklyCount}
-                  weeklyTarget={weeklyTarget}
-                  weeklyProgress={weeklyProgress}
-                />
-              )}
+              <GamificationWidget 
+                totalSessions={stats?.totalSessions ?? 0}
+                currentWeeklyCount={currentWeeklyCount}
+                weeklyTarget={weeklyTarget}
+                weeklyProgress={weeklyProgress}
+              />
 
             </div>
 
@@ -133,40 +94,30 @@ export default function DashboardClient({ user }: Props) {
                 <div className="section-line" />
               </div>
 
-              {loading ? (
-                <div style={{ padding: '40px', textAlign: 'center', color: '#94a3b8' }}>
-                  <div className="loading-spinner" style={{ margin: '0 auto 16px', width: 30, height: 30, border: '3px solid #e2e8f0', borderTopColor: '#4f46e5', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} />
-                  <span style={{ fontSize: 14, fontWeight: 600 }}>Loading activities...</span>
-                  <style jsx>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
-                </div>
-              ) : (
-                <>
-                  <div className="stats-col" style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '16px' }}>
-                    {statsConfig.map((s) => {
-                      const IconComp = s.iconComp
-                      return (
-                        <div key={s.id} className="stat-card">
-                          <div className="stat-icon-wrap" style={{ background: 'transparent' }}>
-                            <IconComp size={32} />
-                          </div>
-                          <div className="stat-info">
-                            <span className="stat-val" style={{ fontSize: '18px' }}>{s.value}</span>
-                            <span className="stat-lbl">{s.label}</span>
-                          </div>
-                        </div>
-                      )
-                    })}
-                  </div>
+              <div className="stats-col" style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '16px' }}>
+                {statsConfig.map((s) => {
+                  const IconComp = s.iconComp
+                  return (
+                    <div key={s.id} className="stat-card">
+                      <div className="stat-icon-wrap" style={{ background: 'transparent' }}>
+                        <IconComp size={32} />
+                      </div>
+                      <div className="stat-info">
+                        <span className="stat-val" style={{ fontSize: '18px' }}>{s.value}</span>
+                        <span className="stat-lbl">{s.label}</span>
+                      </div>
+                    </div>
+                  )
+                })}
+              </div>
 
-                  <div className="analytics-col">
-                    <CompetencyMatrix sessions={sessions} />
-                    <div style={{ height: 24 }} />
-                    <ActivityHeatmap sessions={sessions} />
-                    <div style={{ height: 24 }} />
-                    <RecentActivity sessions={sessions} />
-                  </div>
-                </>
-              )}
+              <div className="analytics-col">
+                <CompetencyMatrix sessions={sessions} />
+                <div style={{ height: 24 }} />
+                <ActivityHeatmap sessions={sessions} />
+                <div style={{ height: 24 }} />
+                <RecentActivity sessions={sessions} />
+              </div>
             </section>
           </aside>
         </div>
