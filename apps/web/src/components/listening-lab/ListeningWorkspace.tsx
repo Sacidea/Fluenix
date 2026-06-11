@@ -153,7 +153,7 @@ export function ListeningWorkspace() {
       const speakerStr = String(speaker)
       // find the gender from the scenario dialogue
       const dialogueLine = scenario.dialogue.find((l: any) => l.speaker === speakerStr)
-      const gender = dialogueLine?.gender || 'male'
+      const gender = (dialogueLine?.gender || 'male').toLowerCase()
       
       const targetPool = gender === 'female' ? fPool : mPool
       const poolToUse = targetPool.length > 0 ? targetPool : voices

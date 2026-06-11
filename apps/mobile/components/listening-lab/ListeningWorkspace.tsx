@@ -157,7 +157,7 @@ export function ListeningWorkspace() {
     
     for (let i = 0; i < (scenario.dialogue as unknown[]).length; i++) {
       const line = (scenario.dialogue as any)[i];
-      const gender = line.gender || 'male';
+      const gender = (line.gender || 'male').toLowerCase();
       const targetPool = gender === 'female' ? femalePool : malePool;
       const poolToUse = targetPool.length > 0 ? targetPool : voices;
       const voiceIdx = (line.speaker?.length || 0) % (poolToUse.length || 1);
