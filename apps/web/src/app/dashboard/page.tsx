@@ -7,8 +7,12 @@ export default async function DashboardPage() {
   const token = await getToken()
   const user = await currentUser()
   
-  const stats = user ? await getDashboardStats(user.id, token) : null
-  const sessions = user ? await getDashboardSessions(user.id, token) : []
+  const [stats, sessions] = user 
+    ? await Promise.all([
+        getDashboardStats(user.id, token),
+        getDashboardSessions(user.id, token)
+      ])
+    : [null, []]
 
   return (
     <DashboardClient 
