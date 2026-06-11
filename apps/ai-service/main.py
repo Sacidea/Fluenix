@@ -64,6 +64,23 @@ LISTENING_SCENARIOS = [
     "Interview: Offer negotiation call - Recruiter discussing leveling and comp package with candidate"
 ]
 
+BEHAVIORAL_PRINCIPLES = [
+    "Customer Obsession - Prioritizing the user over technical convenience",
+    "Ownership - Taking responsibility for a production outage or project failure",
+    "Invent and Simplify - Refactoring legacy code or simplifying a complex architecture",
+    "Are Right, A Lot - Making a tough technical decision with limited data",
+    "Learn and Be Curious - Picking up a completely new language or framework under pressure",
+    "Hire and Develop The Best - Mentoring a junior engineer or handling an underperformer",
+    "Insist on Highest Standards - Rejecting a PR or pushing back against a tight deadline to maintain code quality",
+    "Think Big - Proposing a major architectural shift (e.g. monolith to microservices)",
+    "Bias for Action - Shipping a hotfix quickly vs waiting for a perfect solution",
+    "Frugality - Reducing AWS costs or optimizing resource usage",
+    "Earn Trust - Resolving a severe conflict with a product manager or another team",
+    "Dive Deep - Debugging an incredibly obscure bug that no one else could find",
+    "Have Backbone; Disagree and Commit - Pushing back on leadership about technical debt, then committing to their decision",
+    "Deliver Results - Delivering a critical feature on an impossible deadline"
+]
+
 def get_level_steering(level: str):
     """Provides invisible steering instructions based on CEFR level."""
     steering = f"\n\n[INVISIBLE STEERING: The candidate has a CEFR {level} level. "
@@ -324,16 +341,21 @@ def analyze_pronunciation(data: dict):
 @app.post("/behavioral/generate")
 def generate_behavioral(data: dict):
     try:
+        import random
         level = data.get("level", "B2")
+        principle = random.choice(BEHAVIORAL_PRINCIPLES)
         
         system_prompt = f"""You are a FAANG Senior Engineering Manager preparing a behavioral interview.
-Generate a realistic behavioral interview question for a software engineer.
+Generate a highly realistic behavioral interview question for a software engineer.
+Focus specifically on the following Amazon Leadership Principle / theme:
+THEME: {principle}
+
 Their English proficiency is expected to be CEFR {level}.
 
 Return ONLY a JSON object matching this exact schema (do not wrap in markdown):
 {{
   "question": {{
-    "category": "e.g., Customer Obsession, Ownership, Dive Deep, Deliver Results",
+    "category": "{principle.split(' - ')[0]}",
     "context": "A brief 1-2 sentence context or expectation for why this question is being asked in a FAANG interview.",
     "question": "The actual behavioral interview question (e.g., 'Tell me about a time...')"
   }}
