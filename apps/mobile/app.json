@@ -8,7 +8,8 @@
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
     "updates": {
-      "fallbackToCacheTimeout": 0
+      "fallbackToCacheTimeout": 0,
+      "url": "https://u.expo.dev/aff6309b-daac-4d7a-a1ea-17fcd547b21b"
     },
     "runtimeVersion": {
       "policy": "appVersion"
@@ -18,7 +19,11 @@
       "bundleIdentifier": "com.fluenix.app",
       "associatedDomains": [
         "applinks:fluenix.com"
-      ]
+      ],
+      "infoPlist": {
+        "NSSpeechRecognitionUsageDescription": "Allow $(PRODUCT_NAME) to use speech recognition.",
+        "NSMicrophoneUsageDescription": "Allow Fluenix to access the microphone for voice analysis and speaking exercises."
+      }
     },
     "android": {
       "package": "com.fluenix.app",
