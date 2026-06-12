@@ -57,23 +57,10 @@ export function ListeningWorkspace() {
   const synthRef = useRef<SpeechSynthesis | null>(null)
   const recognitionRef = useRef<any>(null)
 
-  const [availableVoices, setAvailableVoices] = useState<SpeechSynthesisVoice[]>([])
-
   // Initialize Speech APIs
   useEffect(() => {
     if (typeof window !== 'undefined') {
       synthRef.current = window.speechSynthesis
-
-      // Asynchronously load voices (especially for mobile)
-      const updateVoices = () => {
-        if (synthRef.current) {
-          setAvailableVoices(synthRef.current.getVoices())
-        }
-      }
-      updateVoices()
-      if (speechSynthesis.onvoiceschanged !== undefined) {
-        speechSynthesis.onvoiceschanged = updateVoices
-      }
 
       // Initialize Speech Recognition for Shadowing mode
       const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition
@@ -148,7 +135,7 @@ export function ListeningWorkspace() {
     let utteranceIndex = 0
 
     // Split into female and male pools based on name keywords
-    const voices = availableVoices.length > 0 ? availableVoices : (synthRef.current?.getVoices() || [])
+    const voices = synthRef.current?.getVoices() || []
     const englishVoices = voices.filter(v => v.lang.startsWith('en'))
     
     const femaleKeywords = ['female', 'woman', 'girl', 'zira', 'samantha', 'victoria', 'karen', 'moira', 'tessa', 'ava', 'susan', 'hazel', 'fiona', 'aria', 'jenny', 'amy', 'olivia', 'emma']
@@ -163,9 +150,8 @@ export function ListeningWorkspace() {
 
     const uniqueSpeakers = Array.from(new Set(scenario.dialogue.map((l: any) => l.speaker)))
     const speakerVoiceMap = new Map<string, SpeechSynthesisVoice | null>()
-    const speakerPitchMap = new Map<string, number>()
 
-    uniqueSpeakers.forEach((speaker: unknown, index: number) => {
+    uniqueSpeakers.forEach((speaker: unknown) => {
       const speakerStr = String(speaker)
       // find the gender from the scenario dialogue
       const dialogueLine = scenario.dialogue.find((l: any) => l.speaker === speakerStr)
@@ -175,38 +161,7 @@ export function ListeningWorkspace() {
       const poolToUse = targetPool.length > 0 ? targetPool : voices
       
       const voiceIdx = (speakerStr.length || 0) % (poolToUse.length || 1)
-      const selectedVoice = poolToUse[voiceIdx] || null
-      speakerVoiceMap.set(speakerStr, selectedVoice)
-
-      // Fallback Pitch variation (if devices only have 1 voice)
-      let pitch = 1.0;
-      if (selectedVoice) {
-        // Count how many speakers already use this exact voice
-        let sameVoiceCount = 0;
-        speakerVoiceMap.forEach((v, s) => {
-          if (s !== speakerStr && v && v.name === selectedVoice.name) {
-            sameVoiceCount++;
-          }
-        });
-        
-        if (sameVoiceCount > 0) {
-           // We have a collision! Differentiate with pitch.
-           if (gender === 'female') {
-             pitch = 1.2 + (sameVoiceCount * 0.1);
-           } else {
-             pitch = 0.8 - (sameVoiceCount * 0.1);
-           }
-        } else {
-           // No collision, but still enforce general gender pitch if the pool fell back to the same default list
-           if (gender === 'female' && !femaleKeywords.some(k => selectedVoice.name.toLowerCase().includes(k))) {
-             pitch = 1.2;
-           } else if (gender === 'male' && !maleKeywords.some(k => selectedVoice.name.toLowerCase().includes(k))) {
-             pitch = 0.8;
-           }
-        }
-      }
-      // Ensure pitch stays within a reasonable bound so it doesn't sound like a chipmunk or a monster
-      speakerPitchMap.set(speakerStr, Math.max(0.5, Math.min(1.5, pitch)))
+      speakerVoiceMap.set(speakerStr, poolToUse[voiceIdx] || null)
     })
     
     const playNext = () => {
@@ -222,8 +177,7 @@ export function ListeningWorkspace() {
       if (voice) {
         utterance.voice = voice
       }
-      utterance.rate = 1.0 // Slower rate on mobile usually sounds better
-      utterance.pitch = speakerPitchMap.get(line.speaker) || 1.0
+      utterance.rate = 1.1
 
       utterance.onend = () => {
         utteranceIndex++
