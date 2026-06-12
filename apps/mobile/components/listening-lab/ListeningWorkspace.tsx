@@ -62,7 +62,7 @@ function renderLineWithIdioms(line: DialogueLine) {
 }
 
 export function ListeningWorkspace() {
-  const { activeScenario: scenario, isLoadingScenario, loadNextScenario } = useListeningSession();
+  const { activeScenario: scenario, isLoadingScenario, loadNextScenario, saveSession } = useListeningSession();
   const { requestMicrophonePermission, handleVoiceError } = usePermissions();
 
   const [isPlaying, setIsPlaying] = useState(false);
@@ -73,6 +73,7 @@ export function ListeningWorkspace() {
   const [currentQuestionIdx, setCurrentQuestionIdx] = useState(0);
   const [selectedOptionId, setSelectedOptionId] = useState<string | null>(null);
   const [isAnswered, setIsAnswered] = useState(false);
+  const [correctAnswersCount, setCorrectAnswersCount] = useState(0);
 
   // Mode 2: Dictation state
   const [dictationAnswers, setDictationAnswers] = useState<string[]>([]);
@@ -113,6 +114,7 @@ export function ListeningWorkspace() {
     setCurrentQuestionIdx(0);
     setSelectedOptionId(null);
     setIsAnswered(false);
+    setCorrectAnswersCount(0);
     setShowTranscript(false);
     setActiveMode('quiz');
     
@@ -200,6 +202,12 @@ export function ListeningWorkspace() {
     if (isAnswered) return;
     setSelectedOptionId(id);
     setIsAnswered(true);
+
+    const currentQuestion = (scenario?.questions as any)?.[currentQuestionIdx];
+    const selectedOption = currentQuestion?.options?.find((o: any) => o.id === id);
+    if (selectedOption?.isCorrect) {
+      setCorrectAnswersCount(p => p + 1);
+    }
   };
 
   const toggleRecording = async () => {
@@ -280,12 +288,15 @@ export function ListeningWorkspace() {
               selectedOptionId={selectedOptionId}
               isAnswered={isAnswered}
               onOptionSelect={handleOptionClick}
-              onNextQuestion={() => {
+              onNextQuestion={async () => {
                 if (currentQuestionIdx < (scenario.questions as unknown[]).length - 1) {
                   setCurrentQuestionIdx(p => p + 1);
                   setSelectedOptionId(null);
                   setIsAnswered(false);
                 } else {
+                  const total = (scenario.questions as unknown[]).length;
+                  const finalScore = Math.round((correctAnswersCount / total) * 100) || 0;
+                  await saveSession(finalScore);
                   loadNextScenario();
                 }
               }}

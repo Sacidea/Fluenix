@@ -31,7 +31,7 @@ function renderLineWithIdioms(line: { text: string, idiomHighlight?: { word: str
 
 // --- Component ---
 export function ListeningWorkspace() {
-  const { activeScenario: scenario, isLoadingScenario, loadNextScenario, error } = useListeningSession()
+  const { activeScenario: scenario, isLoadingScenario, loadNextScenario, saveSession, error } = useListeningSession()
 
   const [isPlaying, setIsPlaying] = useState(false)
   const [showTranscript, setShowTranscript] = useState(false)
@@ -43,6 +43,7 @@ export function ListeningWorkspace() {
   const [currentQuestionIdx, setCurrentQuestionIdx] = useState(0)
   const [selectedOptionId, setSelectedOptionId] = useState<string | null>(null)
   const [isAnswered, setIsAnswered] = useState(false)
+  const [correctAnswersCount, setCorrectAnswersCount] = useState(0)
 
   // Mode 2: Dictation state
   const [dictationAnswers, setDictationAnswers] = useState<string[]>([])
@@ -98,6 +99,7 @@ export function ListeningWorkspace() {
     setCurrentQuestionIdx(0)
     setSelectedOptionId(null)
     setIsAnswered(false)
+    setCorrectAnswersCount(0)
     setShowTranscript(false)
     setActiveMode('quiz')
     
@@ -194,6 +196,11 @@ export function ListeningWorkspace() {
     if (isAnswered) return
     setSelectedOptionId(id)
     setIsAnswered(true)
+
+    const selectedOption = currentQuestion?.options.find((o: any) => o.id === id)
+    if (selectedOption?.isCorrect) {
+      setCorrectAnswersCount(p => p + 1)
+    }
   }
 
   // --- Mode: Dictation Logic ---
@@ -372,12 +379,14 @@ export function ListeningWorkspace() {
             {isAnswered && (
               <button 
                 className="l-btn-next" 
-                onClick={() => {
+                onClick={async () => {
                   if (currentQuestionIdx < scenario.questions.length - 1) {
                     setCurrentQuestionIdx(p => p + 1)
                     setSelectedOptionId(null)
                     setIsAnswered(false)
                   } else {
+                    const finalScore = Math.round((correctAnswersCount / scenario.questions.length) * 100) || 0
+                    await saveSession(finalScore)
                     loadNextScenario()
                   }
                 }}

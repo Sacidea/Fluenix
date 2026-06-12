@@ -55,10 +55,30 @@ export function useListeningSession() {
     loadNextScenario()
   }, [level])
 
+  const saveSession = async (score: number) => {
+    if (!user || !activeScenario) return;
+    try {
+      const token = await getToken();
+      await apiClient.post(API_ROUTES.SESSIONS, {
+        userId: user.id,
+        type: 'listening',
+        scenario: activeScenario.title,
+        duration: 0,
+        score: score,
+        feedback: null
+      }, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+    } catch (err) {
+      console.error("Failed to save session", err);
+    }
+  }
+
   return {
     activeScenario,
     isLoadingScenario,
     loadNextScenario,
+    saveSession,
     error
   }
 }
