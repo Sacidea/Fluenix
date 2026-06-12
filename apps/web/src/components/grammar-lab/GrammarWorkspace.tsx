@@ -3,7 +3,8 @@
 import React, { useState, useEffect, useCallback } from 'react'
 import { apiClient } from '@/lib/apiClient'
 import { useLevel } from '@/context/LevelContext'
-import { useAuth } from '@clerk/nextjs'
+import { useAuth, useUser } from '@clerk/nextjs'
+import { API_ROUTES } from '@fluenix/shared'
 import { CheckCircle2, XCircle, AlertCircle, Loader2, MessageSquare } from 'lucide-react'
 
 // --- Types ---
@@ -28,6 +29,7 @@ type GrammarExercise = {
 export function GrammarWorkspace() {
   const { level } = useLevel()
   const { getToken } = useAuth()
+  const { user } = useUser()
   
   const [exercise, setExercise] = useState<GrammarExercise | null>(null)
   const [isLoading, setIsLoading] = useState(true)
@@ -109,8 +111,23 @@ export function GrammarWorkspace() {
         { exerciseId: exercise.id },
         { headers: token ? { Authorization: `Bearer ${token}` } : undefined }
       )
+      
+      // Kaydetme işlemi (Progress Map'e yansıması için)
+      if (user) {
+        await apiClient.post(API_ROUTES.SESSIONS, {
+          userId: user.id,
+          type: 'grammar',
+          scenario: exercise.title || 'Grammar Linter',
+          duration: 0,
+          score: isCorrect ? 100 : 0,
+          feedback: null
+        }, {
+          headers: token ? { Authorization: `Bearer ${token}` } : undefined
+        });
+      }
+
     } catch (err) {
-      console.error('Failed to mark exercise as seen', err)
+      console.error('Failed to mark exercise as seen or save session', err)
     }
   }
 

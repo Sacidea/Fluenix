@@ -6,7 +6,7 @@ import { Session } from '@/hooks/useProgressData'
 import { CompetencyRadar } from './CompetencyRadar'
 import { ActivityHeatmap } from './ActivityHeatmap'
 
-type SkillKey = 'scenario' | 'writing' | 'pronunciation' | 'behavioral' | 'listening' | 'error-decoding'
+type SkillKey = 'scenario' | 'writing' | 'pronunciation' | 'behavioral' | 'listening' | 'error-decoding' | 'grammar'
 
 type SkillStats = {
   label: string
@@ -21,6 +21,7 @@ const skillConfig: Record<SkillKey, { label: string; path: string }> = {
   pronunciation: { label: 'Pronunciation', path: '/dashboard/pronunciation' },
   behavioral: { label: 'Behavioral', path: '/dashboard/behavioral-lab' },
   listening: { label: 'Listening', path: '/dashboard/listening-lab' },
+  grammar: { label: 'Grammar', path: '/dashboard/grammar-lab' },
   'error-decoding': { label: 'Error Decoding', path: '/dashboard/error-decoding' }
 }
 
@@ -64,6 +65,7 @@ const getSkillStats = (sessions: Session[]): Record<SkillKey, SkillStats> => {
     pronunciation: [],
     behavioral: [],
     listening: [],
+    grammar: [],
     'error-decoding': []
   }
 
@@ -98,6 +100,11 @@ const getSkillStats = (sessions: Session[]): Record<SkillKey, SkillStats> => {
       ...skillConfig.listening,
       sessions: bySkill.listening.length,
       average: bySkill.listening.length ? bySkill.listening.reduce((a, b) => a + b, 0) / bySkill.listening.length : null
+    },
+    grammar: {
+      ...skillConfig.grammar,
+      sessions: bySkill.grammar.length,
+      average: bySkill.grammar.length ? bySkill.grammar.reduce((a, b) => a + b, 0) / bySkill.grammar.length : null
     },
     'error-decoding': {
       ...skillConfig['error-decoding'],
