@@ -9,7 +9,9 @@ const COMP_MAP = {
   pronunciation: { label: 'Pronunciation', index: 2 },
   vocabulary: { label: 'Vocabulary', index: 3 },
   'error-decoding': { label: 'Error Dec.', index: 4 },
-  'grammar-lab': { label: 'Grammar', index: 5 }
+  'grammar-lab': { label: 'Grammar', index: 5 },
+  behavioral: { label: 'Leadership', index: 6 },
+  listening: { label: 'Listening', index: 7 }
 };
 
 const DEFAULT_COMP = [
@@ -18,7 +20,9 @@ const DEFAULT_COMP = [
   { subject: 'Pronunciation', A: 20 },
   { subject: 'Vocabulary', A: 20 },
   { subject: 'Error Dec.', A: 20 },
-  { subject: 'Grammar', A: 20 }
+  { subject: 'Grammar', A: 20 },
+  { subject: 'Leadership', A: 20 },
+  { subject: 'Listening', A: 20 }
 ];
 
 import { Session } from './SessionItem';
@@ -31,7 +35,9 @@ export function CompetencyRadar({ sessions }: { sessions: Session[] }) {
     pronunciation: [] as number[],
     vocabulary: [] as number[],
     'error-decoding': [] as number[],
-    'grammar-lab': [] as number[]
+    'grammar-lab': [] as number[],
+    behavioral: [] as number[],
+    listening: [] as number[]
   };
 
   sessions.forEach(s => {

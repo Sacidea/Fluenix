@@ -27,17 +27,20 @@ const getCompetencyData = (sessions: Session[]) => {
     return s.length ? s.reduce((a, b) => a + Number(b.score), 0) / s.length : null
   }
 
-  // Fallback defaults so the chart doesn't look empty for new users
   const scenarioAvg = getAvg('scenario') ?? 40
   const pronunciationAvg = getAvg('pronunciation') ?? 40
   const writingAvg = getAvg('writing') ?? 40
   const grammarAvg = getAvg('grammar') ?? 40
+  const behavioralAvg = getAvg('behavioral') ?? 40
+  const listeningAvg = getAvg('listening') ?? 40
 
   return [
     { subject: 'Clarity', A: scenarioAvg, fullMark: 100 },
     { subject: 'Vocabulary', A: writingAvg, fullMark: 100 },
     { subject: 'Grammar', A: grammarAvg, fullMark: 100 },
     { subject: 'Pronunciation', A: pronunciationAvg, fullMark: 100 },
+    { subject: 'Leadership', A: behavioralAvg, fullMark: 100 },
+    { subject: 'Listening', A: listeningAvg, fullMark: 100 },
   ]
 }
 

@@ -1,13 +1,14 @@
 import { useState, useEffect } from 'react'
 import axios from 'axios'
 import { apiClient, aiClient } from '@/lib/apiClient'
-import { useAuth } from '@clerk/nextjs'
+import { useAuth, useUser } from '@clerk/nextjs'
 import { useLevel } from '@/context/LevelContext'
 import type { BehavioralQuestion, StarFeedback } from '@fluenix/shared'
-import { parseAIResponse, API_ROUTES, AI_ROUTES } from '@fluenix/shared'
+import { parseAIResponse, createSessionPayload, API_ROUTES, AI_ROUTES } from '@fluenix/shared'
 
 export function useBehavioralSession() {
   const { getToken } = useAuth()
+  const { user } = useUser()
   const { level } = useLevel()
   const [activeQuestion, setActiveQuestion] = useState<BehavioralQuestion | null>(null)
   const [isLoadingQuestion, setIsLoadingQuestion] = useState(true)
@@ -95,6 +96,20 @@ export function useBehavioralSession() {
       const rawFeedback = res.data.analysis
       const parsed = parseAIResponse<StarFeedback>(rawFeedback)
       setFeedback(parsed)
+      
+      // 2. Save Session to Backend
+      if (user) {
+        await apiClient.post(API_ROUTES.SESSIONS, createSessionPayload({
+          userId: user.id,
+          type: 'behavioral',
+          scenario: activeQuestion.category,
+          duration: 0, // Could add a timer here if needed
+          score: parsed.overall_score ?? 0,
+          feedback: parsed 
+        }), {
+          headers: token ? { Authorization: `Bearer ${token}` } : undefined
+        })
+      }
       
     } catch (err) {
       console.error(err)

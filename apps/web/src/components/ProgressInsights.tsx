@@ -6,7 +6,7 @@ import { Session } from '@/hooks/useProgressData'
 import { CompetencyRadar } from './CompetencyRadar'
 import { ActivityHeatmap } from './ActivityHeatmap'
 
-type SkillKey = 'scenario' | 'writing' | 'pronunciation'
+type SkillKey = 'scenario' | 'writing' | 'pronunciation' | 'behavioral' | 'listening'
 
 type SkillStats = {
   label: string
@@ -18,7 +18,9 @@ type SkillStats = {
 const skillConfig: Record<SkillKey, { label: string; path: string }> = {
   scenario: { label: 'Scenario', path: '/dashboard/scenario' },
   writing: { label: 'Writing', path: '/dashboard/writing' },
-  pronunciation: { label: 'Pronunciation', path: '/dashboard/pronunciation' }
+  pronunciation: { label: 'Pronunciation', path: '/dashboard/pronunciation' },
+  behavioral: { label: 'Behavioral', path: '/dashboard/behavioral-lab' },
+  listening: { label: 'Listening', path: '/dashboard/listening-lab' }
 }
 
 const dayKey = (d: Date) => d.toISOString().slice(0, 10)
@@ -58,7 +60,9 @@ const getSkillStats = (sessions: Session[]): Record<SkillKey, SkillStats> => {
   const bySkill: Record<SkillKey, number[]> = {
     scenario: [],
     writing: [],
-    pronunciation: []
+    pronunciation: [],
+    behavioral: [],
+    listening: []
   }
 
   for (const s of sessions) {
@@ -82,6 +86,16 @@ const getSkillStats = (sessions: Session[]): Record<SkillKey, SkillStats> => {
       ...skillConfig.pronunciation,
       sessions: bySkill.pronunciation.length,
       average: bySkill.pronunciation.length ? bySkill.pronunciation.reduce((a, b) => a + b, 0) / bySkill.pronunciation.length : null
+    },
+    behavioral: {
+      ...skillConfig.behavioral,
+      sessions: bySkill.behavioral.length,
+      average: bySkill.behavioral.length ? bySkill.behavioral.reduce((a, b) => a + b, 0) / bySkill.behavioral.length : null
+    },
+    listening: {
+      ...skillConfig.listening,
+      sessions: bySkill.listening.length,
+      average: bySkill.listening.length ? bySkill.listening.reduce((a, b) => a + b, 0) / bySkill.listening.length : null
     }
   }
 }
