@@ -197,6 +197,27 @@ export function SessionItem({ session, index = 0, onSelect, onDelete }: SessionI
                 .delete-entry-btn:hover {
                     background: #fef2f2;
                 }
+
+                @media (max-width: 640px) {
+                    .ledger-entry {
+                        padding: 16px 12px;
+                        flex-wrap: wrap;
+                        gap: 12px;
+                    }
+                    .entry-left {
+                        gap: 12px;
+                    }
+                    .entry-right {
+                        gap: 12px;
+                        width: 100%;
+                        justify-content: flex-end;
+                        border-top: 1px solid #f1f5f9;
+                        padding-top: 12px;
+                    }
+                    .delete-entry-btn {
+                        margin-left: 0;
+                    }
+                }
             `}</style>
         </div>
     )
