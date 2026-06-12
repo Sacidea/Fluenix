@@ -56,6 +56,7 @@ export class SessionService implements ISessionService {
     if (redis) {
       try {
         await redis.del(`stats:${data.userId}`)
+        await redis.del(`sessions:${data.userId}`)
       } catch (e) {
         console.warn('Redis del failed:', e)
       }
@@ -66,7 +67,27 @@ export class SessionService implements ISessionService {
   }
 
   async getUserSessions(userId: string): Promise<any[]> {
-    return this.sessionRepo.findByUserId(userId)
+    const cacheKey = `sessions:${userId}`
+    if (redis) {
+      try {
+        const cached = await redis.get(cacheKey)
+        if (cached) return cached as any[]
+      } catch (e) {
+        console.warn('Redis get failed:', e)
+      }
+    }
+
+    const sessions = await this.sessionRepo.findByUserId(userId)
+
+    if (redis) {
+      try {
+        await redis.set(cacheKey, sessions, { ex: 300 })
+      } catch (e) {
+        console.warn('Redis set failed:', e)
+      }
+    }
+
+    return sessions
   }
 
   async getUserStats(userId: string): Promise<any> {
@@ -113,6 +134,7 @@ export class SessionService implements ISessionService {
     if (deleted && redis) {
       try {
         await redis.del(`stats:${userId}`)
+        await redis.del(`sessions:${userId}`)
       } catch (e) {
         console.warn('Redis del failed:', e)
       }
