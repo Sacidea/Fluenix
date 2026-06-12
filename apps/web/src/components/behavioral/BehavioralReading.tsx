@@ -24,17 +24,9 @@ export function BehavioralReading() {
   return (
     <div className="behavioral-reading-container">
       {/* Graded Reading Section with Chapters and Quiz */}
-      <div className="graded-reading-section" style={{
-        background: '#f8fafc',
-        border: '1px solid #e2e8f0',
-        borderRadius: '12px',
-        padding: '0',
-        display: 'flex',
-        overflow: 'hidden',
-        minHeight: '600px'
-      }}>
+      <div className="graded-reading-container">
         {/* Chapters Sidebar */}
-        <div style={{ width: '250px', background: 'white', borderRight: '1px solid #e2e8f0', display: 'flex', flexDirection: 'column' }}>
+        <div className="chapters-sidebar">
           <div style={{ padding: '20px 16px', borderBottom: '1px solid #e2e8f0', background: '#f8fafc' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#0f172a', fontWeight: 700, fontSize: '15px', marginBottom: '8px' }}>
               <BookText size={18} className="text-blue-600" />
@@ -74,7 +66,7 @@ export function BehavioralReading() {
         </div>
 
         {/* Content Area */}
-        <div style={{ flex: 1, padding: '32px', overflowY: 'auto' }}>
+        <div className="reading-content-area">
           <div className="lesson-content-markdown" style={{ color: '#334155', lineHeight: 1.7 }}>
             <ReactMarkdown>{readingContent.content}</ReactMarkdown>
           </div>
