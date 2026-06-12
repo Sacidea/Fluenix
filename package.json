@@ -27,7 +27,22 @@
       "react-dom": "19.2.3",
       "@types/react": "19.2.17",
       "@types/react-dom": "19.0.3"
-    }
+    },
+    "onlyBuiltDependencies": [
+      "@clerk/shared",
+      "@prisma/client",
+      "@prisma/engines",
+      "@sentry-internal/node-cpu-profiler",
+      "@sentry/cli",
+      "browser-tabs-lock",
+      "bufferutil",
+      "core-js",
+      "msgpackr-extract",
+      "prisma",
+      "sharp",
+      "unrs-resolver",
+      "utf-8-validate"
+    ]
   },
   "dependencies": {
     "zod": "3.24.2"
