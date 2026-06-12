@@ -1,5 +1,5 @@
 import { auth, currentUser } from '@clerk/nextjs/server'
-import { getDashboardStats, getDashboardSessions } from '@/lib/getDashboardStats'
+import { getDashboardStats } from '@/lib/getDashboardStats'
 import DashboardClient from '@/components/dashboard/DashboardClient'
 
 export default async function DashboardPage() {
@@ -7,12 +7,9 @@ export default async function DashboardPage() {
   const token = await getToken()
   const user = await currentUser()
   
-  const [stats, sessions] = user 
-    ? await Promise.all([
-        getDashboardStats(user.id, token),
-        getDashboardSessions(user.id, token)
-      ])
-    : [null, []]
+  const data = user ? await getDashboardStats(user.id, token) : null
+  const stats = data?.stats || null
+  const sessions = data?.sessions || []
 
   return (
     <DashboardClient 

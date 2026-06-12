@@ -1,7 +1,9 @@
 import { PrismaClient } from '@prisma/client'
 import { ISessionRepository } from '../interfaces/ISessionRepository'
 import { ISessionService, CreateSessionDto } from '../interfaces/ISessionService'
-import { redis } from '../config/redis'
+import NodeCache from 'node-cache'
+
+const cache = new NodeCache({ stdTTL: 300 })
 
 export class SessionService implements ISessionService {
   constructor(
@@ -52,15 +54,9 @@ export class SessionService implements ISessionService {
       })
     }
 
-    // Invalidate Redis cache
-    if (redis) {
-      try {
-        await redis.del(`stats:${data.userId}`)
-        await redis.del(`sessions:${data.userId}`)
-      } catch (e) {
-        console.warn('Redis del failed:', e)
-      }
-    }
+    // Invalidate cache
+    cache.del(`stats:${data.userId}`)
+    cache.del(`sessions:${data.userId}`)
 
     // Create the session
     return this.sessionRepo.create(data)
@@ -68,38 +64,19 @@ export class SessionService implements ISessionService {
 
   async getUserSessions(userId: string): Promise<any[]> {
     const cacheKey = `sessions:${userId}`
-    if (redis) {
-      try {
-        const cached = await redis.get(cacheKey)
-        if (cached) return cached as any[]
-      } catch (e) {
-        console.warn('Redis get failed:', e)
-      }
-    }
+    const cached = cache.get(cacheKey)
+    if (cached) return cached as any[]
 
     const sessions = await this.sessionRepo.findByUserId(userId)
-
-    if (redis) {
-      try {
-        await redis.set(cacheKey, sessions, { ex: 300 })
-      } catch (e) {
-        console.warn('Redis set failed:', e)
-      }
-    }
+    cache.set(cacheKey, sessions)
 
     return sessions
   }
 
   async getUserStats(userId: string): Promise<any> {
     const cacheKey = `stats:${userId}`
-    if (redis) {
-      try {
-        const cached = await redis.get(cacheKey)
-        if (cached) return cached
-      } catch (e) {
-        console.warn('Redis get failed:', e)
-      }
-    }
+    const cached = cache.get(cacheKey)
+    if (cached) return cached
 
     const { totalSessions, averageScore } = await this.sessionRepo.getStatsAggregations(userId)
     const lastSession = await this.sessionRepo.getLastSessionDate(userId)
@@ -117,27 +94,16 @@ export class SessionService implements ISessionService {
       streak: user?.streak || 0
     }
 
-    if (redis) {
-      try {
-        // Cache for 5 minutes
-        await redis.set(cacheKey, stats, { ex: 300 })
-      } catch (e) {
-        console.warn('Redis set failed:', e)
-      }
-    }
+    cache.set(cacheKey, stats)
 
     return stats
   }
 
   async deleteSession(sessionId: string, userId: string): Promise<boolean> {
     const deleted = await this.sessionRepo.deleteSession(sessionId, userId)
-    if (deleted && redis) {
-      try {
-        await redis.del(`stats:${userId}`)
-        await redis.del(`sessions:${userId}`)
-      } catch (e) {
-        console.warn('Redis del failed:', e)
-      }
+    if (deleted) {
+      cache.del(`stats:${userId}`)
+      cache.del(`sessions:${userId}`)
     }
     return deleted
   }

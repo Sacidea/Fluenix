@@ -69,26 +69,14 @@ const globalLimiter = rateLimit({
 app.use(globalLimiter)
 
 app.get('/health', async (req: Request, res: Response) => {
-  try {
-    const redisPing = await redis.ping()
-    res.json({ 
-      status: 'ok', 
-      service: 'fluenix-api',
-      redis: redisPing === 'PONG' ? 'connected' : 'error',
-      timestamp: new Date().toISOString(),
-      debug_clerk_key: process.env.CLERK_JWT_PUBLIC_KEY ? process.env.CLERK_JWT_PUBLIC_KEY.substring(0, 30) : 'MISSING',
-      debug_db: process.env.DATABASE_URL ? 'PRESENT' : 'MISSING'
-    })
-  } catch (error) {
-    res.json({ 
-      status: 'ok', 
-      service: 'fluenix-api',
-      redis: 'not_connected',
-      timestamp: new Date().toISOString(),
-      debug_clerk_key: process.env.CLERK_JWT_PUBLIC_KEY ? process.env.CLERK_JWT_PUBLIC_KEY.substring(0, 30) : 'MISSING',
-      debug_db: process.env.DATABASE_URL ? 'PRESENT' : 'MISSING'
-    })
-  }
+  res.json({ 
+    status: 'ok', 
+    service: 'fluenix-api',
+    redis: 'removed',
+    timestamp: new Date().toISOString(),
+    debug_clerk_key: process.env.CLERK_JWT_PUBLIC_KEY ? process.env.CLERK_JWT_PUBLIC_KEY.substring(0, 30) : 'MISSING',
+    debug_db: process.env.DATABASE_URL ? 'PRESENT' : 'MISSING'
+  })
 })
 
 // The error handler must be registered before any other error middleware and after all controllers
