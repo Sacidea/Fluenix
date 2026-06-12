@@ -493,4 +493,12 @@
   .transcript-panel {
     padding: 16px;
   }
+  .practice-modes-nav {
+    flex-wrap: wrap;
+    gap: 4px;
+  }
+  .mode-tab {
+    flex: 1 1 45%;
+    padding: 8px 12px;
+  }
 }
