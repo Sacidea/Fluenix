@@ -33,6 +33,7 @@ const getCompetencyData = (sessions: Session[]) => {
   const grammarAvg = getAvg('grammar') ?? 40
   const behavioralAvg = getAvg('behavioral') ?? 40
   const listeningAvg = getAvg('listening') ?? 40
+  const errorDecodingAvg = getAvg('error-decoding') ?? 40
 
   return [
     { subject: 'Clarity', A: scenarioAvg, fullMark: 100 },
@@ -41,6 +42,7 @@ const getCompetencyData = (sessions: Session[]) => {
     { subject: 'Pronunciation', A: pronunciationAvg, fullMark: 100 },
     { subject: 'Leadership', A: behavioralAvg, fullMark: 100 },
     { subject: 'Listening', A: listeningAvg, fullMark: 100 },
+    { subject: 'Error Dec.', A: errorDecodingAvg, fullMark: 100 },
   ]
 }
 
