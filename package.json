@@ -39,6 +39,7 @@
       "core-js",
       "msgpackr-extract",
       "prisma",
+      "puppeteer",
       "sharp",
       "unrs-resolver",
       "utf-8-validate"
