@@ -239,7 +239,12 @@ export function ErrorWorkspace() {
 
       {/* Quiz Section */}
       <div className="quiz-section">
-        <h3 className="question-text">{scenario.question}</h3>
+        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '24px', alignItems: 'flex-start', gap: '16px' }}>
+          <h3 className="question-text" style={{ margin: 0 }}>{scenario.question}</h3>
+          <span style={{ fontFamily: 'var(--font-mono)', fontSize: '11px', fontWeight: 800, color: '#6366f1', whiteSpace: 'nowrap', paddingTop: '4px' }}>
+            Q {sessionCount + 1} / {ROUNDS_PER_SESSION}
+          </span>
+        </div>
         
         <div className="options-list">
           {(scenario?.options || []).map(opt => {
