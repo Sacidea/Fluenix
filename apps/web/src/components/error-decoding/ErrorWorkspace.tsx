@@ -89,11 +89,14 @@ export function ErrorWorkspace() {
 
   const saveSessionProgress = async (finalScore: number) => {
     try {
+      if (!user) return
       const token = await getToken()
       await apiClient.post(
-        '/api/sessions/complete',
+        '/api/sessions',
         {
+          userId: user.id,
           type: 'error-decoding',
+          scenario: 'Error Decoding Challenge',
           score: finalScore,
           duration: ROUNDS_PER_SESSION * 60, // approximate 3 minutes
           feedback: { rounds: ROUNDS_PER_SESSION, correct: correctAnswers }

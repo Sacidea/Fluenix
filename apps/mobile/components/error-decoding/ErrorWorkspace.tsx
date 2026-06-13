@@ -105,11 +105,14 @@ export function ErrorWorkspace() {
 
   const saveSessionProgress = async (finalScore: number) => {
     try {
+      if (!user) return;
       const token = await getToken();
       await axios.post(
-        `${API_URL}/api/sessions/complete`,
+        `${API_URL}/api/sessions`,
         {
+          userId: user.id,
           type: 'error-decoding',
+          scenario: 'Error Decoding Challenge',
           score: finalScore,
           duration: ROUNDS_PER_SESSION * 60,
           feedback: { rounds: ROUNDS_PER_SESSION, correct: correctAnswers }
