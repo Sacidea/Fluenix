@@ -89,6 +89,11 @@ export function ErrorWorkspace() {
       });
       
       const data = typeof res.data.scenario === 'string' ? JSON.parse(res.data.scenario) : res.data.scenario;
+      
+      if (data && data.options) {
+        data.options = [...data.options].sort(() => Math.random() - 0.5);
+      }
+      
       setScenario(data);
     } catch (err) {
       console.error('Failed to fetch scenario', err);

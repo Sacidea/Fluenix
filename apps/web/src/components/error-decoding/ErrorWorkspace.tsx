@@ -61,6 +61,12 @@ export function ErrorWorkspace() {
       })
       
       const data = typeof res.data.scenario === 'string' ? JSON.parse(res.data.scenario) : res.data.scenario
+      
+      // Shuffle options to prevent correct answer from always being in the same spot (cached scenarios)
+      if (data && data.options) {
+        data.options = [...data.options].sort(() => Math.random() - 0.5)
+      }
+      
       setScenario(data)
     } catch (err: unknown) {
       console.error('Failed to fetch scenario', err)

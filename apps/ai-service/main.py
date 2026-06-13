@@ -493,7 +493,13 @@ Return ONLY a JSON object matching this exact schema (do not wrap in markdown):
         )
         raw = response.content[0].text
         clean = raw.replace("```json", "").replace("```", "").strip()
-        return {"scenario": json.loads(clean)}
+        scenario_data = json.loads(clean)
+        
+        if "options" in scenario_data:
+            import random
+            random.shuffle(scenario_data["options"])
+            
+        return {"scenario": scenario_data}
     except Exception as e:
         import traceback
         traceback.print_exc()
@@ -562,7 +568,12 @@ Return ONLY a JSON object matching this exact schema (do not wrap in markdown):
         raw = response.content[0].text
         clean = raw.replace("```json", "").replace("```", "").strip()
         try:
-            return {"scenario": json.loads(clean)}
+            scenario_data = json.loads(clean)
+            import random
+            for q in scenario_data.get("questions", []):
+                if "options" in q:
+                    random.shuffle(q["options"])
+            return {"scenario": scenario_data}
         except json.JSONDecodeError as e:
             print("FAILED TO PARSE JSON. RAW OUTPUT:")
             print(raw)

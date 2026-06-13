@@ -38,7 +38,15 @@ export function useListeningSession() {
         { headers: { Authorization: `Bearer ${token}` } }
       )
       if (res.data.success) {
-        setActiveScenario(res.data.data)
+        const scenario = res.data.data;
+        if (scenario && scenario.questions) {
+          scenario.questions.forEach((q: any) => {
+            if (q.options) {
+              q.options = [...q.options].sort(() => Math.random() - 0.5);
+            }
+          });
+        }
+        setActiveScenario(scenario)
       } else {
         throw new Error('Failed to load next scenario')
       }
