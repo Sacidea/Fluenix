@@ -23,6 +23,7 @@ const labelMap: Record<string, string> = {
     scenario: 'Simulation Transcript',
     writing: 'Technical Ledger Entry',
     pronunciation: 'Acoustic Report',
+    'error-decoding': 'Error Decoder Log',
 }
 
 const getLabel = (session: { type: string; scenario?: string }) => {
@@ -32,7 +33,8 @@ const getLabel = (session: { type: string; scenario?: string }) => {
 
 export function SessionItem({ session, index = 0, onSelect, onDelete }: SessionItemProps) {
     const Icon = session.type === 'scenario' ? Icons.MessagesSquare :
-                 session.type === 'pronunciation' ? Icons.Mic : Icons.PenTool
+                 session.type === 'pronunciation' ? Icons.Mic : 
+                 session.type === 'error-decoding' ? Icons.Terminal : Icons.PenTool
 
     const scoreColor = session.score != null ? (session.score >= 80 ? '#059669' : session.score >= 60 ? '#d97706' : '#dc2626') : '#94a3b8'
 

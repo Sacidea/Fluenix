@@ -46,7 +46,9 @@ export function ListeningPlayer({ scenario, isPlaying, onPlayPause, showTranscri
                 styles.waveformBar, 
                 { 
                   backgroundColor: isPlaying ? colors.cyan500 : '#cffafe',
-                  height: isPlaying ? 16 + Math.random() * 24 : 8 
+                  height: isPlaying 
+                    ? 12 + Math.abs(Math.sin(i * 0.7)) * 28 
+                    : 8 
                 }
               ]} 
             />

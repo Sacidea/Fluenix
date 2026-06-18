@@ -19,7 +19,6 @@ export function useScenarioSession() {
   const [started, setStarted] = useState(false);
   const [startTime, setStartTime] = useState<Date | null>(null);
   const [durationStr, setDurationStr] = useState('00:00');
-  const [listening, setListening] = useState(false);
   const [isLoadingMission, setIsLoadingMission] = useState(false);
   const [analysisResult, setAnalysisResult] = useState<unknown>(null);
 
@@ -251,7 +250,6 @@ export function useScenarioSession() {
     messages,
     input, setInput,
     loading, started, durationStr,
-    listening,
     isLoadingMission,
     startScenario,
     sendMessage,

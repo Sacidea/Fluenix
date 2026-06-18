@@ -1,8 +1,9 @@
 import React, { useRef, useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, ScrollView, KeyboardAvoidingView, Platform, ActivityIndicator, StyleSheet } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, ScrollView, KeyboardAvoidingView, Platform, ActivityIndicator, StyleSheet, Alert } from 'react-native';
 import * as Icons from 'lucide-react-native';
 import { Message } from '@fluenix/shared';
 import { colors, shadow } from '../../utils/theme';
+import { usePermissions } from '../../hooks/usePermissions';
 
 let ExpoSpeechRecognitionModule: any = null;
 let useSpeechRecognitionEvent: any = (_event: string, _handler: any) => {};
@@ -36,6 +37,7 @@ export function SimulationWorkspace({
 }: Props) {
   const scrollViewRef = useRef<ScrollView>(null);
   const [isRecording, setIsRecording] = useState(false);
+  const { requestMicrophonePermission, handleVoiceError } = usePermissions();
 
   // Speech recognition event handlers
   useSpeechRecognitionEvent('result', (e: any) => {
@@ -51,11 +53,17 @@ export function SimulationWorkspace({
   });
 
   useSpeechRecognitionEvent('end', () => setIsRecording(false));
-  useSpeechRecognitionEvent('error', () => setIsRecording(false));
+  useSpeechRecognitionEvent('error', (e: any) => {
+    setIsRecording(false);
+    handleVoiceError(e?.error);
+  });
 
   const toggleRecording = async () => {
     if (!ExpoSpeechRecognitionModule) {
-      console.warn('Speech recognition not available on this device');
+      Alert.alert(
+        'Ses Tanıma Kullanılamıyor',
+        'Bu cihazda ses tanıma desteklenmiyor. Lütfen mesajınızı yazarak gönderin.'
+      );
       return;
     }
     
@@ -64,6 +72,8 @@ export function SimulationWorkspace({
         await ExpoSpeechRecognitionModule.stop();
         setIsRecording(false);
       } else {
+        const hasPerm = await requestMicrophonePermission();
+        if (!hasPerm) return;
         setInput('');
         await ExpoSpeechRecognitionModule.start({
           lang: 'en-US',

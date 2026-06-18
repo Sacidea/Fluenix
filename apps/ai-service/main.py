@@ -3,9 +3,30 @@ from fastapi.middleware.cors import CORSMiddleware
 from anthropic import Anthropic
 from dotenv import load_dotenv
 import os
+import re
+import json
 import traceback
 
 load_dotenv()
+
+def extract_json(raw: str) -> dict:
+    """Robustly extract JSON from LLM output, handling markdown blocks and extra text."""
+    # 1. Try to find JSON within markdown code blocks first
+    block_match = re.search(r'```(?:json)?\s*([\s\S]*?)```', raw)
+    if block_match:
+        try:
+            return json.loads(block_match.group(1).strip())
+        except json.JSONDecodeError:
+            pass
+    # 2. Try to extract the outermost { ... } object
+    brace_match = re.search(r'\{[\s\S]*\}', raw)
+    if brace_match:
+        try:
+            return json.loads(brace_match.group())
+        except json.JSONDecodeError:
+            pass
+    # 3. Fallback: try parsing the raw string directly
+    return json.loads(raw.strip())
 
 app = FastAPI(title="Fluenix AI Service")
 client = Anthropic(
@@ -98,7 +119,6 @@ def health():
     return {"status": "ok"}
 
 from fastapi.responses import StreamingResponse
-import json
 
 @app.post("/scenario/chat")
 def scenario_chat(data: dict):
@@ -118,6 +138,7 @@ def scenario_chat(data: dict):
             with client.messages.stream(
                 model="claude-sonnet-4-6",
                 max_tokens=4096,
+                temperature=0.8,
                 system=[{
                     "type": "text",
                     "text": system_prompt,
@@ -140,6 +161,7 @@ def scenario_chat(data: dict):
             response = client.messages.create(
                 model="claude-sonnet-4-6",
                 max_tokens=4096,
+                temperature=0.8,
                 system=[{
                     "type": "text",
                     "text": system_prompt,
@@ -173,10 +195,10 @@ Return ONLY a JSON object matching this exact schema (do not wrap in markdown co
   }}
 }}"""
 
-        import json
         response = client.messages.create(
             model="claude-sonnet-4-6",
-            max_tokens=4096,
+            max_tokens=2048,
+            temperature=0.7,
             system=[{
                 "type": "text",
                 "text": system_prompt,
@@ -185,14 +207,12 @@ Return ONLY a JSON object matching this exact schema (do not wrap in markdown co
             extra_headers={"anthropic-beta": "prompt-caching-2024-07-31"},
             messages=[{
                 "role": "user",
-                "content": f"Generate a new writing mission for {{category}}."
+                "content": f"Generate a new writing mission for {category}."
             }]
         )
         raw = response.content[0].text
-        clean = raw.replace("```json", "").replace("```", "").strip()
-        return json.loads(clean)
+        return extract_json(raw)
     except Exception as e:
-        import traceback
         traceback.print_exc()
         raise HTTPException(status_code=500, detail=str(e))
 
@@ -235,7 +255,8 @@ Do NOT wrap the JSON in markdown code blocks. Start immediately with {{."""
 
         response = client.messages.create(
             model="claude-sonnet-4-6",
-            max_tokens=4096,
+            max_tokens=2048,
+            temperature=0.3,
             system=[{
                 "type": "text",
                 "text": system_msg,
@@ -264,23 +285,47 @@ def analyze_scenario(data: dict):
             for m in messages
         ])
 
-        system_prompt=f"""You are a technical English evaluator.
-        The user is at CEFR {level}. Grade them based on the expectations for that level in a tech environment.
-        Return ONLY a JSON object:
-        {{
-          "fluency_score": <0-100>,
-          "vocabulary_score": <0-100>,
-          "technical_accuracy": <0-100>,
-          "overall_score": <0-100>,
-          "strengths": ["...", "..."],
-          "improvements": ["...", "..."],
-          "overall_feedback": "2-3 sentences"
-        }}
-        Return only JSON."""
+        scenario_label = {"interview": "Technical Interview", "standup": "Daily Standup", "code_review": "Code Review"}.get(scenario, scenario)
+
+        system_prompt=f"""You are a senior technical English evaluator at a FAANG company.
+You are reviewing a {scenario_label} simulation where a candidate practiced professional English.
+Their CEFR level is {level}.
+
+Evaluate the conversation transcript on these criteria:
+
+1. FLUENCY (0-100): Sentence structure, natural flow, use of fillers/hedging, response length.
+   - 0-40: Broken sentences, frequent L1 interference, unnaturally short responses.
+   - 40-70: Functional but stilted, some unnatural phrasing, adequate length.
+   - 70-100: Natural, confident, professional cadence with appropriate detail.
+
+2. VOCABULARY (0-100): Range and precision of technical and professional terms.
+   - 0-40: Basic words only, avoids technical terms, repetitive.
+   - 40-70: Uses common tech terms correctly, limited range.
+   - 70-100: Rich vocabulary, precise jargon, idiomatic professional expressions.
+
+3. TECHNICAL ACCURACY (0-100): Correctness of technical content, not English.
+   - 0-40: Major technical errors or vague hand-waving.
+   - 40-70: Generally correct but lacks depth or specificity.
+   - 70-100: Precise, demonstrates deep understanding, uses concrete examples.
+
+4. OVERALL (0-100): Weighted average — would this person pass a FAANG {scenario_label}?
+
+Return ONLY a JSON object:
+{{
+  "fluency_score": <0-100>,
+  "vocabulary_score": <0-100>,
+  "technical_accuracy": <0-100>,
+  "overall_score": <0-100>,
+  "strengths": ["Specific strength 1", "Specific strength 2"],
+  "improvements": ["Actionable improvement 1", "Actionable improvement 2"],
+  "overall_feedback": "2-3 sentence summary with specific examples from the transcript."
+}}
+Return only JSON. Do not wrap in markdown."""
 
         response = client.messages.create(
             model="claude-sonnet-4-6",
-            max_tokens=4096,
+            max_tokens=2048,
+            temperature=0.3,
             system=[{
                 "type": "text",
                 "text": system_prompt,
@@ -289,12 +334,11 @@ def analyze_scenario(data: dict):
             extra_headers={"anthropic-beta": "prompt-caching-2024-07-31"},
             messages=[{
                 "role": "user",
-                "content": f"Scenario: {scenario}\n\nConversation:\n{transcript}"
+                "content": f"Scenario type: {scenario_label}\n\nConversation transcript:\n{transcript}"
             }]
         )
         raw = response.content[0].text
-        clean = raw.replace("```json", "").replace("```", "").strip()
-        return {"analysis": clean}
+        return {"analysis": json.dumps(extract_json(raw))}
     except Exception as e:
         traceback.print_exc()
         raise HTTPException(status_code=500, detail=str(e))
@@ -306,20 +350,35 @@ def analyze_pronunciation(data: dict):
         target_word = data.get("target_word", "")
         level = data.get("level", "B2")
         
-        system_prompt = f"""You are a technical English pronunciation specialist.
-        Compare transcript with target. Grade relative to CEFR {level} expectations.
-        Return ONLY a JSON object:
-        {{
-          "accuracy_score": <0-100>,
-          "is_correct": <true/false>,
-          "feedback": "Professional feedback.",
-          "tip": "Technical tip."
-        }}
-        Return only JSON."""
+        # Client-side STT already converted speech to text.
+        # We analyze: did the STT hear the correct word? If not, what went wrong phonetically?
+        system_prompt = f"""You are an expert English pronunciation coach specializing in technical vocabulary.
+The student (CEFR {level}) tried to pronounce a target word. A speech-to-text engine transcribed what it heard.
+
+Your job:
+1. Compare the STT transcript against the target word.
+2. If they differ, analyze the PHONETIC reason — which sounds were likely mispronounced.
+3. If they match, still provide a useful pronunciation tip for the word (stress pattern, silent letters, common mistakes by non-native speakers).
+4. Consider that STT errors can also indicate pronunciation issues (e.g., "algorithm" heard as "al gore rhythm" suggests wrong stress).
+
+Scoring guide:
+- If transcript matches target exactly: 85-100 (give 100 only if the word has no common pronunciation pitfalls).
+- If transcript is close but slightly different: 50-84 based on severity.
+- If transcript is completely wrong: 0-49.
+
+Return ONLY a JSON object:
+{{
+  "accuracy_score": <0-100>,
+  "is_correct": <true if score >= 70>,
+  "feedback": "Specific phonetic feedback. Example: 'The stress should be on the SECOND syllable: al-GO-rithm, not AL-go-rithm.'",
+  "tip": "A practical tip for remembering the correct pronunciation. Keep it concise."
+}}
+Return only JSON. Do not wrap in markdown."""
 
         response = client.messages.create(
             model="claude-sonnet-4-6",
-            max_tokens=4096,
+            max_tokens=512,
+            temperature=0.3,
             system=[{
                 "type": "text",
                 "text": system_prompt,
@@ -328,12 +387,11 @@ def analyze_pronunciation(data: dict):
             extra_headers={"anthropic-beta": "prompt-caching-2024-07-31"},
             messages=[{
                 "role": "user",
-                "content": f"Target word: {target_word}\nUser said: {transcript}"
+                "content": f"Target word: {target_word}\nSTT heard: {transcript}"
             }]
         )
         raw = response.content[0].text
-        clean = raw.replace("```json", "").replace("```", "").strip()
-        return {"result": clean}
+        return {"result": json.dumps(extract_json(raw))}
     except Exception as e:
         traceback.print_exc()
         raise HTTPException(status_code=500, detail=str(e))
@@ -361,10 +419,10 @@ Return ONLY a JSON object matching this exact schema (do not wrap in markdown):
   }}
 }}"""
 
-        import json
         response = client.messages.create(
             model="claude-sonnet-4-6",
-            max_tokens=4096,
+            max_tokens=1024,
+            temperature=0.7,
             system=[{
                 "type": "text",
                 "text": system_prompt,
@@ -377,10 +435,8 @@ Return ONLY a JSON object matching this exact schema (do not wrap in markdown):
             }]
         )
         raw = response.content[0].text
-        clean = raw.replace("```json", "").replace("```", "").strip()
-        return json.loads(clean)
+        return extract_json(raw)
     except Exception as e:
-        import traceback
         traceback.print_exc()
         raise HTTPException(status_code=500, detail=str(e))
 
@@ -430,7 +486,8 @@ Return ONLY JSON. Do not use markdown blocks."""
 
         response = client.messages.create(
             model="claude-sonnet-4-6",
-            max_tokens=4096,
+            max_tokens=2048,
+            temperature=0.3,
             system=[{
                 "type": "text",
                 "text": system_prompt,
@@ -443,8 +500,7 @@ Return ONLY JSON. Do not use markdown blocks."""
             }]
         )
         raw = response.content[0].text
-        clean = raw.replace("```json", "").replace("```", "").strip()
-        return {"analysis": clean}
+        return {"analysis": json.dumps(extract_json(raw))}
     except Exception as e:
         traceback.print_exc()
         raise HTTPException(status_code=500, detail=str(e))
@@ -476,10 +532,10 @@ Return ONLY a JSON object matching this exact schema (do not wrap in markdown):
   ]
 }}"""
 
-        import json
         response = client.messages.create(
             model="claude-sonnet-4-6",
             max_tokens=4096,
+            temperature=0.7,
             system=[{
                 "type": "text",
                 "text": system_prompt,
@@ -492,8 +548,7 @@ Return ONLY a JSON object matching this exact schema (do not wrap in markdown):
             }]
         )
         raw = response.content[0].text
-        clean = raw.replace("```json", "").replace("```", "").strip()
-        scenario_data = json.loads(clean)
+        scenario_data = extract_json(raw)
         
         if "options" in scenario_data:
             import random
@@ -501,7 +556,6 @@ Return ONLY a JSON object matching this exact schema (do not wrap in markdown):
             
         return {"scenario": scenario_data}
     except Exception as e:
-        import traceback
         traceback.print_exc()
         raise HTTPException(status_code=500, detail=str(e))
 
@@ -525,7 +579,7 @@ Return ONLY a JSON object matching this exact schema (do not wrap in markdown):
   "title": "Short title (e.g. System Design Interview)",
   "context": "Context of the audio (e.g. An interviewer is asking about scaling databases)",
   "dialogue": [
-    {{ "speaker": "Interviewer", "gender": "male", "text": "Can you explain how you would shard a relational database?" }},
+    {{ "speaker": "Interviewer", "gender": "male", "text": "Can you explain how you would shard a relational database?", "idiomHighlight": {{ "word": "shard", "meaning": "To split a database into smaller, faster, more manageable parts called shards." }} }},
     {{ "speaker": "Candidate", "gender": "female", "text": "Sure, sharding involves..." }}
   ],
   "questions": [
@@ -550,10 +604,10 @@ Return ONLY a JSON object matching this exact schema (do not wrap in markdown):
   }}
 }}"""
 
-        import json
         response = client.messages.create(
             model="claude-sonnet-4-6",
             max_tokens=4096,
+            temperature=0.7,
             system=[{
                 "type": "text",
                 "text": system_prompt,
@@ -566,19 +620,17 @@ Return ONLY a JSON object matching this exact schema (do not wrap in markdown):
             }]
         )
         raw = response.content[0].text
-        clean = raw.replace("```json", "").replace("```", "").strip()
         try:
-            scenario_data = json.loads(clean)
+            scenario_data = extract_json(raw)
             import random
             for q in scenario_data.get("questions", []):
                 if "options" in q:
                     random.shuffle(q["options"])
             return {"scenario": scenario_data}
-        except json.JSONDecodeError as e:
+        except (json.JSONDecodeError, ValueError) as e:
             print("FAILED TO PARSE JSON. RAW OUTPUT:")
             print(raw)
-            raise e
+            raise HTTPException(status_code=500, detail=f"Failed to parse AI response: {str(e)}")
     except Exception as e:
-        import traceback
         traceback.print_exc()
         raise HTTPException(status_code=500, detail=str(e))

@@ -1,11 +1,12 @@
 import { useState, useEffect, useRef } from 'react';
-import { Platform } from 'react-native';
+import { Platform, Alert } from 'react-native';
 import { useAuth, useUser } from '@clerk/clerk-expo';
 import * as Speech from 'expo-speech';
 import type { Word, PronunciationResult } from '@fluenix/shared';
 import { parseAIResponse, API_ROUTES, AI_ROUTES } from '@fluenix/shared';
 import { apiClient, aiClient } from '../utils/apiClient';
 import { offlineStorage } from '../utils/offlineStorage';
+import { usePermissions } from './usePermissions';
 
 let ExpoSpeechRecognitionModule: any = null;
 let useSpeechRecognitionEvent: any = (_event: string, _handler: any) => {};
@@ -23,6 +24,7 @@ try {
 export function usePronunciationSession() {
   const { getToken } = useAuth();
   const { user } = useUser();
+  const { requestMicrophonePermission } = usePermissions();
   const userLevel = 'B2'; // Hardcoded for now
   
   const [words, setWords] = useState<Word[]>([]);
@@ -150,9 +152,14 @@ export function usePronunciationSession() {
 
   const startListening = async () => {
     if (!ExpoSpeechRecognitionModule) {
-      console.warn('Speech recognition not available');
+      Alert.alert(
+        'Ses Tanıma Kullanılamıyor',
+        'Bu cihazda ses tanıma desteklenmiyor. Lütfen emülatör yerine gerçek cihaz kullanın.'
+      );
       return;
     }
+    const hasPerm = await requestMicrophonePermission();
+    if (!hasPerm) return;
     try {
       setTranscript('');
       await ExpoSpeechRecognitionModule.start({

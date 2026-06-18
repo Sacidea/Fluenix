@@ -179,23 +179,36 @@ export function ListeningWorkspace() {
           }
         }
       }
-      
+    }
+
+    // Sequential playback with natural pauses between speakers
+    const lines = scenario.dialogue as any[];
+    let currentLineIdx = 0;
+
+    const speakNext = () => {
+      if (currentLineIdx >= lines.length) {
+        setIsPlaying(false);
+        return;
+      }
+      const line = lines[currentLineIdx];
+      const speakerName = line.speaker || `Speaker_${currentLineIdx}`;
       const selectedVoice = speakerVoiceMap[speakerName];
-      
+      currentLineIdx++;
+
       Speech.speak(line.text, {
         language: 'en-US',
         voice: selectedVoice,
         rate: 0.9,
         onDone: () => {
-          if (i === (scenario.dialogue as unknown[]).length - 1) {
-            setIsPlaying(false);
-          }
+          // Natural pause between speakers
+          setTimeout(speakNext, 400);
         },
         onStopped: () => {
           setIsPlaying(false);
         }
       });
-    }
+    };
+    speakNext();
   };
 
   const handleOptionClick = (id: string) => {
