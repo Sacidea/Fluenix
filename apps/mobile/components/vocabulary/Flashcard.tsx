@@ -86,7 +86,7 @@ export function Flashcard({ word, isFlipped, setIsFlipped }: FlashcardProps) {
 
         {/* BACK */}
         <Animated.View 
-          style={[backAnimatedStyle, styles.card, styles.cardBack, styles.cardAbsolute]}
+          style={[backAnimatedStyle, styles.card]}
         >
           <View style={styles.backContent}>
             <View style={styles.backHeader}>
@@ -244,6 +244,8 @@ const styles = StyleSheet.create({
     fontSize: 12,
     fontWeight: '700',
     color: '#312e81',
+    flexShrink: 1,
+    flexWrap: 'wrap',
   },
   typeBadge: {
     alignSelf: 'flex-start',

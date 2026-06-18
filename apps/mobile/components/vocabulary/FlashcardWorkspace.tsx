@@ -161,34 +161,25 @@ export function FlashcardWorkspace() {
 
       {/* Action Buttons */}
       <View style={styles.actionsSection}>
-        <View style={styles.actionsRow}>
-          <TouchableOpacity 
-            disabled={!isFlipped}
-            onPress={() => handleNext('review')}
-            style={[
-              styles.actionBtn,
-              isFlipped ? styles.reviewBtnActive : styles.actionBtnDisabled,
-            ]}
-          >
-            <Icons.X size={20} color={isFlipped ? "#DC2626" : "#94A3B8"} />
-            <Text style={[styles.actionBtnText, isFlipped ? styles.reviewBtnText : styles.actionBtnTextDisabled]}>Needs Review</Text>
-          </TouchableOpacity>
+        {isFlipped ? (
+          <View style={styles.actionsRow}>
+            <TouchableOpacity 
+              onPress={() => handleNext('review')}
+              style={[styles.actionBtn, styles.reviewBtnActive]}
+            >
+              <Icons.X size={20} color="#DC2626" />
+              <Text style={[styles.actionBtnText, styles.reviewBtnText]}>Needs Review</Text>
+            </TouchableOpacity>
 
-          <TouchableOpacity 
-            disabled={!isFlipped}
-            onPress={() => handleNext('got_it')}
-            style={[
-              styles.actionBtn,
-              styles.gotItBtn,
-              isFlipped ? styles.gotItBtnActive : styles.gotItBtnDisabled,
-            ]}
-          >
-            <Icons.Check size={20} color={colors.white} />
-            <Text style={styles.gotItBtnText}>Got It</Text>
-          </TouchableOpacity>
-        </View>
-        
-        {!isFlipped && (
+            <TouchableOpacity 
+              onPress={() => handleNext('got_it')}
+              style={[styles.actionBtn, styles.gotItBtn, styles.gotItBtnActive]}
+            >
+              <Icons.Check size={20} color={colors.white} />
+              <Text style={styles.gotItBtnText}>Got It</Text>
+            </TouchableOpacity>
+          </View>
+        ) : (
           <View style={styles.tapHintRow}>
             <Text style={styles.tapHintText}>Tap the card to reveal definition and unlock buttons</Text>
           </View>
@@ -359,7 +350,7 @@ const styles = StyleSheet.create({
     backgroundColor: colors.slate200,
   },
   actionsSection: {
-    marginTop: 8,
+    marginTop: 32,
     marginBottom: 16,
   },
   actionsRow: {
