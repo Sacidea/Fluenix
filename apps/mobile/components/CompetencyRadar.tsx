@@ -3,56 +3,25 @@ import { View, Text, Dimensions, StyleSheet } from 'react-native';
 import Svg, { Polygon, Line, Text as SvgText, Circle } from 'react-native-svg';
 import { colors, shadow } from '../utils/theme';
 
-const COMP_MAP = {
-  scenario: { label: 'Scenario', index: 0 },
-  writing: { label: 'Writing', index: 1 },
-  pronunciation: { label: 'Pronunciation', index: 2 },
-  vocabulary: { label: 'Vocabulary', index: 3 },
-  'error-decoding': { label: 'Error Dec.', index: 4 },
-  'grammar-lab': { label: 'Grammar', index: 5 },
-  behavioral: { label: 'Leadership', index: 6 },
-  listening: { label: 'Listening', index: 7 }
-};
-
-const DEFAULT_COMP = [
-  { subject: 'Scenario', A: 20 },
-  { subject: 'Writing', A: 20 },
-  { subject: 'Pronunciation', A: 20 },
-  { subject: 'Vocabulary', A: 20 },
-  { subject: 'Error Dec.', A: 20 },
-  { subject: 'Grammar', A: 20 },
-  { subject: 'Leadership', A: 20 },
-  { subject: 'Listening', A: 20 }
-];
-
 import { Session } from './SessionItem';
 
 export function CompetencyRadar({ sessions }: { sessions: Session[] }) {
-  const data = [...DEFAULT_COMP];
-  const scores = {
-    scenario: [] as number[],
-    writing: [] as number[],
-    pronunciation: [] as number[],
-    vocabulary: [] as number[],
-    'error-decoding': [] as number[],
-    'grammar-lab': [] as number[],
-    behavioral: [] as number[],
-    listening: [] as number[]
+  const scored = sessions.filter(s => typeof s.score === 'number');
+  
+  const getAvg = (type: string) => {
+    const s = scored.filter(s => s.type === type);
+    return s.length ? s.reduce((a, b) => a + Number(b.score), 0) / s.length : 20; // Default to 20 when no data
   };
 
-  sessions.forEach(s => {
-    if (s.type in scores && typeof s.score === 'number') {
-      scores[s.type as keyof typeof scores].push(s.score);
-    }
-  });
-
-  Object.entries(scores).forEach(([key, arr]) => {
-    if (arr.length > 0) {
-      const avg = arr.reduce((a, b) => a + b, 0) / arr.length;
-      const idx = COMP_MAP[key as keyof typeof COMP_MAP].index;
-      data[idx].A = Math.max(20, avg);
-    }
-  });
+  const data = [
+    { subject: 'Clarity', A: getAvg('scenario') },
+    { subject: 'Vocabulary', A: getAvg('writing') },
+    { subject: 'Grammar', A: getAvg('grammar-lab') },
+    { subject: 'Pronunciation', A: getAvg('pronunciation') },
+    { subject: 'Leadership', A: getAvg('behavioral') },
+    { subject: 'Listening', A: getAvg('listening') },
+    { subject: 'Error Dec.', A: getAvg('error-decoding') },
+  ];
 
   const size = Dimensions.get('window').width - 80;
   const center = size / 2;
@@ -76,7 +45,7 @@ export function CompetencyRadar({ sessions }: { sessions: Session[] }) {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Competency Map</Text>
+      <Text style={styles.title}>Competency Profile</Text>
       <Svg width={size} height={size}>
         {/* Grids */}
         {gridLevels.map(level => {
