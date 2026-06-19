@@ -64,8 +64,8 @@ export function AnalysisWorkspace({
 
         {/* Word Display */}
         <View style={styles.wordDisplay}>
-          <Text style={styles.wordText}>{currentWord.word}</Text>
-          <Text style={styles.phoneticText}>/{currentWord.phonetic}/</Text>
+          <Text style={styles.wordText} adjustsFontSizeToFit numberOfLines={1}>{currentWord.word}</Text>
+          <Text style={styles.phoneticText} adjustsFontSizeToFit numberOfLines={1}>/{currentWord.phonetic}/</Text>
         </View>
 
         {/* Action Row */}
