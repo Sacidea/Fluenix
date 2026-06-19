@@ -65,7 +65,7 @@ export default function ProgressPage() {
             <AlertTriangle size={48} className="error-icon" />
             <h3>Data Synchronization Error</h3>
             <p>Could not retrieve your operational metrics at this time.</p>
-            <button onClick={refetch} className="retry-btn">Re-initialize Sync</button>
+            <button onClick={() => refetch()} className="retry-btn">Re-initialize Sync</button>
           </div>
         ) : (
           <motion.div 
