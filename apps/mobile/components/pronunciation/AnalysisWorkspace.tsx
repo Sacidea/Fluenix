@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, TouchableOpacity, ActivityIndicator, StyleSheet } from 'react-native';
+import { View, Text, TouchableOpacity, ActivityIndicator, StyleSheet, ScrollView } from 'react-native';
 import * as Icons from 'lucide-react-native';
 import type { Word, PronunciationResult } from '@fluenix/shared';
 import { colors, shadow } from '../../utils/theme';
@@ -64,8 +64,12 @@ export function AnalysisWorkspace({
 
         {/* Word Display */}
         <View style={styles.wordDisplay}>
-          <Text style={styles.wordText} adjustsFontSizeToFit numberOfLines={1}>{currentWord.word}</Text>
-          <Text style={styles.phoneticText} adjustsFontSizeToFit numberOfLines={1}>/{currentWord.phonetic}/</Text>
+          <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ alignItems: 'center', justifyContent: 'center', flexGrow: 1, paddingHorizontal: 16 }}>
+            <View style={{ alignItems: 'center' }}>
+              <Text style={styles.wordText}>{currentWord.word}</Text>
+              <Text style={styles.phoneticText}>/{currentWord.phonetic}/</Text>
+            </View>
+          </ScrollView>
         </View>
 
         {/* Action Row */}
@@ -208,7 +212,7 @@ const styles = StyleSheet.create({
     backgroundColor: colors.blue500,
   },
   wordDisplay: {
-    alignItems: 'center',
+    width: '100%',
     marginBottom: 40,
   },
   wordText: {
@@ -216,7 +220,6 @@ const styles = StyleSheet.create({
     fontWeight: '800',
     color: colors.slate800,
     marginBottom: 8,
-    width: '100%',
     textAlign: 'center',
   },
   phoneticText: {
@@ -224,7 +227,6 @@ const styles = StyleSheet.create({
     fontFamily: 'monospace',
     color: colors.slate400,
     letterSpacing: 4,
-    width: '100%',
     textAlign: 'center',
   },
   actionRow: {
