@@ -99,13 +99,18 @@
 }
 
 /* ── ELI5 Panel ──────────────────────────────────────────── */
+@keyframes slideDown {
+  from { opacity: 0; transform: translateY(-10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
 .eli5-panel {
   background: linear-gradient(135deg, #f5f3ff, #faf5ff);
   border-top: 1px solid #ddd6fe;
   padding: 20px 24px;
   display: flex;
   gap: 16px;
-  animation: slideDown 0.3s ease-out;
+  animation: slideDown 0.3s ease-out forwards;
 }
 
 .eli5-icon {

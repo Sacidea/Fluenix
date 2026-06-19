@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { View, Text, TouchableOpacity, ActivityIndicator, ScrollView, Alert, StyleSheet } from 'react-native';
+import { View, Text, TouchableOpacity, ActivityIndicator, ScrollView, Alert, StyleSheet, Pressable } from 'react-native';
 import { useListeningSession } from '../../hooks/useListeningSession';
 import * as Icons from 'lucide-react-native';
 import * as Speech from 'expo-speech';
@@ -16,6 +16,7 @@ try {
   console.warn('expo-speech-recognition not available in ListeningWorkspace');
 }
 import { colors, shadow } from '../../utils/theme';
+import { Platform } from 'react-native';
 
 import { usePermissions } from '../../hooks/usePermissions';
 
@@ -35,7 +36,7 @@ type DialogueLine = {
   };
 };
 
-function renderLineWithIdioms(line: DialogueLine) {
+function renderLineWithIdioms(line: DialogueLine, onIdiomClick?: (meaning: string) => void) {
   if (!line.idiomHighlight || !line.idiomHighlight.word) return <Text style={styles.dialogueText}>{line.text}</Text>;
 
   const { word, meaning } = line.idiomHighlight;
@@ -49,7 +50,15 @@ function renderLineWithIdioms(line: DialogueLine) {
             <Text 
               key={i} 
               style={styles.idiomHighlight}
-              onPress={() => Alert.alert('Idiom Meaning', meaning)}
+              onPress={() => {
+                if (onIdiomClick) {
+                  onIdiomClick(meaning);
+                } else if (Platform.OS === 'web') {
+                  window.alert("Idiom Meaning: " + meaning);
+                } else {
+                  Alert.alert('Idiom Meaning', meaning);
+                }
+              }}
             >
               {part}
             </Text>
@@ -68,6 +77,7 @@ export function ListeningWorkspace() {
   const [isPlaying, setIsPlaying] = useState(false);
   const [showTranscript, setShowTranscript] = useState(false);
   const [activeMode, setActiveMode] = useState<PracticeMode>('quiz');
+  const [activeTooltip, setActiveTooltip] = useState<string | null>(null);
 
   // Mode 1: Quiz state
   const [currentQuestionIdx, setCurrentQuestionIdx] = useState(0);
@@ -236,7 +246,7 @@ export function ListeningWorkspace() {
         setIsPlaying(false);
         setSpokenText('');
         setShadowScore(null);
-        await ExpoSpeechRecognitionModule?.start({ lang: 'en-US', interimResults: true });
+        await ExpoSpeechRecognitionModule?.start({ lang: 'en-US', interimResults: true, continuous: true });
         setIsRecording(true);
       }
     } catch (e) {
@@ -261,6 +271,12 @@ export function ListeningWorkspace() {
 
   return (
     <ScrollView style={styles.container} contentContainerStyle={styles.contentContainer}>
+      {activeTooltip && (
+        <Pressable 
+          style={[StyleSheet.absoluteFill, { zIndex: 10, elevation: 10 }]} 
+          onPress={() => setActiveTooltip(null)}
+        />
+      )}
       
       <ListeningPlayer 
         scenario={scenario}
@@ -268,8 +284,20 @@ export function ListeningWorkspace() {
         onPlayPause={handlePlayPause}
         showTranscript={showTranscript}
         onToggleTranscript={() => setShowTranscript(!showTranscript)}
-        renderLineWithIdioms={renderLineWithIdioms}
+        renderLineWithIdioms={(line) => renderLineWithIdioms(line, (meaning) => {
+          setActiveTooltip(activeTooltip === meaning ? null : meaning);
+        })}
       />
+
+      {activeTooltip && (
+        <TouchableOpacity style={[styles.tooltipContainer, { zIndex: 20, elevation: 20 }]} onPress={() => setActiveTooltip(null)} activeOpacity={0.8}>
+          <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+            <Text style={styles.tooltipTitle}>💡 Idiom Meaning:</Text>
+            <Icons.X size={14} color="#92400e" />
+          </View>
+          <Text style={styles.tooltipText}>{activeTooltip}</Text>
+        </TouchableOpacity>
+      )}
 
       <View style={styles.workspaceCard}>
         <View style={styles.tabContainer}>
@@ -366,6 +394,26 @@ const styles = StyleSheet.create({
     textDecorationLine: 'underline',
     textDecorationStyle: 'dashed',
     textDecorationColor: '#06b6d4',
+  },
+  tooltipContainer: {
+    padding: 16,
+    backgroundColor: '#fef3c7',
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: '#fde68a',
+    marginBottom: 24,
+    ...shadow.sm,
+  },
+  tooltipTitle: {
+    fontSize: 14,
+    color: '#92400e',
+    fontWeight: '900',
+  },
+  tooltipText: {
+    fontSize: 14,
+    color: '#b45309',
+    marginTop: 4,
+    lineHeight: 22,
   },
   loadingContainer: {
     flex: 1,

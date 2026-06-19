@@ -188,7 +188,15 @@ export function ErrorWorkspace() {
               <span className="terminal-title">{scenario.title}</span>
             </div>
             {scenario.eli5 && (
-              <button className="eli5-btn" onClick={() => setShowEli5(!showEli5)}>
+              <button 
+                type="button"
+                className="eli5-btn" 
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  setShowEli5(!showEli5);
+                }}
+              >
                 <Wand2 size={12} />
                 Explain like I'm 5
               </button>
@@ -214,9 +222,14 @@ export function ErrorWorkspace() {
             </div>
             {scenario.eli5 && (
               <button 
+                type="button"
                 className="eli5-btn" 
                 style={{ background: 'rgba(14, 165, 233, 0.1)', color: '#0284c7', borderColor: 'rgba(14, 165, 233, 0.2)' }}
-                onClick={() => setShowEli5(!showEli5)}
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  setShowEli5(!showEli5);
+                }}
               >
                 <Wand2 size={12} />
                 Explain like I'm 5

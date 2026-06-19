@@ -13,7 +13,7 @@ export default function VocabularyLabScreen() {
       {/* HEADER */}
       <View style={styles.header}>
         <TouchableOpacity 
-          onPress={() => router.back()} 
+          onPress={() => router.replace('/dashboard')} 
           style={styles.backButton}
         >
           <Icons.ChevronLeft size={16} color="#64748b" />

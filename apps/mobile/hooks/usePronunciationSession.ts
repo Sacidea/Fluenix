@@ -165,7 +165,8 @@ export function usePronunciationSession() {
       await ExpoSpeechRecognitionModule.start({
         lang: 'en-US',
         interimResults: false,
-        maxAlternatives: 1
+        maxAlternatives: 1,
+        continuous: true
       });
       setListening(true);
     } catch (e) {
@@ -195,7 +196,7 @@ export function usePronunciationSession() {
       }, {
         headers: { Authorization: `Bearer ${token}` }
       });
-      const parsedResult = parseAIResponse<PronunciationResult>(res.data.candidates[0].content.parts[0].text);
+      const parsedResult = parseAIResponse<PronunciationResult>(res.data.result || res.data);
       setResult(parsedResult);
       
       // Auto-master if they passed
@@ -212,7 +213,8 @@ export function usePronunciationSession() {
 
   const speakWord = () => {
     if (!words[currentIndex]) return;
-    Speech.speak(words[currentIndex].word, {
+    Speech.stop();
+    Speech.speak(`, ${words[currentIndex].word}`, {
       language: 'en-US',
       rate: 0.8
     });
