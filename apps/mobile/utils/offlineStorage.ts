@@ -1,6 +1,7 @@
 import * as FileSystem from 'expo-file-system';
+import { Platform } from 'react-native';
 
-const CACHE_DIR = ((FileSystem as any).documentDirectory ?? '') + 'cache/';
+const CACHE_DIR = Platform.OS === 'web' ? '' : (((FileSystem as any).documentDirectory ?? '') + 'cache/');
 
 interface CacheEntry<T> {
   data: T;
@@ -9,6 +10,7 @@ interface CacheEntry<T> {
 }
 
 async function ensureCacheDir(): Promise<void> {
+  if (Platform.OS === 'web') return;
   const dirInfo = await FileSystem.getInfoAsync(CACHE_DIR);
   if (!dirInfo.exists) {
     await FileSystem.makeDirectoryAsync(CACHE_DIR, { intermediates: true });
@@ -27,6 +29,7 @@ export const offlineStorage = {
    * If ttlMinutes is omitted or null, the entry never expires.
    */
   async set(key: string, data: unknown, ttlMinutes?: number): Promise<void> {
+    if (Platform.OS === 'web') return;
     await ensureCacheDir();
 
     const entry: CacheEntry<unknown> = {
@@ -46,6 +49,7 @@ export const offlineStorage = {
    * Retrieve cached data by key. Returns null if not found or expired.
    */
   async get<T>(key: string): Promise<T | null> {
+    if (Platform.OS === 'web') return null;
     try {
       const path = keyToPath(key);
       const info = await FileSystem.getInfoAsync(path);
@@ -78,6 +82,7 @@ export const offlineStorage = {
    * Remove a single cached entry.
    */
   async remove(key: string): Promise<void> {
+    if (Platform.OS === 'web') return;
     try {
       await FileSystem.deleteAsync(keyToPath(key), { idempotent: true });
     } catch {
@@ -89,6 +94,7 @@ export const offlineStorage = {
    * Clear all cached data.
    */
   async clear(): Promise<void> {
+    if (Platform.OS === 'web') return;
     try {
       await FileSystem.deleteAsync(CACHE_DIR, { idempotent: true });
     } catch {

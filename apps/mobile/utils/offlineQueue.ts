@@ -1,7 +1,8 @@
 import * as FileSystem from 'expo-file-system';
 import type { AxiosInstance } from 'axios';
+import { Platform } from 'react-native';
 
-const QUEUE_PATH = ((FileSystem as any).documentDirectory ?? '') + 'offline_queue.json';
+const QUEUE_PATH = Platform.OS === 'web' ? '' : (((FileSystem as any).documentDirectory ?? '') + 'offline_queue.json');
 
 export interface QueuedAction {
   id: string;
@@ -17,6 +18,7 @@ function uid(): string {
 }
 
 async function readQueue(): Promise<QueuedAction[]> {
+  if (Platform.OS === 'web') return [];
   try {
     const info = await FileSystem.getInfoAsync(QUEUE_PATH);
     if (!info.exists) return [];
@@ -30,6 +32,7 @@ async function readQueue(): Promise<QueuedAction[]> {
 }
 
 async function writeQueue(queue: QueuedAction[]): Promise<void> {
+  if (Platform.OS === 'web') return;
   await FileSystem.writeAsStringAsync(
     QUEUE_PATH,
     JSON.stringify(queue),
@@ -96,6 +99,7 @@ export const offlineQueue = {
 
   /** Remove all queued actions. */
   async clear(): Promise<void> {
+    if (Platform.OS === 'web') return;
     try {
       await FileSystem.deleteAsync(QUEUE_PATH, { idempotent: true });
     } catch {
