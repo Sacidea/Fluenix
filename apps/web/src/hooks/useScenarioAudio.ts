@@ -68,6 +68,9 @@ export function useScenarioAudio() {
   }
 
   const startListening = (onResult: (text: string) => void) => {
+    window.speechSynthesis.cancel()
+    if (speakTimeoutRef.current) clearTimeout(speakTimeoutRef.current)
+
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition
     if (!SpeechRecognition) {
       alert('Speech recognition is not supported in this browser.')
