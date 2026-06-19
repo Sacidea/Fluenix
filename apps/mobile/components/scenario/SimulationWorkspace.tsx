@@ -79,6 +79,7 @@ export function SimulationWorkspace({
           lang: 'en-US',
           interimResults: true,
           maxAlternatives: 1,
+          continuous: true,
         });
         setIsRecording(true);
       }

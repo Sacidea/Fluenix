@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { View, Text, TouchableOpacity, ActivityIndicator, Alert, ScrollView, StyleSheet } from 'react-native';
+import { View, Text, TouchableOpacity, ActivityIndicator, Alert, ScrollView, StyleSheet, Pressable, Platform } from 'react-native';
 import * as Icons from 'lucide-react-native';
 import { useUser, useAuth } from '@clerk/clerk-expo';
 import axios from 'axios';
@@ -29,7 +29,7 @@ interface ErrorScenario {
 const ROUNDS_PER_SESSION = 3;
 
 // Highlight renderer for Mobile
-function renderContentWithHighlights(content: string, highlights?: { word: string; tooltip: string }[]) {
+function renderContentWithHighlights(content: string, highlights?: { word: string; tooltip: string }[], onHighlightClick?: (tooltip: string) => void) {
   if (!highlights || highlights.length === 0) return <Text style={styles.monoTextLight}>{content}</Text>;
 
   const words = highlights.map(h => h.word.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'));
@@ -45,7 +45,13 @@ function renderContentWithHighlights(content: string, highlights?: { word: strin
             <Text 
               key={i} 
               onPress={() => {
-                Alert.alert("Highlight", highlight.tooltip);
+                if (onHighlightClick) {
+                  onHighlightClick(highlight.tooltip);
+                } else if (Platform.OS === 'web') {
+                  window.alert("Highlight: " + highlight.tooltip);
+                } else {
+                  Alert.alert("Highlight", highlight.tooltip);
+                }
               }}
               style={styles.highlightText}
             >
@@ -68,6 +74,7 @@ export function ErrorWorkspace() {
   const [loading, setLoading] = useState(false);
   const [sessionCount, setSessionCount] = useState(0);
   const [correctAnswers, setCorrectAnswers] = useState(0);
+  const [activeTooltip, setActiveTooltip] = useState<string | null>(null);
   
   const [selectedOptionId, setSelectedOptionId] = useState<string | null>(null);
   const [isAnswered, setIsAnswered] = useState(false);
@@ -205,6 +212,12 @@ export function ErrorWorkspace() {
 
   return (
     <View style={styles.workspace}>
+      {(activeTooltip || showEli5) && (
+        <Pressable 
+          style={[StyleSheet.absoluteFill, { zIndex: 10, elevation: 10 }]} 
+          onPress={() => { setActiveTooltip(null); setShowEli5(false); }}
+        />
+      )}
       {/* Progress */}
       <View style={styles.progressRow}>
         <Text style={styles.progressRound}>
@@ -232,17 +245,35 @@ export function ErrorWorkspace() {
               </TouchableOpacity>
             )}
           </View>
-          
-          <View style={styles.stackTraceBody}>
-            {renderContentWithHighlights(scenario.content, scenario.highlights)}
-          </View>
+
+          {activeTooltip && (
+            <TouchableOpacity style={[styles.tooltipContainer, { zIndex: 20, elevation: 20 }]} onPress={() => setActiveTooltip(null)} activeOpacity={0.8}>
+              <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+                <Text style={styles.tooltipTitle}>💡 Tooltip:</Text>
+                <Icons.X size={14} color="#92400e" />
+              </View>
+              <Text style={styles.tooltipText}>{activeTooltip}</Text>
+            </TouchableOpacity>
+          )}
 
           {showEli5 && scenario.eli5 && (
-            <View style={styles.eli5Container}>
-              <View style={{ marginTop: 2 }}><Icons.Wand2 size={16} color="#c084fc" /></View>
+            <TouchableOpacity style={[styles.eli5Container, { zIndex: 20, elevation: 20 }]} onPress={() => setShowEli5(false)} activeOpacity={0.8}>
+              <View style={{ flexDirection: 'row', gap: 8, alignItems: 'center', justifyContent: 'space-between' }}>
+                <View style={{ flexDirection: 'row', gap: 8, alignItems: 'center' }}>
+                  <Icons.Wand2 size={16} color="#c084fc" />
+                  <Text style={{ fontSize: 12, fontWeight: '700', color: '#c084fc' }}>Explain Like I'm 5</Text>
+                </View>
+                <Icons.X size={14} color="#c084fc" />
+              </View>
               <Text style={styles.eli5Text}>{scenario.eli5}</Text>
-            </View>
+            </TouchableOpacity>
           )}
+          
+          <View style={styles.stackTraceBody}>
+            {renderContentWithHighlights(scenario.content, scenario.highlights, (tooltip) => {
+              setActiveTooltip(activeTooltip === tooltip ? null : tooltip);
+            })}
+          </View>
         </View>
       ) : (
         <View style={[styles.docContainer, shadow.sm]}>
@@ -255,19 +286,34 @@ export function ErrorWorkspace() {
               </TouchableOpacity>
             )}
           </View>
+
+          {activeTooltip && (
+            <View style={styles.tooltipContainer}>
+              <Text style={styles.tooltipTitle}>💡 Tooltip:</Text>
+              <Text style={styles.tooltipText}>{activeTooltip}</Text>
+            </View>
+          )}
+
+          {showEli5 && scenario.eli5 && (
+            <TouchableOpacity style={[styles.docEli5Container, { zIndex: 20, elevation: 20 }]} onPress={() => setShowEli5(false)} activeOpacity={0.8}>
+              <View style={{ flexDirection: 'row', gap: 8, alignItems: 'center', justifyContent: 'space-between' }}>
+                <View style={{ flexDirection: 'row', gap: 8, alignItems: 'center' }}>
+                  <Icons.Wand2 size={16} color="#0ea5e9" />
+                  <Text style={{ fontSize: 12, fontWeight: '700', color: '#0ea5e9' }}>Explain Like I'm 5</Text>
+                </View>
+                <Icons.X size={14} color="#0ea5e9" />
+              </View>
+              <Text style={styles.docEli5Text}>{scenario.eli5}</Text>
+            </TouchableOpacity>
+          )}
           
           <View style={styles.docBody}>
             <Text style={styles.docBodyText}>
-              {renderContentWithHighlights(scenario.content, scenario.highlights)}
+              {renderContentWithHighlights(scenario.content, scenario.highlights, (tooltip) => {
+                setActiveTooltip(activeTooltip === tooltip ? null : tooltip);
+              })}
             </Text>
           </View>
-
-          {showEli5 && scenario.eli5 && (
-            <View style={styles.docEli5Container}>
-              <View style={{ marginTop: 2 }}><Icons.Wand2 size={16} color="#0ea5e9" /></View>
-              <Text style={styles.docEli5Text}>{scenario.eli5}</Text>
-            </View>
-          )}
         </View>
       )}
 
@@ -398,6 +444,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 6,
+    flexShrink: 1,
   },
   trafficDot: {
     width: 12,
@@ -411,6 +458,7 @@ const styles = StyleSheet.create({
     color: colors.slate400,
     fontWeight: '700',
     textTransform: 'uppercase',
+    flexShrink: 1,
   },
   eli5Btn: {
     flexDirection: 'row',
@@ -443,14 +491,30 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     paddingHorizontal: 4,
   },
+  tooltipContainer: {
+    padding: 12,
+    backgroundColor: '#fef3c7',
+    borderTopWidth: 1,
+    borderColor: '#fde68a',
+  },
+  tooltipTitle: {
+    fontSize: 12,
+    color: '#92400e',
+    fontWeight: '900',
+  },
+  tooltipText: {
+    fontSize: 12,
+    color: '#b45309',
+    marginTop: 4,
+    lineHeight: 18,
+  },
   eli5Container: {
     padding: 16,
     backgroundColor: 'rgba(88,28,135,0.3)',
     borderTopWidth: 1,
     borderTopColor: 'rgba(168,85,247,0.2)',
-    flexDirection: 'row',
-    alignItems: 'flex-start',
-    gap: 12,
+    flexDirection: 'column',
+    gap: 8,
   },
   eli5Text: {
     flex: 1,
@@ -484,6 +548,7 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     textTransform: 'uppercase',
     letterSpacing: 4,
+    flexShrink: 1,
   },
   docEli5Btn: {
     flexDirection: 'row',
@@ -515,9 +580,8 @@ const styles = StyleSheet.create({
     backgroundColor: '#f0f9ff',
     borderTopWidth: 1,
     borderTopColor: '#e0f2fe',
-    flexDirection: 'row',
-    alignItems: 'flex-start',
-    gap: 12,
+    flexDirection: 'column',
+    gap: 8,
   },
   docEli5Text: {
     flex: 1,
