@@ -213,9 +213,10 @@ const styles = StyleSheet.create({
   },
   wordText: {
     fontSize: 36,
-    fontWeight: '900',
+    fontWeight: '800',
     color: colors.slate800,
     marginBottom: 8,
+    paddingHorizontal: 8,
   },
   phoneticText: {
     fontSize: 18,
