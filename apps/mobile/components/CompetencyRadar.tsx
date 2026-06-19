@@ -104,7 +104,8 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   title: {
-    fontWeight: '700',
+    fontWeight: '800',
+    fontSize: 14,
     color: colors.slate800,
     alignSelf: 'flex-start',
     marginBottom: 16,

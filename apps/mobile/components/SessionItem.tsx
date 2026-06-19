@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
+import { View, Text, TouchableOpacity, Platform, StyleSheet } from 'react-native';
 import * as Icons from 'lucide-react-native';
 import { colors, shadow } from '../utils/theme';
 
@@ -66,8 +66,8 @@ export function SessionItem({ session, onPress, onDelete }: { session: Session; 
           <View>
             <Text style={styles.sessionType}>{getLabel(session)}</Text>
             <Text style={styles.sessionDate}>
-              {new Date(session.createdAt).toLocaleDateString(undefined, { 
-                month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' 
+              {new Date(session.createdAt).toLocaleDateString('en-US', { 
+                day: '2-digit', month: 'short', year: 'numeric' 
               })}
             </Text>
           </View>
@@ -123,21 +123,28 @@ const styles = StyleSheet.create({
     gap: 16,
   },
   iconBox: {
-    width: 40,
-    height: 40,
-    borderRadius: 12,
-    backgroundColor: colors.slate100,
+    width: 36,
+    height: 36,
+    borderRadius: 10,
+    backgroundColor: '#f8fafc',
     alignItems: 'center',
     justifyContent: 'center',
+    borderWidth: 1,
+    borderColor: '#f1f5f9',
   },
   sessionType: {
-    fontWeight: '700',
-    color: colors.slate800,
-    fontSize: 14,
+    fontFamily: Platform.OS === 'ios' ? 'Georgia' : 'serif',
+    fontStyle: 'italic',
+    fontWeight: '400',
+    color: colors.slate900,
+    fontSize: 16,
   },
   sessionDate: {
-    fontSize: 10,
-    color: colors.slate500,
+    fontSize: 11,
+    fontWeight: '700',
+    color: '#94a3b8',
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
     marginTop: 4,
   },
   scoreSection: {
