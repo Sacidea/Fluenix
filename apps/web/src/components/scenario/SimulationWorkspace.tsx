@@ -125,11 +125,8 @@ export function SimulationWorkspace({
         <footer className="comms-input-area">
           <button 
             className={`voice-btn ${listening ? 'listening' : 'idle'}`}
-            onMouseDown={startListening}
-            onMouseUp={stopListening}
-            onTouchStart={startListening}
-            onTouchEnd={stopListening}
-            title="Hold to speak"
+            onClick={listening ? stopListening : startListening}
+            title={listening ? "Click to stop recording" : "Click to start recording"}
           >
             {listening ? <Square size={20} /> : <Mic size={20} />}
           </button>
@@ -140,7 +137,7 @@ export function SimulationWorkspace({
             value={input}
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={(e) => e.key === 'Enter' && sendMessage()}
-            placeholder="Hold mic to speak or type here..."
+            placeholder="Click mic to speak or type here..."
             disabled={listening}
           />
           
