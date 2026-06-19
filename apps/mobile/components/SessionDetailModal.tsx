@@ -76,7 +76,7 @@ export function SessionDetailModal({ visible, session, onClose }: { visible: boo
             </View>
             {typeof session.score === 'number' && (
               <View style={styles.scoreContainer}>
-                <Text style={styles.infoLabel}>Accuracy Match</Text>
+                <Text style={styles.infoLabel}>Score</Text>
                 <Text style={[styles.scoreValue, session.score >= 80 ? styles.scoreGreen : session.score >= 60 ? styles.scoreAmber : styles.scoreRed]}>
                   {Math.round(session.score)}%
                 </Text>

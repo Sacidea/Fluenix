@@ -78,7 +78,7 @@ export function SessionItem({ session, onPress, onDelete }: { session: Session; 
               <Text style={[styles.scoreValue, session.score !== undefined ? (session.score >= 80 ? styles.scoreGreen : session.score >= 60 ? styles.scoreAmber : styles.scoreRed) : undefined]}>
                 {session.score !== undefined ? `${Math.round(session.score)}%` : ''}
               </Text>
-              <Text style={styles.scoreLabel}>Accuracy Match</Text>
+              <Text style={styles.scoreLabel}>SCORE</Text>
             </>
           ) : (
             <Text style={styles.noScoreText}>COMPLETE</Text>
