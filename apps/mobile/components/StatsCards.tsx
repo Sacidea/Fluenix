@@ -49,9 +49,9 @@ export function StatsCards({ stats }: Props) {
           >
             <Text style={styles.levelText}>LVL {level}</Text>
           </LinearGradient>
-          <View>
-            <Text style={styles.bannerTitle}>Engineering Proficiency</Text>
-            <Text style={styles.bannerSub}>{xp} XP / {nextLevelXp} XP to Level {level + 1}</Text>
+          <View style={{ flex: 1 }}>
+            <Text style={styles.bannerTitle} numberOfLines={1}>Engineering Proficiency</Text>
+            <Text style={styles.bannerSub} numberOfLines={1}>{xp} XP / {nextLevelXp} XP to Level {level + 1}</Text>
           </View>
         </View>
         <View style={styles.xpTrack}>

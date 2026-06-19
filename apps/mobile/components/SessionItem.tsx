@@ -63,8 +63,8 @@ export function SessionItem({ session, onPress, onDelete }: { session: Session; 
           <View style={styles.iconBox}>
             <IconComp size={20} color="#64748b" />
           </View>
-          <View>
-            <Text style={styles.sessionType}>{getLabel(session)}</Text>
+          <View style={{ flex: 1 }}>
+            <Text style={styles.sessionType} numberOfLines={1}>{getLabel(session)}</Text>
             <Text style={styles.sessionDate}>
               {new Date(session.createdAt).toLocaleDateString('en-US', { 
                 day: '2-digit', month: 'short', year: 'numeric' 
@@ -118,6 +118,7 @@ const styles = StyleSheet.create({
     ...shadow.sm,
   },
   cardLeft: {
+    flex: 1,
     flexDirection: 'row',
     alignItems: 'center',
     gap: 16,
