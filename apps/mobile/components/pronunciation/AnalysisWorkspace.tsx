@@ -64,12 +64,8 @@ export function AnalysisWorkspace({
 
         {/* Word Display */}
         <View style={styles.wordDisplay}>
-          <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ alignItems: 'center', paddingHorizontal: 16 }}>
-            <View style={{ alignItems: 'center' }}>
-              <Text style={styles.wordText}>{currentWord.word}</Text>
-              <Text style={styles.phoneticText}>/{currentWord.phonetic}/</Text>
-            </View>
-          </ScrollView>
+          <Text style={styles.wordText} adjustsFontSizeToFit numberOfLines={1}>{currentWord.word}</Text>
+          <Text style={styles.phoneticText} adjustsFontSizeToFit numberOfLines={1}>/{currentWord.phonetic}/</Text>
         </View>
 
         {/* Action Row */}
