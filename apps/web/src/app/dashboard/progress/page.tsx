@@ -28,7 +28,7 @@ export default function ProgressPage() {
         headers: token ? { Authorization: `Bearer ${token}` } : {}
       })
       if (res.ok) {
-        refetch() // Reload progress data
+        refetch(true) // Reload progress data silently
       } else {
         alert('Failed to delete session')
       }

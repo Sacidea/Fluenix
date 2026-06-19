@@ -21,10 +21,10 @@ export function useProgressData(userId?: string) {
     const [loading, setLoading] = useState(true)
     const [error, setError] = useState(false)
 
-    const fetchData = useCallback(async () => {
+    const fetchData = useCallback(async (silent = false) => {
         if (!userId) return
         setError(false)
-        setLoading(true)
+        if (!silent) setLoading(true)
         try {
             const token = await getToken()
             if (!token) return // Wait for Clerk to initialize
@@ -39,7 +39,7 @@ export function useProgressData(userId?: string) {
             console.error(err)
             setError(true)
         } finally {
-            setLoading(false)
+            if (!silent) setLoading(false)
         }
     }, [userId, getToken])
 
