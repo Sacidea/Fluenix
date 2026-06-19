@@ -216,13 +216,16 @@ const styles = StyleSheet.create({
     fontWeight: '800',
     color: colors.slate800,
     marginBottom: 8,
-    paddingHorizontal: 8,
+    width: '100%',
+    textAlign: 'center',
   },
   phoneticText: {
     fontSize: 18,
     fontFamily: 'monospace',
     color: colors.slate400,
     letterSpacing: 4,
+    width: '100%',
+    textAlign: 'center',
   },
   actionRow: {
     flexDirection: 'row',
