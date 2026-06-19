@@ -4,12 +4,23 @@ import * as Icons from 'lucide-react-native';
 import { colors, shadow } from '../utils/theme';
 
 const labelMap: Record<string, string> = {
-  'scenario': 'Scenario Simulation',
-  'writing': 'Technical Writing',
-  'pronunciation': 'Pronunciation Lab',
+  'technical_interview': 'Technical Interview',
+  'daily_standup': 'Daily Standup',
+  'code_review': 'Code Review',
+  'system_design': 'System Design',
+  'pr_description': 'PR Description',
+  'commit_message': 'Commit Message',
+  'documentation': 'Documentation',
+  'email_draft': 'Professional Email',
+  'scenario': 'Simulation Transcript',
+  'writing': 'Technical Ledger Entry',
+  'pronunciation': 'Acoustic Report',
+  'error-decoding': 'Error Decoder Log',
+  'behavioral': 'Behavioral Interview',
+  'listening': 'Listening Lab',
+  'grammar': 'Grammar Lab',
+  'grammar-lab': 'Grammar Lab',
   'vocabulary': 'Vocabulary Builder',
-  'error-decoding': 'Error Decoder',
-  'grammar-lab': 'Grammar Linter'
 };
 
 const iconMap: Record<string, any> = {
@@ -18,7 +29,15 @@ const iconMap: Record<string, any> = {
   'pronunciation': Icons.Mic,
   'vocabulary': Icons.BookOpen,
   'error-decoding': Icons.Terminal,
-  'grammar-lab': Icons.CheckSquare
+  'grammar-lab': Icons.CheckSquare,
+  'grammar': Icons.CheckSquare,
+  'behavioral': Icons.Users,
+  'listening': Icons.Headphones,
+};
+
+const getLabel = (session: { type: string; scenario?: string }) => {
+  const raw = session.scenario ?? session.type;
+  return labelMap[raw] ?? raw;
 };
 
 export type Session = {
@@ -45,7 +64,7 @@ export function SessionItem({ session, onPress, onDelete }: { session: Session; 
             <IconComp size={20} color="#64748b" />
           </View>
           <View>
-            <Text style={styles.sessionType}>{labelMap[session.type] || session.type}</Text>
+            <Text style={styles.sessionType}>{getLabel(session)}</Text>
             <Text style={styles.sessionDate}>
               {new Date(session.createdAt).toLocaleDateString(undefined, { 
                 month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' 
@@ -56,15 +75,13 @@ export function SessionItem({ session, onPress, onDelete }: { session: Session; 
         <View style={styles.scoreSection}>
           {hasScore ? (
             <>
-              <Text style={[styles.scoreValue, session.score !== undefined ? (session.score >= 80 ? styles.scoreGreen : styles.scorePrimary) : undefined]}>
-                {session.score !== undefined ? Math.round(session.score) : ''}
+              <Text style={[styles.scoreValue, session.score !== undefined ? (session.score >= 80 ? styles.scoreGreen : session.score >= 60 ? styles.scoreAmber : styles.scoreRed) : undefined]}>
+                {session.score !== undefined ? `${Math.round(session.score)}%` : ''}
               </Text>
-              <Text style={styles.scoreLabel}>Score</Text>
+              <Text style={styles.scoreLabel}>Accuracy Match</Text>
             </>
           ) : (
-            <View style={styles.noScoreBadge}>
-              <Text style={styles.noScoreText}>No Score</Text>
-            </View>
+            <Text style={styles.noScoreText}>COMPLETE</Text>
           )}
         </View>
       </TouchableOpacity>
@@ -131,28 +148,26 @@ const styles = StyleSheet.create({
     fontSize: 18,
   },
   scoreGreen: {
-    color: colors.green600,
+    color: '#059669',
   },
-  scorePrimary: {
-    color: colors.primary,
+  scoreAmber: {
+    color: '#d97706',
+  },
+  scoreRed: {
+    color: '#dc2626',
   },
   scoreLabel: {
-    fontSize: 10,
-    fontWeight: '700',
-    color: colors.slate400,
+    fontSize: 9,
+    fontWeight: '800',
+    color: '#94a3b8',
     textTransform: 'uppercase',
-    letterSpacing: 2,
-  },
-  noScoreBadge: {
-    backgroundColor: colors.slate100,
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 4,
+    letterSpacing: 1,
   },
   noScoreText: {
     fontSize: 10,
-    fontWeight: '700',
-    color: colors.slate500,
+    fontWeight: '800',
+    color: '#cbd5e1',
+    letterSpacing: 1,
     textTransform: 'uppercase',
   },
   deleteButton: {

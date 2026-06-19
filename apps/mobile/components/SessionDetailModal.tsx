@@ -4,12 +4,23 @@ import * as Icons from 'lucide-react-native';
 import { colors, shadow } from '../utils/theme';
 
 const labelMap: Record<string, string> = {
-  'scenario': 'Scenario Simulation',
-  'writing': 'Technical Writing',
-  'pronunciation': 'Pronunciation Lab',
+  'technical_interview': 'Technical Interview',
+  'daily_standup': 'Daily Standup',
+  'code_review': 'Code Review',
+  'system_design': 'System Design',
+  'pr_description': 'PR Description',
+  'commit_message': 'Commit Message',
+  'documentation': 'Documentation',
+  'email_draft': 'Professional Email',
+  'scenario': 'Simulation Transcript',
+  'writing': 'Technical Ledger Entry',
+  'pronunciation': 'Acoustic Report',
+  'error-decoding': 'Error Decoder Log',
+  'behavioral': 'Behavioral Interview',
+  'listening': 'Listening Lab',
+  'grammar': 'Grammar Lab',
+  'grammar-lab': 'Grammar Lab',
   'vocabulary': 'Vocabulary Builder',
-  'error-decoding': 'Error Decoder',
-  'grammar-lab': 'Grammar Linter'
 };
 
 import { Session } from './SessionItem';
@@ -30,7 +41,7 @@ export function SessionDetailModal({ visible, session, onClose }: { visible: boo
               Operational Record
             </Text>
             <Text style={styles.headerTitle}>
-              {labelMap[session.type] || session.type}
+              {labelMap[session.scenario ?? session.type] || session.type}
             </Text>
           </View>
           <TouchableOpacity onPress={onClose} style={styles.closeButton}>
@@ -41,19 +52,33 @@ export function SessionDetailModal({ visible, session, onClose }: { visible: boo
         <ScrollView style={styles.scrollContent} showsVerticalScrollIndicator={false}>
           {/* Main Info */}
           <View style={styles.infoCard}>
-            <View>
-              <Text style={styles.infoLabel}>Date</Text>
-              <Text style={styles.infoValue}>
-                {new Date(session.createdAt).toLocaleDateString(undefined, { 
-                  year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' 
-                })}
-              </Text>
+            <View style={styles.infoRow}>
+              <View style={{ flex: 1 }}>
+                <Text style={styles.infoLabel}>Type</Text>
+                <Text style={styles.infoValue}>{session.type}</Text>
+              </View>
+              <View style={{ flex: 1 }}>
+                <Text style={styles.infoLabel}>Scenario</Text>
+                <Text style={styles.infoValue}>{session.scenario || '—'}</Text>
+              </View>
+            </View>
+            <View style={styles.infoRow}>
+              <View style={{ flex: 1 }}>
+                <Text style={styles.infoLabel}>Date</Text>
+                <Text style={styles.infoValue}>
+                  {new Date(session.createdAt).toLocaleString('en-US')}
+                </Text>
+              </View>
+              <View style={{ flex: 1 }}>
+                <Text style={styles.infoLabel}>Duration</Text>
+                <Text style={styles.infoValue}>{(session as any).duration ? `${(session as any).duration}s` : '—'}</Text>
+              </View>
             </View>
             {typeof session.score === 'number' && (
               <View style={styles.scoreContainer}>
-                <Text style={styles.infoLabel}>Score</Text>
-                <Text style={[styles.scoreValue, session.score >= 80 ? styles.scoreGreen : styles.scorePrimary]}>
-                  {Math.round(session.score)}
+                <Text style={styles.infoLabel}>Accuracy Match</Text>
+                <Text style={[styles.scoreValue, session.score >= 80 ? styles.scoreGreen : session.score >= 60 ? styles.scoreAmber : styles.scoreRed]}>
+                  {Math.round(session.score)}%
                 </Text>
               </View>
             )}
@@ -159,9 +184,11 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: colors.slate200,
     marginBottom: 24,
+    gap: 16,
+  },
+  infoRow: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    gap: 16,
   },
   infoLabel: {
     color: colors.slate500,
@@ -173,17 +200,20 @@ const styles = StyleSheet.create({
     color: colors.slate800,
   },
   scoreContainer: {
-    alignItems: 'flex-end',
+    alignItems: 'flex-start',
   },
   scoreValue: {
     fontWeight: '900',
     fontSize: 24,
   },
   scoreGreen: {
-    color: colors.green600,
+    color: '#059669',
   },
-  scorePrimary: {
-    color: colors.primary,
+  scoreAmber: {
+    color: '#d97706',
+  },
+  scoreRed: {
+    color: '#dc2626',
   },
   feedbackContainer: {
     gap: 24,

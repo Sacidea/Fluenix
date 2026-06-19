@@ -72,7 +72,7 @@ export default function ProgressScreen() {
     return (
       <View style={styles.loadingContainer}>
         <ActivityIndicator size="large" color="#4f46e5" />
-        <Text style={styles.loadingText}>Compiling personnel dossier...</Text>
+        <Text style={styles.loadingText}>Analyzing session data...</Text>
       </View>
     );
   }
