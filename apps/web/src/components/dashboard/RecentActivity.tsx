@@ -173,6 +173,7 @@ export function RecentActivity({ sessions, onDelete }: Props) {
           border: 1px solid var(--color-border);
           transition: var(--transition-base);
           cursor: pointer;
+          min-width: 0;
         }
 
         .activity-item:hover {
@@ -194,6 +195,7 @@ export function RecentActivity({ sessions, onDelete }: Props) {
           border-radius: var(--radius-md);
           cursor: pointer;
           transition: all 0.2s ease;
+          flex-shrink: 0;
         }
 
         .delete-activity-btn:hover {
@@ -210,6 +212,7 @@ export function RecentActivity({ sessions, onDelete }: Props) {
           border-radius: var(--radius-sm);
           background: var(--color-primary-bg);
           color: var(--color-primary);
+          flex-shrink: 0;
         }
 
         .activity-content {
@@ -217,12 +220,16 @@ export function RecentActivity({ sessions, onDelete }: Props) {
           display: flex;
           justify-content: space-between;
           align-items: center;
+          min-width: 0;
+          gap: 12px;
         }
 
         .activity-main {
           display: flex;
           flex-direction: column;
           gap: 4px;
+          flex: 1;
+          min-width: 0;
         }
 
         .activity-type {
@@ -230,6 +237,9 @@ export function RecentActivity({ sessions, onDelete }: Props) {
           font-weight: 700;
           color: var(--color-text-dark);
           text-transform: capitalize;
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
         }
 
         .activity-dot {
