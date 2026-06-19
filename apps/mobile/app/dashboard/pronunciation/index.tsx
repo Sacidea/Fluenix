@@ -33,21 +33,21 @@ export default function PronunciationLabScreen() {
           </View>
         </View>
       </View>
-      <WordIndexSidebar 
-        paginatedWords={session.paginatedWords}
-        allWords={session.words}
-        categories={session.categories}
-        selectedCategory={session.selectedCategory}
-        setSelectedCategory={session.setSelectedCategory}
-        currentPage={session.currentPage}
-        totalPages={session.totalPages}
-        setCurrentPage={session.setCurrentPage}
-        currentIndex={session.currentIndex}
-        setWordByIndex={session.setWordByIndex}
-        onGenerateWords={session.generateWords}
-      />
-      
       <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
+        <WordIndexSidebar 
+          paginatedWords={session.paginatedWords}
+          allWords={session.words}
+          categories={session.categories}
+          selectedCategory={session.selectedCategory}
+          setSelectedCategory={session.setSelectedCategory}
+          currentPage={session.currentPage}
+          totalPages={session.totalPages}
+          setCurrentPage={session.setCurrentPage}
+          currentIndex={session.currentIndex}
+          setWordByIndex={session.setWordByIndex}
+          onGenerateWords={session.generateWords}
+        />
+        
         <AnalysisWorkspace 
           supported={session.supported}
           currentWord={session.currentWord}
