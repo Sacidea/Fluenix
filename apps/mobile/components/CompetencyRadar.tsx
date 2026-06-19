@@ -10,13 +10,13 @@ export function CompetencyRadar({ sessions }: { sessions: Session[] }) {
   
   const getAvg = (type: string) => {
     const s = scored.filter(s => s.type === type);
-    return s.length ? s.reduce((a, b) => a + Number(b.score), 0) / s.length : 20; // Default to 20 when no data
+    return s.length ? s.reduce((a, b) => a + Number(b.score), 0) / s.length : 40; // Default to 40 when no data (matches web)
   };
 
   const data = [
     { subject: 'Clarity', A: getAvg('scenario') },
     { subject: 'Vocabulary', A: getAvg('writing') },
-    { subject: 'Grammar', A: getAvg('grammar-lab') },
+    { subject: 'Grammar', A: getAvg('grammar') },
     { subject: 'Pronunciation', A: getAvg('pronunciation') },
     { subject: 'Leadership', A: getAvg('behavioral') },
     { subject: 'Listening', A: getAvg('listening') },
@@ -71,12 +71,12 @@ export function CompetencyRadar({ sessions }: { sessions: Session[] }) {
         })}
 
         {/* Radar Polygon */}
-        <Polygon points={pathString} fill="rgba(99, 102, 241, 0.2)" stroke="#6366f1" strokeWidth="2" />
+        <Polygon points={pathString} fill="rgba(99, 102, 241, 0.4)" stroke="#6366f1" strokeWidth="2" />
         
         {/* Data Points & Labels */}
         {points.map((p, i) => (
           <React.Fragment key={`point-${i}`}>
-            <Circle cx={p.x} cy={p.y} r="4" fill="#4f46e5" />
+            <Circle cx={p.x} cy={p.y} r="4" fill="#6366f1" />
             <SvgText 
               x={p.labelX} y={p.labelY} 
               fill="#64748b" fontSize="10" 
@@ -104,7 +104,8 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   title: {
-    fontWeight: '700',
+    fontWeight: '800',
+    fontSize: 14,
     color: colors.slate800,
     alignSelf: 'flex-start',
     marginBottom: 16,

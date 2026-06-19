@@ -338,7 +338,10 @@ Return only JSON. Do not wrap in markdown."""
             }]
         )
         raw = response.content[0].text
-        return {"analysis": json.dumps(extract_json(raw))}
+        try:
+            return {"analysis": json.dumps(extract_json(raw))}
+        except Exception:
+            return {"analysis": raw}
     except Exception as e:
         traceback.print_exc()
         raise HTTPException(status_code=500, detail=str(e))
@@ -391,7 +394,10 @@ Return only JSON. Do not wrap in markdown."""
             }]
         )
         raw = response.content[0].text
-        return {"result": json.dumps(extract_json(raw))}
+        try:
+            return {"result": json.dumps(extract_json(raw))}
+        except Exception:
+            return {"result": raw}
     except Exception as e:
         traceback.print_exc()
         raise HTTPException(status_code=500, detail=str(e))
@@ -500,7 +506,10 @@ Return ONLY JSON. Do not use markdown blocks."""
             }]
         )
         raw = response.content[0].text
-        return {"analysis": json.dumps(extract_json(raw))}
+        try:
+            return {"analysis": json.dumps(extract_json(raw))}
+        except Exception:
+            return {"analysis": raw}
     except Exception as e:
         traceback.print_exc()
         raise HTTPException(status_code=500, detail=str(e))

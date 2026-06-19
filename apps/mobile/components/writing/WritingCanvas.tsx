@@ -334,14 +334,14 @@ const styles = StyleSheet.create({
     lineHeight: 22,
   },
   codeSnippetCard: {
-    backgroundColor: colors.slate900,
+    backgroundColor: colors.slate800,
     borderRadius: 8,
     overflow: 'hidden',
     borderWidth: 1,
-    borderColor: colors.slate800,
+    borderColor: colors.slate700,
   },
   codeSnippetHeader: {
-    backgroundColor: colors.slate800,
+    backgroundColor: colors.slate700,
     paddingHorizontal: 12,
     paddingVertical: 8,
     flexDirection: 'row',
