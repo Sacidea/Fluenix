@@ -212,7 +212,7 @@ const styles = StyleSheet.create({
     marginBottom: 40,
   },
   wordText: {
-    fontSize: 48,
+    fontSize: 36,
     fontWeight: '900',
     color: colors.slate800,
     marginBottom: 8,
