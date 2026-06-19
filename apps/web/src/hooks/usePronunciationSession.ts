@@ -68,6 +68,7 @@ export function usePronunciationSession() {
   }, [selectedCategory, filteredWords, words, currentIndex])
 
   const startListening = () => {
+    window.speechSynthesis.cancel()
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition
     if (!SpeechRecognition) return
 
