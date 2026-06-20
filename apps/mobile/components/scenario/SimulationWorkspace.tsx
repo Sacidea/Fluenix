@@ -4,6 +4,7 @@ import * as Icons from 'lucide-react-native';
 import { Message } from '@fluenix/shared';
 import { colors, shadow } from '../../utils/theme';
 import { usePermissions } from '../../hooks/usePermissions';
+import * as Speech from 'expo-speech';
 
 let ExpoSpeechRecognitionModule: any = null;
 let useSpeechRecognitionEvent: any = (_event: string, _handler: any) => {};
@@ -74,6 +75,10 @@ export function SimulationWorkspace({
       } else {
         const hasPerm = await requestMicrophonePermission();
         if (!hasPerm) return;
+        
+        // Stop any currently playing AI response voice when user starts speaking
+        Speech.stop();
+        
         setInput('');
         await ExpoSpeechRecognitionModule.start({
           lang: 'en-US',

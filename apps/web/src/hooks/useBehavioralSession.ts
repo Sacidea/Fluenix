@@ -32,9 +32,6 @@ export function useBehavioralSession() {
     setFeedback(null)
     try {
       const token = await getToken()
-      console.log("Token:", token)
-      console.log("Level:", level)
-      console.log("API URL:", process.env.NEXT_PUBLIC_API_URL)
       
       const res = await apiClient.post(
         API_ROUTES.BEHAVIORAL_NEXT,
@@ -47,13 +44,7 @@ export function useBehavioralSession() {
         throw new Error('Failed to load next question')
       }
     } catch (err: unknown) {
-      if (axios.isAxiosError(err)) {
-        console.log("Axios Error Data:", err.response?.data)
-        console.log("Axios Error Status:", err.response?.status)
-        console.log("Axios Error Message:", err.message)
-      } else {
-        console.error(err)
-      }
+      // Error handled via UI state
       setError("Failed to fetch next question. Please try again.")
     } finally {
       setIsLoadingQuestion(false)

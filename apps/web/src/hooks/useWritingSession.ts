@@ -50,8 +50,6 @@ export function useWritingSession() {
     setFeedback(null)
     try {
       const token = await getToken()
-      console.log("Token:", token)
-      console.log("Level:", level)
       const res = await apiClient.post(
         API_ROUTES.WRITING_NEXT,
         { level, category },
@@ -63,11 +61,7 @@ export function useWritingSession() {
         throw new Error('Failed to load next mission')
       }
     } catch (err: unknown) {
-      if (axios.isAxiosError(err)) {
-        console.log("Axios Error:", err.response?.data)
-      } else {
-        console.error(err)
-      }
+      // Error handled via UI state
       setError("Failed to fetch next writing task. Please try again.")
     } finally {
       setIsLoadingMission(false)

@@ -1,12 +1,6 @@
 import React from 'react'
 import { Activity } from 'lucide-react'
-
-interface Session {
-  id: string
-  type: string
-  createdAt: string
-  score: number | null
-}
+import type { Session } from '@/hooks/useProgressData'
 
 interface Props {
   sessions: Session[]
