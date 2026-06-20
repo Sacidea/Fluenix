@@ -27,9 +27,9 @@ const getStreak = (sessions: Session[]) => {
 
 function generateHeatmapData(sessions: Session[]) {
   const now = new Date();
-  // Match web: 15 weeks (~105 days), aligned to start on Sunday
+  // Match web: 5 weeks (~35 days), aligned to start on Sunday
   const start = new Date(now);
-  start.setDate(now.getDate() - (15 * 7 - 1) - now.getDay());
+  start.setDate(now.getDate() - (5 * 7 - 1) - now.getDay());
 
   const totalDays = Math.ceil((now.getTime() - start.getTime()) / (1000 * 60 * 60 * 24)) + 1;
 
