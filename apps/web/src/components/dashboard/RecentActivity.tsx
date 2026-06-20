@@ -25,7 +25,7 @@ const getIcon = (type: string, scenario?: string) => {
   return <CheckCircle2 size={18} />
 }
 
-const getScoreColor = (score: number | null) => {
+const getScoreColor = (score?: number | null) => {
   if (!score) return '#94a3b8'
   if (score >= 90) return '#10b981'
   if (score >= 75) return '#f59e0b'

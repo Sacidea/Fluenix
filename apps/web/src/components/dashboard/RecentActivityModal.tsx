@@ -6,7 +6,7 @@ import type { Session } from '@/hooks/useProgressData'
 interface Props {
   session: Session
   onClose: () => void
-  getScoreColor: (score: number | null) => string
+  getScoreColor: (score?: number | null) => string
 }
 
 export function RecentActivityModal({ session, onClose, getScoreColor }: Props) {
