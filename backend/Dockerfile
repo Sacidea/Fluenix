@@ -1,9 +1,9 @@
-FROM node:20-slim AS base
+FROM node:20-alpine AS base
 
 # Install pnpm and native build tools
 ENV PNPM_HOME="/pnpm"
 ENV PATH="$PNPM_HOME:$PATH"
-RUN apt-get update && apt-get install -y python3 make g++ openssl && corepack enable
+RUN apk add --no-cache python3 make g++ linux-headers openssl && corepack enable
 
 FROM base AS builder
 # Set working directory
