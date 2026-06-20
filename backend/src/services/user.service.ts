@@ -19,9 +19,10 @@ export class UserService implements IUserService {
   }
 
   async getUser(userId: string): Promise<User | { id: string; level: string }> {
-    const user = await this.userRepo.getUserById(userId)
+    let user = await this.userRepo.getUserById(userId)
     if (!user) {
-      return { id: userId, level: 'beginner' }
+      console.log(`[UserService] User ${userId} not found in DB. Auto-creating with placeholder email to prevent FK errors.`)
+      user = await this.userRepo.upsertUser(userId, `${userId}@placeholder.clerk.com`, undefined, 'beginner')
     }
     return user
   }
