@@ -87,7 +87,7 @@ export function RecentActivity({ sessions, onDelete }: Props) {
                   </span>
                 </div>
                 <div className="activity-score-wrapper">
-                  {s.score !== null ? (
+                  {typeof s.score === 'number' ? (
                     <span className="activity-score" style={{ color: getScoreColor(s.score) }}>
                       {Math.round(s.score)}
                     </span>
