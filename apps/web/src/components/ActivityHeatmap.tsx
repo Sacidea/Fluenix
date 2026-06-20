@@ -8,7 +8,7 @@ interface ActivityHeatmapProps {
   sessions: Session[]
 }
 
-const WEEKS = 15 // Number of weeks to display
+const WEEKS = 5 // Display ~30 days (5 weeks to maintain grid)
 const DAYS = 7
 
 const getLocalYMD = (date: Date) => {
