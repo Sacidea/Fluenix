@@ -2,18 +2,6 @@ import dotenv from 'dotenv'
 import path from 'path'
 dotenv.config({ path: path.resolve(__dirname, '../.env') })
 
-import * as Sentry from '@sentry/node'
-import { nodeProfilingIntegration } from '@sentry/profiling-node'
-
-Sentry.init({
-  dsn: process.env.SENTRY_DSN,
-  integrations: [
-    nodeProfilingIntegration(),
-  ],
-  tracesSampleRate: 1.0,
-  profilesSampleRate: 1.0,
-})
-
 import express, { Request, Response } from 'express'
 import cors from 'cors'
 import helmet from 'helmet'
@@ -78,9 +66,6 @@ app.get('/health', async (req: Request, res: Response) => {
     debug_db: process.env.DATABASE_URL ? 'PRESENT' : 'MISSING'
   })
 })
-
-// The error handler must be registered before any other error middleware and after all controllers
-Sentry.setupExpressErrorHandler(app)
 
 // Global Error Handler - Sunucunun "Network Error" vermesini engeller
 app.use((err: any, req: Request, res: Response, next: any) => {

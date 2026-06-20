@@ -32,8 +32,6 @@
       "@clerk/shared",
       "@prisma/client",
       "@prisma/engines",
-      "@sentry-internal/node-cpu-profiler",
-      "@sentry/cli",
       "browser-tabs-lock",
       "bufferutil",
       "core-js",

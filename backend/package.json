@@ -17,8 +17,6 @@
   "license": "ISC",
   "packageManager": "pnpm@10.30.3",
   "dependencies": {
-    "@sentry/node": "^10.56.0",
-    "@sentry/profiling-node": "^10.56.0",
     "@upstash/redis": "^1.36.3",
     "bcryptjs": "^3.0.3",
     "cors": "^2.8.6",
