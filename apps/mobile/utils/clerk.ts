@@ -9,7 +9,6 @@ const createTokenCache = () => {
     async getToken(key: string) {
       try {
         const item = await SecureStore.getItemAsync(key);
-        console.log(`[TokenCache] getToken(${key}) =`, item ? 'FOUND' : 'NULL');
         return item;
       } catch (err) {
         console.error(`[TokenCache] Error in getToken(${key}):`, err);
@@ -19,7 +18,6 @@ const createTokenCache = () => {
     async saveToken(key: string, value: string) {
       try {
         await SecureStore.setItemAsync(key, value);
-        console.log(`[TokenCache] saveToken(${key}) = SUCCESS`);
       } catch (err) {
         console.error(`[TokenCache] Error in saveToken(${key}):`, err);
         return;

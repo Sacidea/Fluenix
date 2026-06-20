@@ -11,14 +11,7 @@ import { WelcomeArea } from './WelcomeArea'
 import { GamificationWidget } from './GamificationWidget'
 import { SessionsIcon, AccuracyIcon, StreakIcon, ActivityIcon } from '../icons/PremiumIcons'
 
-interface Session {
-  id: string
-  type: string
-  scenario: string
-  createdAt: string
-  score: number | null
-  feedback?: unknown
-}
+import type { Session } from '@/hooks/useProgressData'
 interface Props {
   user: { firstName?: string | null, [key: string]: unknown } | null
   stats: { totalSessions?: number, streak?: number, averageScore?: number, lastSession?: string | null } | null

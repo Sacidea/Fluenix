@@ -20,19 +20,19 @@ export default function SignInScreen() {
 
   const onGooglePress = useCallback(async () => {
     try {
-      console.log("Starting OAuth flow...");
+
       const result = await startOAuthFlow({
         redirectUrl: Linking.createURL('/', { scheme: 'fluenix' }),
       });
-      console.log("OAuth Result:", JSON.stringify(result));
+
 
       if (result.createdSessionId && result.setActive) {
-        console.log("Setting active session...");
+
         await result.setActive({ session: result.createdSessionId });
-        console.log("Session set! Redirecting...");
+
         router.replace('/');
       } else {
-        console.log("No createdSessionId returned.", result);
+
         Alert.alert("Error", "Google Login didn't complete (no session ID).");
       }
     } catch (error: unknown) {

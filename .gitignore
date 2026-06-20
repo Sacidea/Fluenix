@@ -21,3 +21,12 @@ venv/
 .DS_Store
 Thumbs.db
 desktop.ini
+
+# Expo (root-level accidental prebuild artifacts)
+/.expo/
+/android/
+/ios/
+
+# Scratch/debug files
+git_history_*.txt
+web_workspace_diff.txt

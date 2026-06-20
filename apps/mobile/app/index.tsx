@@ -8,7 +8,7 @@ export default function IndexScreen() {
   const { user } = useUser();
   const router = useRouter();
 
-  console.log("[Index] Render - isLoaded:", isLoaded, "isSignedIn:", isSignedIn);
+
 
   if (!isLoaded) {
     return (

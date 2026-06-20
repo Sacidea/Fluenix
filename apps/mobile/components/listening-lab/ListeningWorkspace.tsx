@@ -43,13 +43,13 @@ function renderLineWithIdioms(line: DialogueLine, onIdiomClick?: (meaning: strin
   const parts = line.text.split(new RegExp("(" + word + ")", 'gi'));
 
   return (
-    <Text style={styles.dialogueText}>
+    <View style={{ flexDirection: 'row', flexWrap: 'wrap', alignItems: 'flex-start' }}>
       {parts.map((part: string, i: number) => {
         if (part.toLowerCase() === word.toLowerCase()) {
           return (
-            <Text 
+            <TouchableOpacity 
               key={i} 
-              style={styles.idiomHighlight}
+              activeOpacity={0.6}
               onPress={() => {
                 if (onIdiomClick) {
                   onIdiomClick(meaning);
@@ -60,13 +60,18 @@ function renderLineWithIdioms(line: DialogueLine, onIdiomClick?: (meaning: strin
                 }
               }}
             >
-              {part}
-            </Text>
+              <Text style={[styles.dialogueText, styles.idiomHighlight]}>{part}</Text>
+            </TouchableOpacity>
           );
         }
-        return <Text key={i}>{part}</Text>;
+        
+        // Split regular text by spaces to allow proper word wrapping in flex row
+        const words = part.split(/(\s+)/);
+        return words.map((w, j) => (
+          <Text key={`${i}-${j}`} style={styles.dialogueText}>{w}</Text>
+        ));
       })}
-    </Text>
+    </View>
   );
 }
 
@@ -103,7 +108,6 @@ export function ListeningWorkspace() {
   });
 
   useSpeechRecognitionEvent('error', (e: any) => {
-    console.log('Speech error:', e.error);
     setIsRecording(false);
     handleVoiceError(e.error);
   });
