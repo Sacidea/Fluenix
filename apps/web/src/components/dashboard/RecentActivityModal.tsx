@@ -33,7 +33,7 @@ export function RecentActivityModal({ session, onClose, getScoreColor }: Props) 
           <div className="modal-meta">
             <span>{new Date(session.createdAt).toLocaleString()}</span>
             <span className="modal-score" style={{ color: getScoreColor(session.score) }}>
-              Score: {session.score ? Math.round(session.score) : 'N/A'}
+              Score: {typeof session.score === 'number' ? Math.round(session.score) : 'N/A'}
             </span>
           </div>
 
