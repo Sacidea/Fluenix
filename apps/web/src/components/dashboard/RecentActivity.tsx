@@ -3,21 +3,14 @@ import { CheckCircle2, Terminal, FileCode, Users, PenLine, Mic, GitPullRequest, 
 import * as Icons from 'lucide-react'
 import { RecentActivityModal } from './RecentActivityModal'
 
-interface Session {
-  id: string
-  type: string
-  scenario: string
-  createdAt: string
-  score: number | null
-  feedback?: unknown
-}
+import type { Session } from '@/hooks/useProgressData'
 
 interface Props {
   sessions: Session[]
   onDelete?: (id: string) => void
 }
 
-const getIcon = (type: string, scenario: string) => {
+const getIcon = (type: string, scenario?: string) => {
   if (type === 'pronunciation') return <Mic size={18} />
   if (type === 'writing') {
     if (scenario === 'pr_description') return <GitPullRequest size={18} />
@@ -87,7 +80,7 @@ export function RecentActivity({ sessions, onDelete }: Props) {
                   <span className="activity-type">
                     {s.type.toUpperCase()} 
                     <span className="activity-dot">•</span> 
-                    {s.scenario.replace(/_/g, ' ')}
+                    {(s.scenario || 'General').replace(/_/g, ' ')}
                   </span>
                   <span className="activity-time">
                     {new Date(s.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}

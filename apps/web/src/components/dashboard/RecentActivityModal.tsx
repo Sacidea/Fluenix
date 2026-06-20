@@ -1,14 +1,7 @@
 import React from 'react'
 import { X } from 'lucide-react'
 
-interface Session {
-  id: string
-  type: string
-  scenario: string
-  createdAt: string
-  score: number | null
-  feedback?: unknown
-}
+import type { Session } from '@/hooks/useProgressData'
 
 interface Props {
   session: Session
@@ -35,7 +28,7 @@ export function RecentActivityModal({ session, onClose, getScoreColor }: Props) 
             <X size={20} />
           </button>
           <h2 className="modal-title">
-            {session.type.toUpperCase()} - {session.scenario.replace(/_/g, ' ')}
+            {session.type.toUpperCase()} - {(session.scenario || 'General').replace(/_/g, ' ')}
           </h2>
           <div className="modal-meta">
             <span>{new Date(session.createdAt).toLocaleString()}</span>
